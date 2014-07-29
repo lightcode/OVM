@@ -1,0 +1,22 @@
+{
+  "id": "centos-6.4",
+  "name": "CentOS 6.4",
+  "vcpu": 1,
+  "memory": 128,
+  "main_disk": {
+    "path": "/var/kvm/storage/pool-templates/centos-6.4.qcow2",
+    "image_bus": "virtio",
+    "image_dev": "vda",
+    "image_format": "qcow2",
+    "image_size": 8
+  },
+  "main_interface": {
+    "model": "virtio"
+  },
+  "post-install": [
+    {
+      "path": "linux/finish-vm.sh",
+      "params": ["{diskpath}", "centos"]
+    }
+  ]
+}

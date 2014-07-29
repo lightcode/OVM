@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+# vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
+########################################################################
+# Copyright 2014 Matthieu Gaignière                matthieu@lightcode.fr
+########################################################################
+# This file is part of OVM.                          http://lightcode.fr
+#
+# OVM is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+#
+# OVM is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with OVM. If not, see <http://www.gnu.org/licenses/>.
+########################################################################
+
+
+import argparse
+import libvirt
+import sys
+import os
+from pyvirt.libvirtconn import LibvirtConn
+from ovm.vmcreation import *
+from ovm.vmmanagement import *
+from ovm.app import App
+
+
+# Don't show error message from libvirt
+def f(ctx, error):
+    return 1
+
+libvirt.registerErrorHandler(f, None)
+
+App.init()
+LibvirtConn.open()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Provide functions to modify KVM VM with libvirt.')
+    
+    subparsers = parser.add_subparsers()
+    
+    # Create a VM
+    parser_create = subparsers.add_parser('create', help='create a new VM')
+    parser_create.add_argument('name', help='set the name of the VM')
+    parser_create.add_argument('--verbose', '-v', action='store_true',
+        help='print output of post-install scripts')
+    parser_create.add_argument('--template', required=True)
+    parser_create.add_argument('--network', required=True)
+    parser_create.add_argument('--storage', required=True)
+    parser_create.add_argument('--ip', nargs='?', default='auto')
+    parser_create.add_argument('--size', nargs='?')
+    parser_create.add_argument('--vcpu', nargs='?')
+    parser_create.add_argument('--memory', nargs='?')
+    parser_create.set_defaults(func=vm_create)
+
+    # List templates
+    parser_templates = subparsers.add_parser('templates', help='list templates')
+    parser_templates.add_argument('--short', action='store_true',
+        help="print only the list of template names")
+    parser_templates.set_defaults(func=vm_templates)
+
+    # List storages
+    parser_storages = subparsers.add_parser('storages', help='list storages')
+    parser_storages.add_argument('--short', action='store_true',
+        help="print only the list of template names")
+    parser_storages.set_defaults(func=vm_storages)
+
+    # List storages
+    parser_networks = subparsers.add_parser('networks', help='list networks')
+    parser_networks.add_argument('--short', action='store_true',
+        help="print only the list of template names")
+    parser_networks.set_defaults(func=vm_networks)
+    
+    # List VMs
+    parser_list = subparsers.add_parser('list', help='list VMs')
+    parser_list.add_argument(
+        '--short', action='store_true', help="print only the list of VM names")
+    parser_list.add_argument(
+        '--active', action='store_true', help="print only the list of active VM")
+    parser_list.add_argument(
+        '--inactive', action='store_true',
+        help="print only the list of inactive VM")
+    parser_list.add_argument(
+        '--backup', action='store_true',
+        help="print only the list of VM with active backup")
+    parser_list.set_defaults(func=vm_list)
+    
+    # Set option to a VM
+    parser_set = subparsers.add_parser('set', help='set options to a VM')
+    parser_set.add_argument('name', help='name of the VM')
+    parser_set.add_argument(
+        '--backup', help='set backup on/off', choices=['on', 'off'])
+    parser_set.add_argument('--ip', help="set IP address")
+    parser_set.set_defaults(func=vm_set)
+    
+    # Start a VM
+    parser_start = subparsers.add_parser('start', help='start a VM')
+    parser_start.add_argument('name', help='name of the VM')
+    parser_start.set_defaults(func=vm_start)
+    
+    # Show informations about a VM
+    parser_info = subparsers.add_parser('info', help='show informations about a VM')
+    parser_info.add_argument('name', help='name of the VM')
+    parser_info.set_defaults(func=vm_info)
+
+    # Reboot a VM
+    parser_reboot = subparsers.add_parser('reboot', help='reboot a VM')
+    parser_reboot.add_argument('name', help='name of the VM')
+    parser_reboot.set_defaults(func=vm_reboot)
+    
+    # Stop a VM
+    parser_stop = subparsers.add_parser('stop', help='stop a VM')
+    parser_stop.add_argument('name', help='name of the VM')
+    parser_stop.add_argument(
+        '--force', action='store_true', help='force the VM shutdown')
+    parser_stop.set_defaults(func=vm_stop)
+    
+    # Remove a VM
+    parser_remove = subparsers.add_parser('remove', help='remove a VM')
+    parser_remove.add_argument('name', help='name of the VM')
+    parser_remove.add_argument(
+        '--yes', '-y', action='store_true',
+        help='Do remove without asking comfirmation.')
+    parser_remove.set_defaults(func=vm_remove)
+    
+    # SSH
+    parser_ssh = subparsers.add_parser('ssh', help='ssh a VM')
+    parser_ssh.add_argument('name', help='name of the VM')
+    parser_ssh.set_defaults(func=vm_ssh)
+
+    # ping
+    parser_ping = subparsers.add_parser('ping', help='ping a VM')
+    parser_ping.add_argument('name', help='name of the VM')
+    parser_ping.set_defaults(func=vm_ping)
+
+    args = parser.parse_args()
+    args.func(args)

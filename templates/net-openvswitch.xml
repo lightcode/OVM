@@ -1,0 +1,7 @@
+<interface type='network'>
+  <mac />
+  <source network='{network}' portgroup='{portgroup}'/>
+  <virtualport type='openvswitch'>
+  </virtualport>
+  <model type='rtl8139'/>
+</interface>
