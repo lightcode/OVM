@@ -1,6 +1,6 @@
 OVM (Open Virtualization Manager) is a tool that allows you to create and manage VMs. This version of OVM can handle the hypervisor KVM with libvirt. The tool must be run directly on the hypervisor.
 
-This tool is deliver with few drivers to handle networks and storage system but you can build easily your own scripts.
+This tool is delivering with few drivers to handle networks and storage system but you can build easily your own scripts.
 
 
 # Installation
@@ -38,7 +38,7 @@ templates     | Print the list of templates
 Notes :
 
 * The `ssh` and `ping` are usable if an IP address is set into the VM
-* The metadada `backup` that you can change with the command `set` is useless but, you can create your own script that use this metadata. You can list all backed machine with the command `vm list --short --backup`.
+* The metadata `backup` that you can change with the command `set` is useless but, you can create your own script that use this metadata. You can list all backed machine with the command `vm list --short --backup`.
 
 
 # Configure OS templates
@@ -54,7 +54,7 @@ To use the template, you must modify parameters in the JSON file. OVM is distrib
 If you want to handle another OS by OVM, you need to create a new template. A template is a JSON file we create in the folder `/etc/templates`. You can look at the existing templates to build another one.
 
 
-# Configure ressources
+# Configure resources
 
 ## Storage pools
 
@@ -69,7 +69,7 @@ STORAGES['ssd'] = VMStorage(
 Explanations:
 
 * *Pool name*: the name of the book is given by the name in hooks (here: ssd)
-* *Driver* permit to OVM to handle resources. Here the driver allow to OVM to use a libvirt pool
+* *Driver* : it’s a Python class that permit to OVM to handle resources. Here the driver allow to OVM to use a libvirt pool
 * *pool_name* is a driver specific parameter and it specifies the name of the libvirt pool
 
 
@@ -99,7 +99,7 @@ NETWORKS['local'] = VMNetwork(
 
 Explanations:
 
-* *Network name*: the name in the hook at the first line, its the name of the network we use in OVM
+* *Network name*: the name in the hook at the first line, it’s the name of the network we use in OVM
 * *Driver*: permit to OVM to handle the resource. Here the driver allow to OVM to use a libvirt network
 * *bridge_name*: it’s the name of the network in libvirt
 * *net_portgroup*: it’s the name of the portgroup (virtual network defined in libvirt)
