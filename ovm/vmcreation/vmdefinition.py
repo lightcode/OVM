@@ -24,8 +24,8 @@ import os.path
 from ovm.app import App
 from lxml import etree
 
+
 class VMDefinition(object):
-    
     def __init__(self, template, name):
         self._name = name
         self._template = template

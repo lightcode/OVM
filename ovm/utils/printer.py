@@ -22,6 +22,10 @@
 
 from math import log
 
+
+TABLE_PADDING = ' ' * 3
+
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -38,6 +42,7 @@ class bcolors:
         self.FAIL = ''
         self.ENDC = ''
 
+
 class ColoredString(object):
 
     def __init__(self, text, color):
@@ -49,6 +54,7 @@ class ColoredString(object):
 
     def __str__(self):
         return self.color + self.text + bcolors.ENDC
+
 
 def bold_underline(text):
     return '\033[1;4m{0}\033[0m'.format(text)
@@ -64,7 +70,6 @@ def print_title(text, length=60):
     print bold_underline(title.upper())
     print
 
-TABLE_PADDING = ' ' * 3
 def print_table(headers, rows, align=None):
     if not align:
         align = ['l'] * len(headers)

@@ -123,7 +123,8 @@ class Domain(object):
             'screen': None
         }
         try:
-            node = self._saved_tree.xpath("/domain/devices/graphics[@type='vnc']")[0]
+            node = self._saved_tree.xpath(
+                "/domain/devices/graphics[@type='vnc']")[0]
         except:
             return {}
         else:

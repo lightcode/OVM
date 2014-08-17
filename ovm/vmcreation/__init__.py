@@ -193,7 +193,6 @@ def vm_create(args):
     # 5. Print the VM specs
     print_vm_info(domain)
 
-
 def vm_templates(args):
     App.load_templates()
     templates = App.get_templates()
@@ -208,7 +207,6 @@ def vm_templates(args):
         rows.append((tpl.get_id(), tpl.get_name()))
     print_table(headers, rows)
 
-
 def vm_storages(args):
     if args.short:
         print '\n'.join([k for k in STORAGES])
@@ -219,7 +217,6 @@ def vm_storages(args):
     for name, storage in STORAGES.iteritems():
         rows.append((name, storage.pool_name()))
     print_table(headers, rows)
-
 
 def vm_networks(args):
     if args.short:

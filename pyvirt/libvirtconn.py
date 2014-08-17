@@ -23,6 +23,7 @@
 import libvirt
 from pyvirt.domain import Domain
 
+
 class Singleton(object):
     _instance = None
     def __new__(cls):

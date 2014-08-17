@@ -34,7 +34,6 @@ class Singleton(object):
 
 
 class App(Singleton):
-
     templates = []
     _templates_loaded = False
     ETC = '/etc/ovm'
