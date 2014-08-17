@@ -32,5 +32,3 @@ for hook in hooks/${HOOKSET}/hooks.d/*.sh; do
     source $hook
     echo
 done
-
-echo "FIN"

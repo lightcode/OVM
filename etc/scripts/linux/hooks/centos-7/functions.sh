@@ -31,7 +31,6 @@ function _mount_partitions() {
     chroot $MNT_DIR mount -t sysfs none /sys || fail "cannot mount /sys"
 }
 
-
 function _umount_partitions() {
     echo "Umounting all partitions..."
     echo $MNT_DIR

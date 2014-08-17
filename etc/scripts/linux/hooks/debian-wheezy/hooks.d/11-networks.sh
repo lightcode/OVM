@@ -19,8 +19,6 @@
 ########################################################################
 
 
-#cat <<EOF > $MNT_DIR/etc/network/interfaces
-
 INTERFACE=${INTERFACE:-eth0}
 
 NET_FILE="$MNT_DIR/etc/network/interfaces"

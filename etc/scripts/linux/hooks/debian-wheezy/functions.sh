@@ -31,7 +31,6 @@ function _mount_partitions() {
     chroot $MNT_DIR mount -t sysfs none /sys || fail "cannot mount /sys"
 }
 
-
 function _umount_partitions() {
     [ "$MNT_DIR" != "" ] && umount $MNT_DIR/proc $MNT_DIR/sys $MNT_DIR/dev/pts $MNT_DIR/dev $MNT_DIR/boot
     sleep 1s
