@@ -1,8 +1,22 @@
 #!/bin/bash
-
-# File        : finish-vm.sh
-# Author      : Matthieu
-# Description : Script to finish install on a qcow image.
+########################################################################
+# Copyright 2014 Matthieu Gaignière                matthieu@lightcode.fr
+########################################################################
+# This file is part of OVM.                          http://lightcode.fr
+#
+# OVM is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+#
+# OVM is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with OVM. If not, see <http://www.gnu.org/licenses/>.
+########################################################################
 
 
 SCRIPTPATH="$(dirname $0)"
@@ -23,8 +37,7 @@ cancel() {
     fail "CTRL-C detected"
 }
 
-if [ $# -ne 2 ]
-then
+if [ $# -ne 2 ]; then
     echo "usage: $0 <image-file> <hookset>" 1>&2
     exit 1
 fi
@@ -59,6 +72,6 @@ echo "Running hooks..."
 source hooks.sh
 
 
-echo "SUCCESS!"
+echo "Unmount all and clean..."
 clean_all
 exit 0

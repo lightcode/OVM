@@ -20,29 +20,25 @@
 
 
 #
-#  Add french repository
+#  Set the hostname
 #
-cat <<EOF > $MNT_DIR/etc/apt/sources.list
-deb http://ftp.fr.debian.org/debian/ wheezy main
-deb-src http://ftp.fr.debian.org/debian/ wheezy main
-
-deb http://security.debian.org/ wheezy/updates main
-deb-src http://security.debian.org/ wheezy/updates main
-
-# wheezy-updates, previously known as 'volatile'
-deb http://ftp.fr.debian.org/debian/ wheezy-updates main
-deb-src http://ftp.fr.debian.org/debian/ wheezy-updates main
-
-deb http://ftp.fr.debian.org/debian wheezy-backports main
+cat <<EOF > $MNT_DIR/etc/sysconfig/network
+NETWORKING=yes
+HOSTNAME=$HOSTNAME
 EOF
 
-#
-#  Update
-#
-LANG=C DEBIAN_FRONTEND=noninteractive chroot $MNT_DIR apt-get update
-
+cat <<EOF > $MNT_DIR/etc/hosts
+127.0.0.1       localhost
+127.0.1.1       $HOSTNAME
+ 
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+EOF
 
 #
 #  Print for debugging
 #
-_debug_file $MNT_DIR/etc/apt/sources.list
+_debug_file $MNT_DIR/etc/sysconfig/network
+_debug_file $MNT_DIR/etc/hosts

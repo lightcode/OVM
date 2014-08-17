@@ -19,30 +19,25 @@
 ########################################################################
 
 
-#
-#  Add french repository
-#
-cat <<EOF > $MNT_DIR/etc/apt/sources.list
-deb http://ftp.fr.debian.org/debian/ wheezy main
-deb-src http://ftp.fr.debian.org/debian/ wheezy main
-
-deb http://security.debian.org/ wheezy/updates main
-deb-src http://security.debian.org/ wheezy/updates main
-
-# wheezy-updates, previously known as 'volatile'
-deb http://ftp.fr.debian.org/debian/ wheezy-updates main
-deb-src http://ftp.fr.debian.org/debian/ wheezy-updates main
-
-deb http://ftp.fr.debian.org/debian wheezy-backports main
-EOF
-
-#
-#  Update
-#
-LANG=C DEBIAN_FRONTEND=noninteractive chroot $MNT_DIR apt-get update
+function _mount_partitions() {
+    vgscan
+    vgchange -ay
+    VGNAME=$(pvs ${DISK}p2 --noheadings | awk '{ print $2 }')
+    mount /dev/$VGNAME/lv_root $MNT_DIR || fail "cannot mount /"
+    mount --bind /dev/ $MNT_DIR/dev || fail "cannot bind /dev"
+    mount --bind /dev/pts/ $MNT_DIR/dev/pts || fail "cannot bind /dev/pts"
+    chroot $MNT_DIR mount -t ext4 ${DISK}p1 /boot || fail "cannot mount /boot"
+    chroot $MNT_DIR mount -t proc none /proc || fail "cannot mount /proc"
+    chroot $MNT_DIR mount -t sysfs none /sys || fail "cannot mount /sys"
+}
 
 
-#
-#  Print for debugging
-#
-_debug_file $MNT_DIR/etc/apt/sources.list
+function _umount_partitions() {
+    echo "Umounting all partitions..."
+    echo $MNT_DIR
+    [ "$MNT_DIR" != "" ] && umount $MNT_DIR/proc $MNT_DIR/sys $MNT_DIR/dev/pts $MNT_DIR/dev $MNT_DIR/boot
+    sleep 1s
+    [ "$MNT_DIR" != "" ] && umount $MNT_DIR
+    sleep 1s
+    vgchange -an $VGNAME
+}

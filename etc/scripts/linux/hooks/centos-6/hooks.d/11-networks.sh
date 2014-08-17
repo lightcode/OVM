@@ -19,30 +19,47 @@
 ########################################################################
 
 
-#
-#  Add french repository
-#
-cat <<EOF > $MNT_DIR/etc/apt/sources.list
-deb http://ftp.fr.debian.org/debian/ wheezy main
-deb-src http://ftp.fr.debian.org/debian/ wheezy main
+INTERFACE=${INTERFACE:-eth0}
 
-deb http://security.debian.org/ wheezy/updates main
-deb-src http://security.debian.org/ wheezy/updates main
+NET_FILE="$MNT_DIR/etc/sysconfig/network-scripts/ifcfg-$INTERFACE"
+echo -n > $NET_FILE
 
-# wheezy-updates, previously known as 'volatile'
-deb http://ftp.fr.debian.org/debian/ wheezy-updates main
-deb-src http://ftp.fr.debian.org/debian/ wheezy-updates main
-
-deb http://ftp.fr.debian.org/debian wheezy-backports main
+cat <<EOF >> $NET_FILE 
+DEVICE="$INTERFACE"
+NM_CONTROLLED="yes"
+ONBOOT="yes"
+TYPE="Ethernet"
 EOF
 
-#
-#  Update
-#
-LANG=C DEBIAN_FRONTEND=noninteractive chroot $MNT_DIR apt-get update
+
+# IPv4
+IP=${IP:-dhcp}
+
+if [ $IP == "dhcp" ]; then
+    cat <<EOF >> $NET_FILE
+BOOTPROTO="dhcp"
+EOF
+elif [ -n $IP ] && [ -n $NETMASK ] && [ -n $GATEWAY ]; then
+    cat <<EOF >> $NET_FILE
+BOOTPROTO="static"
+IPADDR="$IP"
+NETMASK="$NETMASK"
+GATEWAY="$GATEWAY"
+EOF
+fi
+
+
+# IPv6
+IPV6=${IPV6:-disabled}
+if [ $IPV6 == "auto" ]; then
+    cat <<EOF >> $NET_FILE
+IPV6INIT="yes"
+IPV6_AUTOCONF="yes"
+EOF
+fi
 
 
 #
 #  Print for debugging
 #
-_debug_file $MNT_DIR/etc/apt/sources.list
+_debug_file $NET_FILE

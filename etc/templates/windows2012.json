@@ -24,7 +24,7 @@
    *  type
    */
   "main_disk": {
-    "path": "/var/kvm/storage/pool-templates/win2012r2.qcow2",
+    "path": "/mnt/pool-templates/win2012r2.qcow2",
     "image_bus": "sata",
     "image_dev": "hdb",
     "image_format": "qcow2",
