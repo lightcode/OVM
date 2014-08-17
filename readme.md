@@ -12,7 +12,7 @@ First of all, you need to install this package on your hypervisor:
 
 You can simply use your package manager or build from scratch.
 
-*Note*: libvirt must have volume and Qemu metadata support.
+**Note**: libvirt must have volume and Qemu metadata support.
 
 
 We need to install Python libraries (example on Debian):
@@ -46,7 +46,7 @@ stop          | Halt a VM gracefully
 storages      | Print the list of storages
 templates     | Print the list of templates
 
-*Notes*:
+**Notes**:
 
 * The `ssh` and `ping` are usable if an IP address is set into the VM
 * The metadata `backup` that you can change with the command `set` is useless but, you can create your own script that use this metadata. You can list all backed machine with the command `vm list --short --backup`.
@@ -76,14 +76,15 @@ The storage pool is used by OVM to create the disk of VMs. To add a new storage 
 ```python
 STORAGES['ssd'] = VMStorage(
     VolumeDriver,
-    pool_name='pool-vm-ssd')
+    pool_name='pool-vm-ssd'
+)
 ```
 
 Explanations:
 
-* *Pool name*: the name of the book is given by the name in hooks (here: ssd)
-* *Driver* : it’s a Python class that permit to OVM to handle resources. Here the driver allow to OVM to use a libvirt pool
-* *pool_name* is a driver specific parameter and it specifies the name of the libvirt pool
+* **Pool ID**: the pool name is given between quote in the first line. This name is used in OVM when you create a VM
+* **Driver**: the second line is the driver name. We tell to OVM how to access to the storage
+* **Pool name**: on the third line, the parameter `pool_name` specify the name of the pool in libvirt. It's a driver params.
 
 
 ## Networks
@@ -104,7 +105,7 @@ NETWORKS['local'] = VMNetwork(
         'netmask': 24,
         'gateway': '192.168.1.1',
         'nameservers': ['192.168.1.1'],
-        'autoip_path': '/var/kvm/scripts/vm/.app/local.net'
+        'autoip_path': '/etc/autoip/local.dat'
     }
 )
 ```
@@ -112,8 +113,8 @@ NETWORKS['local'] = VMNetwork(
 
 Explanations:
 
-* *Network name*: the name in the hook at the first line, it’s the name of the network we use in OVM
-* *Driver*: permit to OVM to handle the resource. Here the driver allow to OVM to use a libvirt network
-* *bridge_name*: it’s the name of the network in libvirt
-* *net_portgroup*: it’s the name of the portgroup (virtual network defined in libvirt)
-* *pool_ip*: it's a set of parameters to configure the IP allocation
+* **Network ID**: the network name is given between quote in the first line. This name is used in OVM when you create a VM
+* **Driver**: permit to OVM to handle the resource. Here the driver allow to OVM to use a libvirt network
+* **Bridge name**: the parameter `bridge_name` define the name of the network in libvirt
+* **Port group**: this term is used in libvirt configuration network. _This option is facultative_
+* **IP pool**: it's a set of parameters to configure the IP allocation
