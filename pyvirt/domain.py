@@ -132,7 +132,7 @@ class Domain(object):
             except:
                 port = None
             else:
-                if port > 5900:
+                if port >= 5900:
                     vnc_infos['screen'] = port - 5900
         return vnc_infos
     

@@ -1,17 +1,28 @@
 OVM (Open Virtualization Manager) is a tool that allows you to create and manage VMs. This version of OVM can handle the hypervisor KVM with libvirt. The tool must be run directly on the hypervisor.
 
-This tool is deliver with few drivers to handle networks and storage system but you can build easily your own scripts.
+This tool is delivering with few drivers to handle networks and storage system but you can build easily your own scripts.
 
 
 # Installation
 
-Dependencies:
+First of all, you need to install this package on your hypervisor:
 
 * libvirt
 * python-libvirt
-* lxml (`apt-get install python-lxml`)
-* ipaddr (`pip install ipaddr`)
 
+You can simply use your package manager or build from scratch.
+
+*Note*: libvirt must have volume and Qemu metadata support.
+
+
+We need to install Python libraries (example on Debian):
+
+    # apt-get install python-pip python-lxml
+    # pip install ipaddr
+
+Then, to achieve the installation, we simply do this command:
+
+    # python setup.py install
 
 
 # Commands
@@ -19,7 +30,7 @@ Dependencies:
 OVM is used with the command `vm`. This command take a subcommand like this `vm start <name_of_vm>`.
 
 
-Subcommand    | What it do
+Subcommand    | Description
 ------------- | -------------------------------------------------
 create        | Create a VM
 info          | Give information about a VM
@@ -35,7 +46,7 @@ stop          | Halt a VM gracefully
 storages      | Print the list of storages
 templates     | Print the list of templates
 
-Notes :
+*Notes*:
 
 * The `ssh` and `ping` are usable if an IP address is set into the VM
 * The metadada `backup` that you can change with the command `set` is useless but, you can create your own script that use this metadata. You can list all backed machine with the command `vm list --short --backup`.
@@ -46,15 +57,17 @@ Notes :
 To use the template, you must modify parameters in the JSON file. OVM is distributing with some templates you must configure and create the images. You must edit the path to the disk in the file:
 
 ```json
+{
   "main_disk": {
     "path": "/var/kvm/storage/pool-templates/debian-wheezy.qcow2"
   }
+}
 ```
 
 If you want to handle another OS by OVM, you need to create a new template. A template is a JSON file we create in the folder `/etc/templates`. You can look at the existing templates to build another one.
 
 
-# Configure ressources
+# Configure resources
 
 ## Storage pools
 
@@ -99,7 +112,7 @@ NETWORKS['local'] = VMNetwork(
 
 Explanations:
 
-* *Network name*: the name in the hook at the first line, its the name of the network we use in OVM
+* *Network name*: the name in the hook at the first line, it’s the name of the network we use in OVM
 * *Driver*: permit to OVM to handle the resource. Here the driver allow to OVM to use a libvirt network
 * *bridge_name*: it’s the name of the network in libvirt
 * *net_portgroup*: it’s the name of the portgroup (virtual network defined in libvirt)
