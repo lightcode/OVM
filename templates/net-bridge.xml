@@ -1,5 +1,0 @@
-<interface type='network'>
-  <mac />
-  <source network='{network}' />
-  <model type='rtl8139'/>
-</interface>
