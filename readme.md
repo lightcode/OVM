@@ -49,7 +49,7 @@ templates     | Print the list of templates
 *Notes*:
 
 * The `ssh` and `ping` are usable if an IP address is set into the VM
-* The metadada `backup` that you can change with the command `set` is useless but, you can create your own script that use this metadata. You can list all backed machine with the command `vm list --short --backup`.
+* The metadata `backup` that you can change with the command `set` is useless but, you can create your own script that use this metadata. You can list all backed machine with the command `vm list --short --backup`.
 
 
 # Configure OS templates
@@ -82,7 +82,7 @@ STORAGES['ssd'] = VMStorage(
 Explanations:
 
 * *Pool name*: the name of the book is given by the name in hooks (here: ssd)
-* *Driver* permit to OVM to handle resources. Here the driver allow to OVM to use a libvirt pool
+* *Driver* : it’s a Python class that permit to OVM to handle resources. Here the driver allow to OVM to use a libvirt pool
 * *pool_name* is a driver specific parameter and it specifies the name of the libvirt pool
 
 
