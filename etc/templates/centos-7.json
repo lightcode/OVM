@@ -13,6 +13,12 @@
   "main_interface": {
     "model": "virtio"
   },
+  "abilities": {
+    "resizeDisk": {
+      "script": "linux/resize-qcow2.sh",
+      "params": ["centos-7", "{vol_path}"]
+    }
+  },
   "post-install": [
     {
       "path": "linux/finish-vm.sh",

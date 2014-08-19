@@ -20,4 +20,4 @@
 
 
 find $MNT_DIR/var/log -type f | xargs rm -f
-rm $MNT_DIR/root/.bash_history 2> /dev/null
+rm -f $MNT_DIR/root/.bash_history 2> /dev/null

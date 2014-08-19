@@ -20,5 +20,5 @@
 
 
 find $MNT_DIR/var/log -type f | xargs rm -f
-rm $MNT_DIR/root/.bash_history 2> /dev/null
-rm $MNT_DIR/etc/udev/rules.d/70-persistent-net.rules 2> /dev/null
+rm -f $MNT_DIR/root/.bash_history 2> /dev/null
+rm -f $MNT_DIR/etc/udev/rules.d/70-persistent-net.rules 2> /dev/null

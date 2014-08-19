@@ -30,7 +30,7 @@ clean_all() {
     sleep 1s
     [ "$DISK" != "" ] && qemu-nbd -d $DISK
     sleep 1s
-    [ "$MNT_DIR" != "" ] && rm -r $MNT_DIR
+    [ "$MNT_DIR" != "" ] && rm -rf $MNT_DIR
 }
 
 cancel() {
@@ -55,7 +55,7 @@ source hooks/${HOOKSET}/functions.sh
 echo "Installing $RELEASE into $FILE..."
 
 MNT_DIR=`tempfile`
-rm $MNT_DIR
+rm -f $MNT_DIR
 mkdir $MNT_DIR
 DISK=
 

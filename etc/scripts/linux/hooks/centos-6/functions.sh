@@ -38,3 +38,23 @@ function _umount_partitions() {
     sleep 1s
     vgchange -an $VGNAME
 }
+
+function _resize() {
+    local -r lvm_part="${DISK}p2"
+    local -r lv_root="lv_root"
+
+    echo ",+," | sfdisk -q -f -L -N2 $DISK
+    echo ",+," | sfdisk -q -f -L -N5 $DISK
+
+    vgscan
+    vgchange -ay
+    VGNAME=$(pvs "$lvm_part" --noheadings | awk '{ print $2 }')
+
+    pvresize "$lvm_part"
+    lvextend "/dev/$VGNAME/$lv_root" "$lvm_part"
+    e2fsck -y -f "/dev/$VGNAME/$lv_root"
+    resize2fs "/dev/$VGNAME/$lv_root"
+
+    vgchange -an "$VGNAME"
+    qemu-nbd -d "$DISK"
+}
