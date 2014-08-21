@@ -82,8 +82,10 @@ class Domain(object):
         else:
             self._libvirt_conn = libvirt.open()
 
-        xml = self.vir_domain.XMLDesc()
-        self._saved_tree = etree.fromstring(xml)
+        saved_desc = self.vir_domain.XMLDesc(libvirt.VIR_DOMAIN_XML_INACTIVE)
+        self._saved_tree = etree.fromstring(saved_desc)
+        lived_desc = self.vir_domain.XMLDesc()
+        self._lived_tree = etree.fromstring(lived_desc)
 
     def _get_libvirt_state(self):
         return self.vir_domain.state()[0]
@@ -123,7 +125,7 @@ class Domain(object):
             'screen': None
         }
         try:
-            node = self._saved_tree.xpath(
+            node = self._lived_tree.xpath(
                 "/domain/devices/graphics[@type='vnc']")[0]
         except:
             return {}
@@ -204,6 +206,8 @@ class Domain(object):
             src = disk.xpath('source')[0]
             poolname = src.attrib.get('pool')
             volname = src.attrib.get('volume')
+            if not poolname or not poolname:
+                continue
             pool = self._libvirt_conn.storagePoolLookupByName(poolname)
             vol = pool.storageVolLookupByName(volname)
             volumes.append(Volume(disk, vol))
