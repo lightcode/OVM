@@ -137,6 +137,12 @@ class Domain(object):
                     vnc_infos['screen'] = port - 5900
         return vnc_infos
     
+    def get_autostart(self):
+        return self.vir_domain.autostart()
+
+    def set_autostart(self, boolean):
+        self.vir_domain.setAutostart(bool(boolean))
+
     def get_memory(self):
         """Returns the max memory the domain can use."""
         node = self._saved_tree.xpath('/domain/memory')[0]

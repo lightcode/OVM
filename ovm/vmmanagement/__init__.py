@@ -54,6 +54,8 @@ def print_vm_info(domain):
     print 'Maximum memory : {0}B'.format(si_unit(domain.get_memory(), True))
     print 'IP address     : {0}'.format(domain.get_main_ipv4())
     print 'Backup         : {0}'.format(domain.get_backup_text())
+    print 'Starting       : {0}'.format(
+        'Auto' if domain.get_autostart() else 'Manual')
     print 'VNC screen     : {0}'.format(domain.get_vnc_info()['screen'])
     print
     print
@@ -91,8 +93,9 @@ def vm_info(args):
     print_vm_info(domain)
 
 def vm_list(args):
-    headers = ('Name', 'vCPU', 'Cur. memory', 'State', 'Backup', 'IP')
-    align = ('l', 'r', 'r', 'l', 'l', 'l')
+    headers = ('Name', 'vCPU', 'Cur. memory', 'Starting',
+        'State', 'Backup', 'IP')
+    align = ('l', 'r', 'r', 'l', 'l', 'l', 'l')
     rows = []
 
     if args.active and args.inactive:
@@ -118,6 +121,7 @@ def vm_list(args):
         rows.append((
             domain.get_name(), domain.get_vcpu_count(),
             '%sB' % si_unit(domain.get_current_memory(), True),
+            'Auto' if domain.get_autostart() else 'Manual',
             state,
             domain.get_backup_text(),
             default(main_ip, '-')
@@ -194,6 +198,12 @@ def vm_set(args):
         if args.backup not in ('on', 'off'):
             App.fatal("Backup value must be 'on' or 'off'.")
         domain.set_backup(args.backup == 'on')
+
+    if args.starting:
+        args.starting = args.starting.lower()
+        if args.starting not in ('manual', 'auto'):
+            App.fatal("Starting value must be 'manual' or 'auto'")
+        domain.set_autostart(args.starting == 'auto')
 
 def vm_ssh(args):
     domain = _get_domain(args.name)

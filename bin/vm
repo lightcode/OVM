@@ -97,6 +97,9 @@ if __name__ == "__main__":
     parser_set.add_argument('name', help='name of the VM')
     parser_set.add_argument(
         '--backup', help='set backup on/off', choices=['on', 'off'])
+    parser_set.add_argument(
+        '--starting', help='set starting auto/manual',
+        choices=['auto', 'manual'])
     parser_set.add_argument('--ip', help="set IP address")
     parser_set.set_defaults(func=vm_set)
     

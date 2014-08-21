@@ -65,7 +65,16 @@ _vm()
                     vm_list="$(vm list --short)"
                     COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 elif [[ "${COMP_WORDS[1]}" == "set" ]]; then
-                    opts="--ip --backup"
+                    opts="--ip --backup --starting"
+                    if [[ "$prev" == "--backup" ]]; then
+                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                        return 0
+                    elif [[ "$prev" == "--starting" ]]; then
+                        COMPREPLY=( $(compgen -W "auto manual" -- ${cur}) )
+                        return 0
+                    elif [[ $prev == "--*" ]]; then
+                        return 0
+                    fi
                     COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 fi
                 return 0
