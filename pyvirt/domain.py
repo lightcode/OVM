@@ -156,35 +156,8 @@ class Domain(object):
         mem = self._mem_extract_value(node)
         return mem
 
-    def _ga_get_ips(self):
-        # cmd = [
-        #     'virsh', 'qemu-agent-command', self.get_name(), 
-        #     '{"execute":"guest-network-get-interfaces"}'
-        # ]
-        # process = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        # res = process.stdout.read()
-        # process.communicate()
-        # try:
-        #     ifaces = json.loads(res)['return']
-        # except ValueError:
-        #     return {}
-
-        # r_iface = {}
-        # for iface in ifaces:
-        #     hwaddr = iface['hardware-address']
-        #     if hwaddr == '00:00:00:00:00:00':
-        #         continue
-        #     ipv4 = None
-        #     for ip in iface['ip-addresses']:
-        #         if ip['ip-address-type'] == 'ipv4':
-        #             ipv4 = ip['ip-address']
-        #             break
-        #     r_iface[hwaddr] = {'ipv4': ipv4}
-        # return r_iface
-        return {}
-
     def get_interfaces(self):
-        all_ips = self._ga_get_ips()
+        all_ips = {}
         interfaces = []
         xml_ifaces = self._saved_tree.xpath(
             "/domain/devices/interface[@type='network']")
