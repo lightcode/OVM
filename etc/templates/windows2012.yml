@@ -1,16 +1,14 @@
-{
-  "id": "windows2012r2",
-  "name": "Windows 2012 R2",
-  "vcpu": 1,
-  "memory": 1024,
-  "main_disk": {
-    "path": "/mnt/pool-templates/win2012r2.qcow2",
-    "image_bus": "sata",
-    "image_dev": "hdb",
-    "image_format": "qcow2",
-    "image_size": 25
-  },
-  "main_interface": {
-    "model": "rtl8139"
-  }
-}
+id: windows2012r2
+name: Windows 2012 R2
+vcpu: 1
+memory: 1024
+
+main_disk:
+  path: /mnt/pool-templates/win2012r2.qcow2
+  image_bus: sata
+  image_dev: hdb
+  image_format: qcow2
+  image_size: 25
+
+main_interface:
+  model: rtl8139

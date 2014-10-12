@@ -61,11 +61,8 @@ templates     | Print the list of templates
 To use the template, you must modify parameters in the YAML file. OVM is distributing with some templates you must configure and create the images. You must edit the path to the disk in the file:
 
 ```yaml
-{
-  "main_disk": {
-    "path": "/var/kvm/storage/pool-templates/debian-wheezy.qcow2"
-  }
-}
+main_disk:
+  path: /mnt/pool-templates/debian-wheezy.qcow2
 ```
 
 If you want to handle another OS by OVM, you need to create a new template. A template is a YAML file we create in the folder `/etc/templates`. You can look at the existing templates to build another one.
