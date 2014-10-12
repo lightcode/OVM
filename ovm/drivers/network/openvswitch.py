@@ -30,7 +30,7 @@ class OpenvSwitchDriver(NetworkDriver):
         tree = (
             E.interface(
                 E.source(
-                    network=self._params.get('bridge_name')
+                    network=self._params.get('net_name')
                 ),
                 E.virtualport(type='openvswitch'),
                 E.model(type=self._params.get('driver_type')),

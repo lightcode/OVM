@@ -37,7 +37,7 @@ NETWORKS = {}
 
 NETWORKS['local'] = VMNetwork(
     OpenvSwitchDriver,
-    bridge_name='net-ovs',
+    net_name='net-ovs',
     net_portgroup='local',
     pool_ip={
         'ip_start': '192.168.1.30',
@@ -51,7 +51,7 @@ NETWORKS['local'] = VMNetwork(
 
 NETWORKS['prod'] = VMNetwork(
     OpenvSwitchDriver,
-    bridge_name='net-ovs',
+    net_name='net-ovs',
     net_portgroup='prod',
     pool_ip={
         'ip_start': '10.42.1.10',

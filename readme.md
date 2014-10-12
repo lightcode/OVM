@@ -101,7 +101,7 @@ You can add network by adding the following line at the end of the bloc "Network
 ```python
 NETWORKS['local'] = VMNetwork(
     OpenvSwitchDriver,
-    bridge_name='net-ovs',
+    net_name='net-ovs',
     net_portgroup='local',
     pool_ip={
         'ip_start': '192.168.1.30',
@@ -119,6 +119,6 @@ Explanations:
 
 * **Network ID**: the network name is given between quote in the first line. This name is used in OVM when you create a VM
 * **Driver**: permit to OVM to handle the resource. Here the driver allow to OVM to use a libvirt network
-* **Bridge name**: the parameter `bridge_name` define the name of the network in libvirt
+* **Bridge name**: the parameter `net_name` define the name of the network in libvirt
 * **Port group**: this term is used in libvirt configuration network. _This option is facultative_
 * **IP pool**: it's a set of parameters to configure the IP allocation
