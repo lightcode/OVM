@@ -1,28 +1,8 @@
 {
-  /**
-   * ID of the template
-   */
   "id": "windows2012r2",
-
-  /**
-   *  Name
-   */
   "name": "Windows 2012 R2",
-
-  /**
-   *  Default velues
-   */
   "vcpu": 1,
   "memory": 1024,
-
-  /**
-   *  Choose the main disk
-   *
-   *  path
-   *  bus : virtio, ide...
-   *  dev
-   *  type
-   */
   "main_disk": {
     "path": "/mnt/pool-templates/win2012r2.qcow2",
     "image_bus": "sata",
@@ -30,10 +10,6 @@
     "image_format": "qcow2",
     "image_size": 25
   },
-
-  /**
-   *  Main interface
-   */
   "main_interface": {
     "model": "rtl8139"
   }

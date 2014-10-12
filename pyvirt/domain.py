@@ -21,7 +21,6 @@
 
 
 import libvirt
-import json
 from lxml import etree
 from subprocess import Popen, PIPE
 from .virdomainmeta import virDomainMeta
@@ -103,7 +102,7 @@ class Domain(object):
 
     def get_name(self):
         return self.vir_domain.name()
-    
+
     def get_state_text(self):
         num = self._get_libvirt_state()
         try:
@@ -119,7 +118,7 @@ class Domain(object):
             return
 
         return int(node.text)
-    
+
     def get_vnc_info(self):
         vnc_infos = {
             'screen': None
@@ -138,7 +137,7 @@ class Domain(object):
                 if port >= 5900:
                     vnc_infos['screen'] = port - 5900
         return vnc_infos
-    
+
     def get_autostart(self):
         return self.vir_domain.autostart()
 

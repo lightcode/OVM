@@ -1,28 +1,20 @@
 {
-  /**
-   * ID of the template
-   */
+  # ID of the template
   "id": "debian-wheezy",
 
-  /**
-   *  Name
-   */
+  # Name
   "name": "Debian Wheezy",
 
-  /**
-   *  Default velues
-   */
+  # Default velues for RAM and CPU count
   "vcpu": 1,
   "memory": 128,
 
-  /**
-   *  Choose the main disk
-   *
-   *  path
-   *  bus : virtio, ide...
-   *  dev
-   *  type
-   */
+  # Choose the main disk
+  #
+  # path
+  # bus : virtio, ide...
+  # dev
+  # type
   "main_disk": {
     "path": "/mnt/pool-templates/debian-wheezy.qcow2",
     "image_bus": "virtio",
@@ -31,16 +23,12 @@
     "image_size": 8
   },
 
-  /**
-   *  Main interface
-   */
+  # Main interface
   "main_interface": {
     "model": "virtio"
   },
 
-  /**
-   *  Abilities
-   */
+  # Abilities
   "abilities": {
     "resizeDisk": {
       "script": "linux/resize-qcow2.sh",
@@ -48,9 +36,7 @@
     }
   },
 
-  /**
-   *  Post install scripts
-   */
+  # Post install scripts
   "post-install": [
     {
       "path": "linux/finish-vm.sh",

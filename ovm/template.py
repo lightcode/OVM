@@ -20,8 +20,7 @@
 ########################################################################
 
 
-import json
-from ovm.utils.minify_json import json_minify
+import yaml
 
 
 DEFAULT_ABILITIES = {
@@ -54,10 +53,10 @@ class Template(object):
 
     def get_id(self):
         return self._config['id']
-    
+
     @classmethod
-    def load_json(cls, ofile):
-        config = json.loads(json_minify(ofile.read()))
+    def load_file(cls, ofile):
+        config = yaml.load(ofile.read())
         abilities = DEFAULT_ABILITIES.copy()
         if 'abilities' in config:
             abilities.update(config['abilities'])

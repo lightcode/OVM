@@ -48,8 +48,8 @@ class App(Singleton):
             return
 
         for path in iglob(ETC_TEMPLATES):
-            ofile = open(path)
-            cls.templates.append(Template.load_json(ofile))
+            with open(path) as ofile:
+                 cls.templates.append(Template.load_file(ofile))
 
     @classmethod
     def get_templates(cls):
@@ -70,4 +70,4 @@ class App(Singleton):
 
 App.init()
 
-ETC_TEMPLATES = App.ETC + '/templates/*.json'
+ETC_TEMPLATES = App.ETC + '/templates/*.yml'
