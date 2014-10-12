@@ -5,24 +5,28 @@ This tool is delivering with few drivers to handle networks and storage system b
 
 # Installation
 
-First of all, you need to install this package on your hypervisor:
+This project use Python 3, you can install it on Debian with this command:
+
+    # apt-get install python3
+
+
+You also need to install these packages on your hypervisor:
 
 * libvirt
-* python-libvirt
+* python3-libvirt
 
-You can simply use your package manager or build from scratch.
+You can simply use your package manager or build them yourself.
 
 **Note**: libvirt must have volume and Qemu metadata support.
 
 
 We need to install Python libraries (example on Debian):
 
-    # apt-get install python-pip python-lxml
-    # pip install ipaddr
+    # apt-get install python3-lxml python3-ipaddr
 
-Then, to achieve the installation, we simply do this command:
+Now, you can download and extract OVM. Then, to achieve the installation, we simply do this command into the `ovm` directory:
 
-    # python setup.py install
+    # python3 setup.py install
 
 
 # Commands
