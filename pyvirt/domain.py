@@ -24,7 +24,7 @@ import libvirt
 import json
 from lxml import etree
 from subprocess import Popen, PIPE
-from virdomainmeta import virDomainMeta
+from .virdomainmeta import virDomainMeta
 
 
 class Volume(object):
@@ -97,7 +97,7 @@ class Domain(object):
         except KeyError:
             pass
         if unit not in ('k', 'KiB'):
-            print "WARNING: this unit of memory isn't recognize"
+            print("WARNING: this unit of memory isn't recognize")
         mem = int(node.text) * (2**10)
         return mem
 
@@ -115,7 +115,7 @@ class Domain(object):
         try:
             node = self._saved_tree.xpath('/domain/vcpu')[0]
         except:
-            print "Cannot get the 'vcpu' element in XML."
+            print("Cannot get the 'vcpu' element in XML.")
             return
 
         return int(node.text)

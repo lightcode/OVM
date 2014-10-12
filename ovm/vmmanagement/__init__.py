@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 ########################################################################
 # Copyright 2014 Matthieu Gaignière                  http://lightcode.fr
@@ -47,18 +47,18 @@ def _get_domain(name):
 
 def print_vm_info(domain):
     print_title('Information about VM {0}'.format(domain.get_name()))
-    print 'State          : {0}'.format(domain.get_state_text())
-    print 'vCPU number    : {0}'.format(domain.get_vcpu_count())
-    print 'Current memory : {0}B'.format(
-        si_unit(domain.get_current_memory(), True))
-    print 'Maximum memory : {0}B'.format(si_unit(domain.get_memory(), True))
-    print 'IP address     : {0}'.format(domain.get_main_ipv4())
-    print 'Backup         : {0}'.format(domain.get_backup_text())
-    print 'Starting       : {0}'.format(
-        'Auto' if domain.get_autostart() else 'Manual')
-    print 'VNC screen     : {0}'.format(domain.get_vnc_info()['screen'])
-    print
-    print
+    print('State          : {0}'.format(domain.get_state_text()))
+    print('vCPU number    : {0}'.format(domain.get_vcpu_count()))
+    print('Current memory : {0}B'.format(
+        si_unit(domain.get_current_memory(), True)))
+    print('Maximum memory : {0}B'.format(si_unit(domain.get_memory(), True)))
+    print('IP address     : {0}'.format(domain.get_main_ipv4()))
+    print('Backup         : {0}'.format(domain.get_backup_text()))
+    print('Starting       : {0}'.format(
+        'Auto' if domain.get_autostart() else 'Manual'))
+    print('VNC screen     : {0}'.format(domain.get_vnc_info()['screen']))
+    print()
+    print()
 
     print_title('Interfaces')
     headers = ['MAC address', 'Network', 'Port group', 'IPv4']
@@ -71,8 +71,8 @@ def print_vm_info(domain):
             default(iface.get_ipv4())
         ))
     print_table(headers, rows)
-    print
-    print
+    print()
+    print()
 
     print_title('Volumes')
     headers = ['Name', 'Pool', 'Capacity', 'Allocation']
@@ -86,7 +86,7 @@ def print_vm_info(domain):
             '%sB' % si_unit(vol.get_allocation(), True)
         ))
     print_table(headers, rows, align)
-    print
+    print()
 
 def vm_info(args):
     domain = _get_domain(args.name)
@@ -131,7 +131,7 @@ def vm_list(args):
  
     if args.short:
         for line in rows:
-            print line[0]
+            print(line[0])
     else:
         print_table(headers, rows, align)
 
@@ -168,7 +168,7 @@ def vm_remove(args):
 
     res = None
     while not args.yes and res not in ('y', 'n'):
-        res = raw_input('Delete VM "%s" and all disks? [y/N] ' % domain.get_name())
+        res = input('Delete VM "%s" and all disks? [y/N] ' % domain.get_name())
         res = res.lower()
 
     if res == 'n':
@@ -183,7 +183,7 @@ def vm_remove(args):
 
     res = virdomain.undefine()
     if res == 0:
-        print 'The domain have been removed.'
+        print('The domain have been removed.')
     else:
         App.fatal('Error %d: the VM cannot removed.' % res)
 

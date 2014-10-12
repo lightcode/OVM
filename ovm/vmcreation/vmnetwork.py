@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 ########################################################################
 # Copyright 2014 Matthieu Gaignière                  http://lightcode.fr
@@ -21,7 +21,7 @@
 
 
 from ipaddr import IPAddress
-from utils import xml_template
+from .utils import xml_template
 
 
 def _iter_range(ipstart, ipend):

@@ -21,8 +21,8 @@
 
 
 import os
-from distutils.core import setup
 import shutil
+from distutils.core import setup
 
 
 setup(
@@ -44,6 +44,6 @@ setup(
 )
 
 if os.path.exists('/etc/ovm'):
-    print "Don't change /etc/ovm"
+    print("Don't change /etc/ovm")
 else:
     shutil.copytree('etc/', '/etc/ovm')

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 ########################################################################
 # Copyright 2014 Matthieu Gaignière                  http://lightcode.fr
@@ -43,7 +43,7 @@ def _resize_fs(template, vol_path, verbose=False):
     '''
     tpl = template._config
     if 'abilities' in tpl and 'resizeDisk' in tpl['abilities']:
-        print 'Resizing filesystem...'
+        print('Resizing filesystem...')
         options = tpl['abilities']['resizeDisk']
         params = []
         for param in options['params']:
@@ -58,7 +58,7 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
         path = os.path.join(App.ETC, 'scripts', path)
 
     if not os.path.exists(path):
-        print 'Ignoring script "{0}": not found'.format(path)
+        print('Ignoring script "{0}": not found'.format(path))
         return
 
     os.chmod(path, stat.S_IXUSR)
@@ -74,7 +74,7 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
     try:
         process = Popen(cmd, env=env, stdout=stdout, stderr=stderr)
     except Exception as e:
-        print 'Ignoring script "{0}": {1}'.format(path, e)
+        print('Ignoring script "{0}": {1}'.format(path, e))
     else:
         return process.communicate()
 
@@ -82,7 +82,7 @@ def _post_install(template, diskpath, env_params, verbose=False):
     tpl = template._config
     if 'post-install' not in tpl:
         return
-    print 'Running post-install scripts...'
+    print('Running post-install scripts...')
     for hook in tpl['post-install']:
         path = hook['path']
         params = hook['params']
@@ -156,7 +156,7 @@ def vm_create(args):
     # 1. Find the template
     App.load_templates()
     template = App.get_template(args.template)
-    print 'You choose the template {0}.'.format(template.get_name())
+    print('You choose the template {0}.'.format(template.get_name()))
 
     network.import_template_spec(template)
 
@@ -164,7 +164,7 @@ def vm_create(args):
     vmd.set_network(network)
     vmd.set_storage(storage)
     
-    print "Creating VM's disk..."
+    print("Creating VM's disk...")
     storage.import_template(template)
     storage.set_vmd(vmd)
     diskpath = storage.create_disk(template)
@@ -198,7 +198,7 @@ def vm_templates(args):
     templates = App.get_templates()
 
     if args.short:
-        print '\n'.join([tpl.get_id() for tpl in templates])
+        print('\n'.join([tpl.get_id() for tpl in templates]))
         return
 
     headers = ('ID', 'Name')
@@ -209,22 +209,22 @@ def vm_templates(args):
 
 def vm_storages(args):
     if args.short:
-        print '\n'.join([k for k in STORAGES])
+        print('\n'.join([k for k in STORAGES]))
         return
 
     headers = ('ID', 'Pool name')
     rows = []
-    for name, storage in STORAGES.iteritems():
+    for name, storage in STORAGES.items():
         rows.append((name, storage.pool_name()))
     print_table(headers, rows)
 
 def vm_networks(args):
     if args.short:
-        print '\n'.join([k for k in NETWORKS])
+        print('\n'.join([k for k in NETWORKS]))
         return
 
     headers = ('ID',)
     rows = []
-    for name, network in NETWORKS.iteritems():
+    for name, network in NETWORKS.items():
         rows.append((name,))
     print_table(headers, rows)
