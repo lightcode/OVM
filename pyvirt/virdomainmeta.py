@@ -57,7 +57,7 @@ class virDomainMeta(object):
         self._domain = domain
 
     def _save_xml(self):
-        xml = ET.tostring(self._root)
+        xml = ET.tostring(self._root).decode('utf8')
         self._domain.setMetadata(
             libvirt.VIR_DOMAIN_METADATA_ELEMENT,
             xml,

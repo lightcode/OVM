@@ -62,7 +62,7 @@ class VMStorage(object):
 
         # 2. Add volume into the pool
         xml = self._driver._get_vol_xml()
-        vol = pool.createXML(xml)
+        vol = pool.createXML(xml.decode('utf8'))
 
         # 3. Copy template image in new pool
         img_path = template.get_path()

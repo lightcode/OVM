@@ -49,4 +49,4 @@ class LibvirtConn(Singleton):
 
     @classmethod
     def define_domain(cls, xml):
-        cls._conn.defineXML(xml)
+        cls._conn.defineXML(xml.decode('utf8'))
