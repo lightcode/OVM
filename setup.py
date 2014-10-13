@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 ########################################################################
-# Copyright 2014 Matthieu Gaignière                matthieu@lightcode.fr
+# Copyright 2014 Matthieu Gaignière                  http://lightcode.fr
 ########################################################################
-# This file is part of OVM.                          http://lightcode.fr
+# This file is part of OVM.
 #
 # OVM is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free

@@ -1,8 +1,9 @@
 #!/bin/bash
+# vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 ########################################################################
-# Copyright 2014 Matthieu Gaignière                matthieu@lightcode.fr
+# Copyright 2014 Matthieu Gaignière                  http://lightcode.fr
 ########################################################################
-# This file is part of OVM.                          http://lightcode.fr
+# This file is part of OVM.
 #
 # OVM is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
@@ -27,7 +28,7 @@ echo $HOSTNAME > $MNT_DIR/etc/hostname
 cat <<EOF > $MNT_DIR/etc/hosts
 127.0.0.1       localhost
 127.0.1.1       $HOSTNAME
- 
+
 # The following lines are desirable for IPv6 capable hosts
 ::1     localhost ip6-localhost ip6-loopback
 ff02::1 ip6-allnodes
