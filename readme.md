@@ -70,9 +70,17 @@ If you want to handle another OS by OVM, you need to create a new template. A te
 
 # Configure resources
 
+The resources are configure in the YAML file `resources.yml`. The file follow the YAML syntax and there are two main dictionaries: `storages` and `networks`. Each dictionary is described in this chapter.
+
+
 ## Storage pools
 
-The storage pool is used by OVM to create the disk of VMs. To add a new storage pool, add the following line at the end of the bloc "Storage pools definition" in `resources.yml`:
+Storage pools are used by OVM to create the disk of VMs. To add a new storage pool, we add a dictionary where the key is the **Pool ID**. This dictionary contains another dictionary with different parameters:
+
+* **driver**: this key tells to OVM how to handle the pool. Today, only the driver `VolumeDriver` exists.
+* **pool_name**: this parameter specifies the name of the pool in libvirt.
+
+**Example**:
 
 ```yaml
 storages:
@@ -81,19 +89,19 @@ storages:
     pool_name: pool-vm-ssd
 ```
 
-Explanations:
-
-* **Pool ID**: the pool name is given between quote in the first line. This name is used in OVM when you create a VM
-* **Driver**: the second line is the driver name. We tell to OVM how to access to the storage
-* **Pool name**: on the third line, the parameter `pool_name` specify the name of the pool in libvirt. It's a driver params.
+Here we create the storage pool *ssd*. We use the driver *VolumeDriver* to access it. The other parameter, _pool-vm-ssd_ is the name of the libvirt pool.
 
 
 ## Networks
 
-To add a network connection to a VM, you must create a network. The network can be used to configure a static IPv4 automatically.
+Networks are used by OVM to add an interface in the VM and eventually to configure the IP stack. To add a new network, we add a dictionary where the key is the **Network ID**. This dictionary contains another dictionary with different parameters:
 
-You can add network by adding the following line at the end of the bloc "Networks definition" in `resources.yml` :
+* **driver**: this key tells to OVM how to handle the network. Today, only the driver `OpenvSwitchDriver` exists.
+* **net_name**: the parameter `net_name` define the name of the network in libvirt.
+* **net_portgroup**: this term is used in libvirt configuration network. _This option is facultative_.
+* **pool_ip**: it's a set of parameters to configure the IP allocation.
 
+**Example**:
 
 ```yaml
 networks:
@@ -109,12 +117,3 @@ networks:
       nameservers: ['192.168.1.1']
       autoip_path: /etc/autoip/ovm/local.dat
 ```
-
-
-Explanations:
-
-* **Network ID**: the network name is given between quote in the first line. This name is used in OVM when you create a VM
-* **Driver**: permit to OVM to handle the resource. Here the driver allow to OVM to use a libvirt network
-* **Bridge name**: the parameter `net_name` define the name of the network in libvirt
-* **Port group**: this term is used in libvirt configuration network. _This option is facultative_
-* **IP pool**: it's a set of parameters to configure the IP allocation
