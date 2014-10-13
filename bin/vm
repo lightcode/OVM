@@ -42,10 +42,12 @@ LibvirtConn.open()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Provide functions to modify KVM VM with libvirt.')
-    
+        description='Provide functions to create and manage VMs in KVM.',
+        prog='OVM (Open Virtualization Manager)')
+    parser.add_argument('--version', action='version', version='%(prog)s 2.0')
+
     subparsers = parser.add_subparsers()
-    
+
     # Create a VM
     parser_create = subparsers.add_parser('create', help='create a new VM')
     parser_create.add_argument('name', help='set the name of the VM')
@@ -77,7 +79,7 @@ if __name__ == "__main__":
     parser_networks.add_argument('--short', action='store_true',
         help="print only the list of template names")
     parser_networks.set_defaults(func=vm_networks)
-    
+
     # List VMs
     parser_list = subparsers.add_parser('list', help='list VMs')
     parser_list.add_argument(
@@ -91,7 +93,7 @@ if __name__ == "__main__":
         '--backup', action='store_true',
         help="print only the list of VM with active backup")
     parser_list.set_defaults(func=vm_list)
-    
+
     # Set option to a VM
     parser_set = subparsers.add_parser('set', help='set options to a VM')
     parser_set.add_argument('name', help='name of the VM')
@@ -102,12 +104,12 @@ if __name__ == "__main__":
         choices=['auto', 'manual'])
     parser_set.add_argument('--ip', help="set IP address")
     parser_set.set_defaults(func=vm_set)
-    
+
     # Start a VM
     parser_start = subparsers.add_parser('start', help='start a VM')
     parser_start.add_argument('name', help='name of the VM')
     parser_start.set_defaults(func=vm_start)
-    
+
     # Show informations about a VM
     parser_info = subparsers.add_parser('info', help='show informations about a VM')
     parser_info.add_argument('name', help='name of the VM')
@@ -117,14 +119,14 @@ if __name__ == "__main__":
     parser_reboot = subparsers.add_parser('reboot', help='reboot a VM')
     parser_reboot.add_argument('name', help='name of the VM')
     parser_reboot.set_defaults(func=vm_reboot)
-    
+
     # Stop a VM
     parser_stop = subparsers.add_parser('stop', help='stop a VM')
     parser_stop.add_argument('name', help='name of the VM')
     parser_stop.add_argument(
         '--force', action='store_true', help='force the VM shutdown')
     parser_stop.set_defaults(func=vm_stop)
-    
+
     # Remove a VM
     parser_remove = subparsers.add_parser('remove', help='remove a VM')
     parser_remove.add_argument('name', help='name of the VM')
@@ -132,7 +134,7 @@ if __name__ == "__main__":
         '--yes', '-y', action='store_true',
         help='Do remove without asking comfirmation.')
     parser_remove.set_defaults(func=vm_remove)
-    
+
     # SSH
     parser_ssh = subparsers.add_parser('ssh', help='ssh a VM')
     parser_ssh.add_argument('name', help='name of the VM')

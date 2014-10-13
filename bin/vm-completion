@@ -25,10 +25,13 @@ _vm()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="create info list ping reboot remove set ssh start stop storages networks templates"
+    opts="create info list ping reboot remove set ssh start stop storages networks templates --version --help"
 
     if [[ COMP_CWORD -gt 1 ]]; then
         case "${COMP_WORDS[1]}" in
+            --version | --help)
+                return 0
+            ;;
             create)
                 if [[ "$prev" == "--template" ]]; then
                     templates="$(vm templates --short)"
