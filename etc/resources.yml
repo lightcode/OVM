@@ -1,0 +1,32 @@
+storages:
+  ssd:
+    driver: VolumeDriver
+    pool_name: pool-vm-ssd
+  nfs:
+    driver: VolumeDriver
+    pool_name: pool-vm-nfs
+
+
+networks:
+  local:
+    driver: OpenvSwitchDriver
+    net_name: net-ovs
+    net_portgroup: local
+    pool_ip:
+      ip_start: 192.168.1.30
+      ip_end: 192.168.1.63
+      netmask: 24
+      gateway: 192.168.1.1
+      nameservers: ['192.168.1.1']
+      autoip_path: /etc/autoip/ovm/local.dat
+  prod:
+    driver: OpenvSwitchDriver
+    net_name: net-ovs
+    net_portgroup: prod
+    pool_ip:
+      ip_start: 10.42.1.10
+      ip_end: 10.42.1.254
+      netmask: 24
+      gateway: 10.42.1.1
+      nameservers: ['192.168.1.1']
+      autoip_path: /etc/autoip/ovm/prod.dat

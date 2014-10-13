@@ -20,50 +20,11 @@
 ########################################################################
 
 
-import os
-import sys
-from glob import iglob
-from ovm.resources import Resources
-from ovm.singleton import Singleton
-from ovm.template import Template
+class Singleton(object):
 
-
-class App(Singleton):
-
-    templates = []
-    _templates_loaded = False
-    ETC = '/etc/ovm'
-
-    @classmethod
-    def init(cls):
-        Resources.init(os.path.join(cls.ETC, 'resources.yml'))
-
-    @classmethod
-    def load_templates(cls):
-        if cls._templates_loaded:
-            return
-
-        for path in iglob(ETC_TEMPLATES):
-            with open(path) as ofile:
-                 cls.templates.append(Template.load_file(ofile))
-
-    @classmethod
-    def get_templates(cls):
-        return cls.templates
-
-    @classmethod
-    def get_template(cls, id_):
-        for tpl in cls.get_templates():
-            if tpl.get_id() == id_:
-                return tpl
-
-    @classmethod
-    def fatal(cls, text=None):
-        if text:
-            print(text, file=sys.stderr)
-        sys.exit(1)
-
-
-App.init()
-
-ETC_TEMPLATES = App.ETC + '/templates/*.yml'
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = object.__new__(cls)
+        return cls._instance

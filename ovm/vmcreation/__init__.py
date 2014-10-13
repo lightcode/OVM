@@ -26,6 +26,7 @@ import sys
 from glob import iglob
 from pyvirt.libvirtconn import LibvirtConn
 from ovm.app import App
+from ovm.resources import Resources
 from ovm.utils.printer import print_table
 from ovm.vmcreation.vmdefinition import VMDefinition
 from ovm.vmcreation.vmnetwork import VMNetwork
@@ -33,9 +34,9 @@ from ovm.vmcreation.vmstorage import VMStorage
 from ovm.vmmanagement import print_vm_info
 from subprocess import PIPE, Popen
 
-sys.path.append(App.ETC)
 
-from config import STORAGES, NETWORKS
+STORAGES = Resources.get_storages()
+NETWORKS = Resources.get_networks()
 
 
 def _resize_fs(template, vol_path, verbose=False):
@@ -187,7 +188,7 @@ def vm_create(args):
     domain = LibvirtConn.get_domain(vmd.name())
     domain.set_main_ipv4(params['IP'])
 
-    # 4. Lock network ressources
+    # 4. Lock network resources
     network.lock_ip()
 
     # 5. Print the VM specs

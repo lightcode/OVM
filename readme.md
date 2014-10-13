@@ -22,7 +22,7 @@ You can simply use your package manager or build them yourself.
 
 We need to install Python libraries (example on Debian):
 
-    # apt-get install python3-lxml python3-ipaddr
+    # apt-get install python3-lxml python3-ipaddr python3-yaml
 
 Now, you can download and extract OVM. Then, to achieve the installation, we simply do this command into the `ovm` directory:
 
@@ -72,13 +72,13 @@ If you want to handle another OS by OVM, you need to create a new template. A te
 
 ## Storage pools
 
-The storage pool is used by OVM to create the disk of VMs. To add a new storage pool, add the following line at the end of the bloc "Storage pools definition" in `config.py`:
+The storage pool is used by OVM to create the disk of VMs. To add a new storage pool, add the following line at the end of the bloc "Storage pools definition" in `resources.yml`:
 
-```python
-STORAGES['ssd'] = VMStorage(
-    VolumeDriver,
-    pool_name='pool-vm-ssd'
-)
+```yaml
+storages:
+  ssd:
+    driver: VolumeDriver
+    pool_name: pool-vm-ssd
 ```
 
 Explanations:
@@ -92,23 +92,22 @@ Explanations:
 
 To add a network connection to a VM, you must create a network. The network can be used to configure a static IPv4 automatically.
 
-You can add network by adding the following line at the end of the bloc "Networks definition" in `config.py` :
+You can add network by adding the following line at the end of the bloc "Networks definition" in `resources.yml` :
 
 
-```python
-NETWORKS['local'] = VMNetwork(
-    OpenvSwitchDriver,
-    net_name='net-ovs',
-    net_portgroup='local',
-    pool_ip={
-        'ip_start': '192.168.1.30',
-        'ip_end': '192.168.1.63',
-        'netmask': 24,
-        'gateway': '192.168.1.1',
-        'nameservers': ['192.168.1.1'],
-        'autoip_path': '/etc/autoip/local.dat'
-    }
-)
+```yaml
+networks:
+  local:
+    driver: OpenvSwitchDriver
+    net_name: net-ovs
+    net_portgroup: local
+    pool_ip:
+      ip_start: 192.168.1.30
+      ip_end: 192.168.1.63
+      netmask: 24
+      gateway: 192.168.1.1
+      nameservers: ['192.168.1.1']
+      autoip_path: /etc/autoip/ovm/local.dat
 ```
 
 

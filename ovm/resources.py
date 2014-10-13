@@ -20,50 +20,44 @@
 ########################################################################
 
 
-import os
-import sys
-from glob import iglob
-from ovm.resources import Resources
+import yaml
+from ovm.drivers.network.openvswitch import OpenvSwitchDriver
+from ovm.drivers.storage.volume import VolumeDriver
 from ovm.singleton import Singleton
-from ovm.template import Template
+from ovm.vmcreation.vmnetwork import VMNetwork
+from ovm.vmcreation.vmstorage import VMStorage
 
 
-class App(Singleton):
+class Resources(Singleton):
 
-    templates = []
-    _templates_loaded = False
-    ETC = '/etc/ovm'
-
-    @classmethod
-    def init(cls):
-        Resources.init(os.path.join(cls.ETC, 'resources.yml'))
+    path = None
+    networks = {}
+    storages = {}
 
     @classmethod
-    def load_templates(cls):
-        if cls._templates_loaded:
-            return
-
-        for path in iglob(ETC_TEMPLATES):
-            with open(path) as ofile:
-                 cls.templates.append(Template.load_file(ofile))
+    def init(cls, path):
+        cls.path = path
 
     @classmethod
-    def get_templates(cls):
-        return cls.templates
+    def load_resources(cls):
+        if not cls.networks or not cls.storages:
+            with open(cls.path) as fd:
+                resources = yaml.load(fd)
+
+            for name, network in resources['networks'].items():
+                driver = globals()[network.pop('driver')]
+                cls.networks[name]= VMNetwork(driver, **network)
+
+            for name, storage in resources['storages'].items():
+                driver = globals()[storage.pop('driver')]
+                cls.storages[name]= VMStorage(driver, **storage)
 
     @classmethod
-    def get_template(cls, id_):
-        for tpl in cls.get_templates():
-            if tpl.get_id() == id_:
-                return tpl
+    def get_networks(cls):
+        cls.load_resources()
+        return cls.networks
 
     @classmethod
-    def fatal(cls, text=None):
-        if text:
-            print(text, file=sys.stderr)
-        sys.exit(1)
-
-
-App.init()
-
-ETC_TEMPLATES = App.ETC + '/templates/*.yml'
+    def get_storages(cls):
+        cls.load_resources()
+        return cls.storages
