@@ -56,7 +56,7 @@ if __name__ == "__main__":
     parser_create.add_argument('--template', required=True)
     parser_create.add_argument('--network', required=True)
     parser_create.add_argument('--storage', required=True)
-    parser_create.add_argument('--ip', nargs='?', default='auto')
+    parser_create.add_argument('--ip', nargs='?', default='default')
     parser_create.add_argument('--size', nargs='?')
     parser_create.add_argument('--vcpu', nargs='?')
     parser_create.add_argument('--memory', nargs='?')

@@ -34,7 +34,9 @@ def _iter_range(ipstart, ipend):
 
 
 class VMNetwork(object):
-    def __init__(self, driver, pool_ip=None, options=None, **params):
+    def __init__(self, driver, ipv4_allocation=None, ipv4_pool=None,
+                options=None, **params):
+        
         self._method = None
         self._driver = driver()
         
@@ -48,15 +50,16 @@ class VMNetwork(object):
         if options:
             self.options.update(options)
 
-        self.pool_ip = pool_ip
+        self.ipv4_allocation = ipv4_allocation
+        self.ipv4_pool = ipv4_pool
 
         # Set driver params
         self._driver.set_params(**params)
 
     def _lock_ip(self):
-        autoip_path = self.pool_ip['autoip_path']
+        autoip_path = self.ipv4_pool['autoip_path']
         with open(autoip_path, 'a+') as file_:
-            file_.write(self.pool_ip['ip'] + '\n')
+            file_.write(self.ipv4_pool['ip'] + '\n')
 
     def lock_ip(self):
         if self._method in ('auto', 'manual'):
@@ -66,7 +69,7 @@ class VMNetwork(object):
         return (self._method == 'dhcp')
 
     def _get_used_ips(self):
-        autoip_path = self.pool_ip['autoip_path']
+        autoip_path = self.ipv4_pool['autoip_path']
         used_ips = []
         try:
             with open(autoip_path, 'r+') as autoip_file:
@@ -81,8 +84,8 @@ class VMNetwork(object):
         ipchoose = None
         used_ips = self._get_used_ips()
 
-        ipstart = self.pool_ip['ip_start']
-        ipend = self.pool_ip['ip_end']
+        ipstart = self.ipv4_pool['ip_start']
+        ipend = self.ipv4_pool['ip_end']
 
         for ip in _iter_range(ipstart, ipend):
             if str(ip) not in used_ips:
@@ -92,7 +95,13 @@ class VMNetwork(object):
         if not ipchoose:
             raise Exception('No IPs available in your IP pool')
 
-        self.pool_ip['ip'] = ipchoose
+        self.ipv4_pool['ip'] = ipchoose
+
+    def set_ip_default(self):
+        if self.ipv4_allocation == 'static':
+            self.set_ip_auto()
+        else:
+            self.set_ip_dhcp()
 
     def set_ip_dhcp(self):
         self._method = 'dhcp'
@@ -104,19 +113,19 @@ class VMNetwork(object):
         except ValueError:
             raise Exception('"%s" is not a valid IP address.' % ip)
 
-        # Check if the IP is in the pool_ip
-        ipstart = self.pool_ip['ip_start']
-        ipend = self.pool_ip['ip_end']
+        # Check if the IP is in the ipv4_pool
+        ipstart = self.ipv4_pool['ip_start']
+        ipend = self.ipv4_pool['ip_end']
         if ip not in _iter_range(ipstart, ipend):
            raise Exception('"%s" does not match with the pool.' % ip)
 
         # Check if the IP has already attributed
-        autoip_path = self.pool_ip['autoip_path']
+        autoip_path = self.ipv4_pool['autoip_path']
         used_ips = self._get_used_ips()
         if str(ip) in used_ips:
             raise Exception('This IP address has been provided.')
 
-        self.pool_ip['ip'] = str(ip)
+        self.ipv4_pool['ip'] = str(ip)
 
     def import_template_spec(self, template):
         model = template._config['main_interface']['model']

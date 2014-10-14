@@ -110,6 +110,11 @@ def _process_args_network(args):
             network.set_ip_dhcp()
         except Exception as e:
             App.fatal(e)
+    elif args.ip == 'default':
+        try:
+            network.set_ip_default()
+        except Exception as e:
+            App.fatal(e)
     else:
         try:
             network.set_ip_manual(args.ip)
@@ -147,10 +152,10 @@ def vm_create(args):
     if network.is_dhcp():
         params['IP'] = 'dhcp'
     else:
-        params['IP'] = str(network.pool_ip['ip'])
-        params['NETMASK'] = _long_netmask(network.pool_ip['netmask'])
-        params['GATEWAY'] = str(network.pool_ip['gateway'])
-        params['NAMESERVERS'] = ' '.join(network.pool_ip['nameservers'])
+        params['IP'] = str(network.ipv4_pool['ip'])
+        params['NETMASK'] = _long_netmask(network.ipv4_pool['netmask'])
+        params['GATEWAY'] = str(network.ipv4_pool['gateway'])
+        params['NAMESERVERS'] = ' '.join(network.ipv4_pool['nameservers'])
    
     storage = _process_args_storage(args)
 

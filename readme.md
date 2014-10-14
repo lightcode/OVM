@@ -99,7 +99,8 @@ Networks are used by OVM to add an interface in the VM and eventually to configu
 * **driver**: this key tells to OVM how to handle the network. Today, only the driver `OpenvSwitchDriver` exists.
 * **net_name**: the parameter `net_name` define the name of the network in libvirt.
 * **net_portgroup**: this term is used in libvirt configuration network. _This option is facultative_.
-* **pool_ip**: it's a set of parameters to configure the IP allocation.
+* **ipv4_allocation**: this parameter is used to precise to OVM the type of IPv4 allocation. You can choose `static` and precise the `ipv4_pool` parameter or you can choose `dhcp` and let the DHCP server on your network allocate the IPv4.
+* **ipv4_pool**: it's a set of parameters to configure the IP allocation.
 
 **Example**:
 
@@ -109,7 +110,8 @@ networks:
     driver: OpenvSwitchDriver
     net_name: net-ovs
     net_portgroup: local
-    pool_ip:
+    ipv4_allocation: static
+    ipv4_pool:
       ip_start: 192.168.1.30
       ip_end: 192.168.1.63
       netmask: 24
