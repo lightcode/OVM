@@ -39,6 +39,7 @@ IP=${IP:-dhcp}
 if [ $IP == "dhcp" ]; then
     cat <<EOF >> $NET_FILE
 BOOTPROTO="dhcp"
+DHCP_HOSTNAME="${HOSTNAME}"
 EOF
 elif [ -n $IP ] && [ -n $NETMASK ] && [ -n $GATEWAY ]; then
     cat <<EOF >> $NET_FILE
