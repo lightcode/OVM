@@ -26,7 +26,7 @@ _vm()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="create info list ping reboot remove set ssh start stop storages networks templates --version --help"
+    opts="create info list ping reboot rm set ssh start stop storages networks templates --version --help"
 
     if [[ COMP_CWORD -gt 1 ]]; then
         case "${COMP_WORDS[1]}" in
@@ -59,7 +59,7 @@ _vm()
                 COMPREPLY=( $(compgen -W "--short" -- ${cur}) )
                 return 0
             ;;
-            remove)
+            rm)
                 vm_list="$(vm list --inactive --short)"
                 COMPREPLY=( $(compgen -W "--yes ${vm_list}" -- ${cur}) )
                 return 0
@@ -83,18 +83,21 @@ _vm()
                 fi
                 return 0
             ;;
-            ping | reboot | ssh | stop)
+            ping | reboot | ssh)
                 if [[ COMP_CWORD -eq 2 ]]; then
                     vm_list="$(vm list --active --short)"
                     COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 fi
                 return 0
             ;;
+            stop)
+                vm_list="$(vm list --active --short)"
+                COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
+                return 0
+            ;;
             start)
-                if [[ COMP_CWORD -eq 2 ]]; then
-                    vm_list="$(vm list --inactive --short)"
-                    COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
-                fi
+                vm_list="$(vm list --inactive --short)"
+                COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 return 0
             ;;
             *)

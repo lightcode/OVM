@@ -159,33 +159,47 @@ def vm_reboot(args):
         App.fatal('VM must be active.')
     virdomain.reset()
 
-def vm_remove(args):
-    domain = _get_domain(args.name)
+def _remove_vm(name, force):
+    domain = _get_domain(name)
     virdomain = domain.vir_domain
 
-    if virdomain.isActive():
-        virdomain.destroy()
-
     res = None
-    while not args.yes and res not in ('y', 'n'):
+    while not force and res not in ('y', 'n'):
         res = input('Delete VM "%s" and all disks? [y/N] ' % domain.get_name())
         res = res.lower()
 
     if res == 'n':
-        App.fatal('Deletion aborted.')    
+        App.notice('Deletion of "{0}" aborted by user.'.format(name))
+        return False
     
+    if virdomain.isActive():
+        virdomain.destroy()
+
     for vol in domain.get_volumes():
         vol.vir_vol.delete()
 
     snapshots = virdomain.listAllSnapshots()
     if snapshots:
-        App.fatal('Error : the VM cannot be removed. Delete snapshots first.')
+        App.notice('The VM "{0}" cannot be removed. \
+            Delete snapshots first.'.format(name))
+        return False
 
     res = virdomain.undefine()
     if res == 0:
         print('The domain have been removed.')
+        return True
     else:
-        App.fatal('Error %d: the VM cannot removed.' % res)
+        App.notice('Error %d: the VM cannot removed.' % res)
+        return False
+
+def vm_remove(args):
+    error_count = 0
+    for name in args.name:
+        if _remove_vm(name, args.yes):
+            error_count += 1
+
+    if error_count > 0:
+        App.fatal('{0} VMs cannot be deleted.'.format(error_count))
 
 def vm_set(args):
     domain = _get_domain(args.name)
@@ -225,18 +239,31 @@ def vm_ssh(args):
         pass
 
 def vm_start(args):
-    domain = _get_domain(args.name)
-    virdomain = domain.vir_domain
-    if virdomain.isActive():
-        App.fatal('VM must be inactive.')
-    virdomain.create()
+    error_count = 0
+    for name in args.name:
+        domain = _get_domain(name)
+        virdomain = domain.vir_domain
+        if virdomain.isActive():
+            error_count += 1
+            App.notice('VM "{0}" is already active.'.format(name))
+        else:
+            virdomain.create()
+
+    if error_count > 0:
+        App.fatal('{0} VMs cannot be started.'.format(error_count))
 
 def vm_stop(args):
-    virdomain = _get_domain(args.name).vir_domain
-    if not virdomain.isActive():
-        App.fatal('VM must be active.')
+    error_count = 0
+    for name in args.name:
+        virdomain = _get_domain(name).vir_domain
+        if not virdomain.isActive():
+            error_count += 1
+            App.notice('VM "{0}" must be active.'.format(name))
+        else:
+            if args.force:
+                virdomain.destroy()
+            else:
+                virdomain.shutdown()
 
-    if args.force:
-        virdomain.destroy()
-    else:
-        virdomain.shutdown()
+    if error_count > 0:
+        App.fatal('{0} VMs cannot be stopped.'.format(error_count))        

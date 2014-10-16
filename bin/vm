@@ -106,12 +106,14 @@ if __name__ == "__main__":
     parser_set.set_defaults(func=vm_set)
 
     # Start a VM
-    parser_start = subparsers.add_parser('start', help='start a VM')
-    parser_start.add_argument('name', help='name of the VM')
+    parser_start = subparsers.add_parser('start',
+        help='start one or many VMs')
+    parser_start.add_argument('name', nargs='+', help='name of VMs')
     parser_start.set_defaults(func=vm_start)
 
-    # Show informations about a VM
-    parser_info = subparsers.add_parser('info', help='show informations about a VM')
+    # Show information about a VM
+    parser_info = subparsers.add_parser('info',
+        help='show information about a VM')
     parser_info.add_argument('name', help='name of the VM')
     parser_info.set_defaults(func=vm_info)
 
@@ -121,18 +123,18 @@ if __name__ == "__main__":
     parser_reboot.set_defaults(func=vm_reboot)
 
     # Stop a VM
-    parser_stop = subparsers.add_parser('stop', help='stop a VM')
-    parser_stop.add_argument('name', help='name of the VM')
+    parser_stop = subparsers.add_parser('stop', help='stop one or many VMs')
+    parser_stop.add_argument('name', nargs='+', help='name of VMs')
     parser_stop.add_argument(
         '--force', action='store_true', help='force the VM shutdown')
     parser_stop.set_defaults(func=vm_stop)
 
     # Remove a VM
-    parser_remove = subparsers.add_parser('remove', help='remove a VM')
-    parser_remove.add_argument('name', help='name of the VM')
+    parser_remove = subparsers.add_parser('rm', help='remove one or many VMs')
+    parser_remove.add_argument('name', help='name of VMs', nargs='+')
     parser_remove.add_argument(
-        '--yes', '-y', action='store_true',
-        help='Do remove without asking comfirmation.')
+        '--yes', '-y', '-f', action='store_true',
+        help='Remove VM without asking comfirmation.')
     parser_remove.set_defaults(func=vm_remove)
 
     # SSH

@@ -26,6 +26,7 @@ from glob import iglob
 from ovm.resources import Resources
 from ovm.singleton import Singleton
 from ovm.template import Template
+from ovm.utils.printer import bcolors, ColoredString
 
 
 class App(Singleton):
@@ -58,9 +59,15 @@ class App(Singleton):
                 return tpl
 
     @classmethod
+    def notice(cls, text):
+        print('{0} |  {1}'.format(
+            ColoredString('Notice', bcolors.WARNING), text))
+
+    @classmethod
     def fatal(cls, text=None):
         if text:
-            print(text, file=sys.stderr)
+            print('{0}  |  {1}'.format(
+                ColoredString('Fatal', bcolors.FAIL), text))
         sys.exit(1)
 
 
