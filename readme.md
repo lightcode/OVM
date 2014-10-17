@@ -42,7 +42,7 @@ list          | Print the list of VM
 networks      | Print the list of networks
 ping          | Shortcut to ping a VM with the static IP
 reboot        | Reboot a VM
-remove        | Remove a VM
+rm            | Remove a VM
 set           | Modify some properties of VM
 ssh           | Shortcut to open a SSH session on the VM
 start         | Start a VM

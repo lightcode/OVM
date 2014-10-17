@@ -21,6 +21,7 @@
 
 
 import libvirt
+import sys
 from pyvirt.libvirtconn import LibvirtConn
 from subprocess import Popen, PIPE
 from ovm.utils.printer import print_title, si_unit, default, print_table
@@ -248,6 +249,26 @@ def vm_start(args):
             App.notice('VM "{0}" is already active.'.format(name))
         else:
             virdomain.create()
+            App.success('VM "{0}" started with '.format(name), newline=False)
+            
+            ipv4 = domain.get_main_ipv4()
+            have_ipv4 = not ipv4 or ipv4 == 'dhcp'
+            if have_ipv4:
+                sys.stdout.write('no static IP')
+            else:
+                sys.stdout.write('IP {0}'.format(ipv4))
+
+            sys.stdout.write(' and ')
+
+            domain = _get_domain(name)
+            vnc = domain.get_vnc_info()
+            if vnc and 'screen' in vnc and vnc['screen']:
+                sys.stdout.write(
+                    'the VNC screen number {0}'.format(vnc['screen']))
+            else:
+                sys.stdout.write('no VNC screen')
+
+            print('.')
 
     if error_count > 0:
         App.fatal('{0} VMs cannot be started.'.format(error_count))

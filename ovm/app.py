@@ -59,14 +59,21 @@ class App(Singleton):
                 return tpl
 
     @classmethod
+    def success(cls, text, newline=True):
+        sys.stdout.write('{0} |  {1}'.format(
+            ColoredString('Success', bcolors.OKGREEN), text))
+        if newline:
+            print()
+
+    @classmethod
     def notice(cls, text):
-        print('{0} |  {1}'.format(
+        print('{0}  |  {1}'.format(
             ColoredString('Notice', bcolors.WARNING), text))
 
     @classmethod
     def fatal(cls, text=None):
         if text:
-            print('{0}  |  {1}'.format(
+            print('{0}   |  {1}'.format(
                 ColoredString('Fatal', bcolors.FAIL), text))
         sys.exit(1)
 
