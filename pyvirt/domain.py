@@ -35,10 +35,16 @@ class Volume(object):
         return self.vir_vol.name()
 
     def get_capacity(self):
-        return self.vir_vol.info()[1]
+        try:
+            return self.vir_vol.info()[1]
+        except:
+            return 0
 
     def get_allocation(self):
-        return self.vir_vol.info()[2]
+        try:
+            return self.vir_vol.info()[2]
+        except:
+            return 0
 
     def get_pool_name(self):
         source = self.xmldesc.xpath('source')[0]
@@ -181,8 +187,13 @@ class Domain(object):
             if not poolname or not poolname:
                 continue
             pool = self._libvirt_conn.storagePoolLookupByName(poolname)
-            vol = pool.storageVolLookupByName(volname)
-            volumes.append(Volume(disk, vol))
+            try:
+                vol = pool.storageVolLookupByName(volname)
+            except Exception:
+                pass
+            else:
+                volumes.append(Volume(disk, vol))
+            
         return volumes
 
     def get_backup_state(self):
