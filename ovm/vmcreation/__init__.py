@@ -20,6 +20,7 @@
 ########################################################################
 
 
+import concurrent.futures
 import os
 import stat
 import sys
@@ -37,6 +38,7 @@ from subprocess import PIPE, Popen
 
 STORAGES = Resources.get_storages()
 NETWORKS = Resources.get_networks()
+LEVEL_ERROR, LEVEL_INFO = 0, 1
 
 
 def _resize_fs(template, vol_path, verbose=False):
@@ -52,9 +54,17 @@ def _resize_fs(template, vol_path, verbose=False):
         _exec_script(options['script'], params, verbose=verbose)
     return vol_path
 
-def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
-    stdout = stderr = None if verbose else PIPE
+def _thread_logger(fd, level, print_log):
+    for line in fd:
+        line = line.decode('utf8').rstrip()
+        if level == LEVEL_ERROR:
+            if print_log:
+                App.notice(line)
+        elif level == LEVEL_INFO:
+            if print_log:
+                App.info(line)
 
+def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
     if not path.startswith('/'):
         path = os.path.join(App.ETC, 'scripts', path)
 
@@ -71,13 +81,19 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
     env = os.environ.copy()
     if env_params:
         env.update(env_params)
-    
-    try:
-        process = Popen(cmd, env=env, stdout=stdout, stderr=stderr)
-    except Exception as e:
-        print('Ignoring script "{0}": {1}'.format(path, e))
-    else:
-        return process.communicate()
+
+    process = Popen(cmd, env=env, stdout=PIPE, stderr=PIPE)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        threads = []
+        threads.append(executor.submit(
+            _thread_logger, process.stdout, LEVEL_INFO, verbose
+        ))
+        threads.append(executor.submit(
+            _thread_logger, process.stderr, LEVEL_ERROR, verbose
+        ))
+        for future in concurrent.futures.as_completed(threads):
+            if future.exception() is not None:
+                print(future.exception())
 
 def _post_install(template, diskpath, env_params, verbose=False):
     tpl = template._config
@@ -90,8 +106,6 @@ def _post_install(template, diskpath, env_params, verbose=False):
         for i, param in enumerate(params):
             params[i] = param.format(diskpath=diskpath)
         _exec_script(path, params, env_params, verbose)
-        # Put this into a file
-        #print stdout, stderr
 
 def _process_args_network(args):
     if args.network not in NETWORKS:
@@ -197,6 +211,8 @@ def vm_create(args):
     network.lock_ip()
 
     # 5. Print the VM specs
+    if args.verbose:
+        print('\n')
     print_vm_info(domain)
 
 def vm_templates(args):

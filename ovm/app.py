@@ -34,6 +34,7 @@ class App(Singleton):
     templates = []
     _templates_loaded = False
     ETC = '/etc/ovm'
+    LOG_TYPE_SIZE = 7
 
     @classmethod
     def init(cls):
@@ -60,21 +61,37 @@ class App(Singleton):
 
     @classmethod
     def success(cls, text, newline=True):
+        type_txt = 'Success'.ljust(cls.LOG_TYPE_SIZE)
         sys.stdout.write('{0} |  {1}'.format(
-            ColoredString('Success', bcolors.OKGREEN), text))
+            ColoredString(type_txt, bcolors.OKGREEN), text))
         if newline:
-            print()
+            sys.stdout.write('\n')
+        sys.stdout.flush()
 
     @classmethod
-    def notice(cls, text):
-        print('{0}  |  {1}'.format(
-            ColoredString('Notice', bcolors.WARNING), text))
+    def notice(cls, text, newline=True):
+        type_txt = 'Notice'.ljust(cls.LOG_TYPE_SIZE)
+        sys.stdout.write('{0} |  {1}'.format(
+            ColoredString(type_txt, bcolors.WARNING), text))
+        if newline:
+            sys.stdout.write('\n')
+        sys.stdout.flush()
+
+    @classmethod
+    def info(cls, text, newline=True):
+        type_txt = 'Info'.ljust(cls.LOG_TYPE_SIZE)
+        sys.stdout.write('{0} |  {1}'.format(
+            ColoredString(type_txt, bcolors.OKGREEN), text))
+        if newline:
+            sys.stdout.write('\n')
+        sys.stdout.flush()
 
     @classmethod
     def fatal(cls, text=None):
+        type_txt = 'Info'.ljust(cls.LOG_TYPE_SIZE)
         if text:
-            print('{0}   |  {1}'.format(
-                ColoredString('Fatal', bcolors.FAIL), text))
+            print('{0} |  {1}'.format(
+                ColoredString(type_txt, bcolors.FAIL), text))
         sys.exit(1)
 
 
