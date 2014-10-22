@@ -196,7 +196,7 @@ def _remove_vm(name, force):
 def vm_remove(args):
     error_count = 0
     for name in args.name:
-        if _remove_vm(name, args.yes):
+        if not _remove_vm(name, args.yes):
             error_count += 1
 
     if error_count > 0:

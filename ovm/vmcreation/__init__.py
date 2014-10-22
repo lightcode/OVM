@@ -170,7 +170,7 @@ def vm_create(args):
         params['NETMASK'] = _long_netmask(network.ipv4_pool['netmask'])
         params['GATEWAY'] = str(network.ipv4_pool['gateway'])
         params['NAMESERVERS'] = ' '.join(network.ipv4_pool['nameservers'])
-   
+
     storage = _process_args_storage(args)
 
     # 1. Find the template
@@ -183,7 +183,7 @@ def vm_create(args):
     vmd = VMDefinition(template, args.name)
     vmd.set_network(network)
     vmd.set_storage(storage)
-    
+
     print("Creating VM's disk...")
     storage.import_template(template)
     storage.set_vmd(vmd)
@@ -193,7 +193,7 @@ def vm_create(args):
         vmd.set_vcpu(args.vcpu)
 
     if args.memory:
-        vmd.set_memory(args.memory)    
+        vmd.set_memory(args.memory)
 
     # 2. Running post-install scripts
     params['HOSTNAME'] = vmd.name()
@@ -211,8 +211,7 @@ def vm_create(args):
     network.lock_ip()
 
     # 5. Print the VM specs
-    if args.verbose:
-        print('\n')
+    print('\n')
     print_vm_info(domain)
 
 def vm_templates(args):

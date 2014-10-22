@@ -88,7 +88,7 @@ class App(Singleton):
 
     @classmethod
     def fatal(cls, text=None):
-        type_txt = 'Info'.ljust(cls.LOG_TYPE_SIZE)
+        type_txt = 'Fatal'.ljust(cls.LOG_TYPE_SIZE)
         if text:
             print('{0} |  {1}'.format(
                 ColoredString(type_txt, bcolors.FAIL), text))

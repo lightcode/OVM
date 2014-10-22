@@ -22,8 +22,9 @@
 
 import os
 import shutil
-from pyvirt.libvirtconn import LibvirtConn
 from lxml import etree
+from ovm.utils.copyfile import CopyFile
+from pyvirt.libvirtconn import LibvirtConn
 
 
 class VMStorage(object):
@@ -66,7 +67,9 @@ class VMStorage(object):
 
         # 3. Copy template image in new pool
         img_path = template.get_path()
-        shutil.copyfile(img_path, img_target)
+        cf = CopyFile('Copying image')
+        cf.copyProgress(img_path, img_target)
+
         pool.refresh()
         vol = pool.storageVolLookupByName(vol_name)
 
