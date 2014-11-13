@@ -220,6 +220,15 @@ def vm_set(args):
             App.fatal("Starting value must be 'manual' or 'auto'")
         domain.set_autostart(args.starting == 'auto')
 
+def vm_console(args):
+    domain = _get_domain(args.name)
+    virdomain = domain.vir_domain
+
+    if not virdomain.isActive():
+        App.fatal('Cannot connect on an inactive VM.')
+
+    App.fatal('Not implemented yet.')
+
 def vm_ssh(args):
     domain = _get_domain(args.name)
     virdomain = domain.vir_domain

@@ -24,4 +24,4 @@ networks:
       netmask: 24
       gateway: 10.42.1.1
       nameservers: ['192.168.1.1']
-      autoip_path: /etc/autoip/ovm/prod.dat
+      autoip_path: /etc/ovm/autoip/prod.dat

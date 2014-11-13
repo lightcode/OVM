@@ -25,25 +25,30 @@ import shutil
 from distutils.core import setup
 
 
-setup(
-    name='OVM',
-    version='2.0',
-    description='Open Virtualization Manager',
-    author='Matthieu Gaigniere',
-    author_email='matthieu@lightcode.fr',
-    url='http://lightcode.fr',
-    packages=[
-        'ovm', 'ovm.vmcreation', 'ovm.vmmanagement', 'ovm.utils',
-        'ovm.drivers', 'ovm.drivers.network', 'ovm.drivers.storage',
-        'pyvirt'
-    ],
-    scripts=['bin/vm'],
-    data_files=[
-        ('/etc/bash_completion.d', ['bin/vm-completion'])
-    ]
-)
+def main():
+    setup(
+        name='OVM',
+        version='2.0',
+        description='Open Virtualization Manager',
+        author='Matthieu Gaigniere',
+        author_email='matthieu@lightcode.fr',
+        url='http://lightcode.fr',
+        packages=[
+            'ovm', 'ovm.vmcreation', 'ovm.vmmanagement', 'ovm.utils',
+            'ovm.drivers', 'ovm.drivers.network', 'ovm.drivers.storage',
+            'pyvirt'
+        ],
+        scripts=['bin/vm'],
+        data_files=[
+            ('/etc/bash_completion.d', ['bin/vm-completion'])
+        ]
+    )
 
-if os.path.exists('/etc/ovm'):
-    print("Don't change /etc/ovm")
-else:
-    shutil.copytree('etc/', '/etc/ovm')
+    if os.path.exists('/etc/ovm'):
+        print("Don't change /etc/ovm")
+    else:
+        shutil.copytree('etc/', '/etc/ovm')
+
+
+if __name__ == '__main__':
+    main()
