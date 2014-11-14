@@ -73,6 +73,38 @@ class virDomainMeta(object):
     def _get_value(self, name):
         return self._root.find(name)
 
+    def get_os_info(self):
+        # os-type : linux/windows/bsd/...
+        # os-name : Debian/Windows/CentOS/...
+        # os-version : text version of the OS
+        info = {'os_type': None, 'os_name': None, 'os_version': None}
+        try:
+            tag = self._get_value('os_info')
+        except Exception as e:
+            return info
+        else:
+            if tag is None:
+                return info
+
+            if 'os_type' in tag.attrib:
+                info['os_type'] = tag.attrib['os_type']
+            if 'os_name' in tag.attrib:
+                info['os_name'] = tag.attrib['os_name']
+            if 'os_version' in tag.attrib:
+                info['os_version'] = tag.attrib['os_version']
+        return info
+
+    def get_os_string(self):
+        info = self.get_os_info()
+        if info['os_name'] is None:
+            return
+
+        string = info['os_name']
+        if info['os_version'] is not None:
+            string += ' ' + info['os_version']
+
+        return string
+
     def get_backup_state(self):
         try:
             bck = self._get_value('backup').attrib['state']

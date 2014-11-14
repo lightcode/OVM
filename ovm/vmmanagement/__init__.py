@@ -49,6 +49,7 @@ def _get_domain(name):
 
 def print_vm_info(domain):
     print_title('Information about VM {0}'.format(domain.get_name()))
+    print('OS name        : {0}'.format(domain.get_os_string()))
     print('State          : {0}'.format(domain.get_state_text()))
     print('vCPU number    : {0}'.format(domain.get_vcpu_count()))
     print('Current memory : {0}B'.format(
@@ -95,8 +96,8 @@ def vm_info(args):
 
 def vm_list(args):
     headers = ('Name', 'vCPU', 'Cur. memory', 'Starting',
-        'State', 'Backup', 'IP')
-    align = ('l', 'r', 'r', 'l', 'l', 'l', 'l')
+        'State', 'Backup', 'IP', 'OS name')
+    align = ('l', 'r', 'r', 'l', 'l', 'l', 'l', 'l')
     rows = []
 
     if args.active and args.inactive:
@@ -125,7 +126,8 @@ def vm_list(args):
             'Auto' if domain.get_autostart() else 'Manual',
             state,
             domain.get_backup_text(),
-            default(main_ip, '-')
+            default(main_ip, '-'),
+            default(domain.get_os_string(), '-')
         ))
 
     rows.sort(key=lambda e: e[0])
@@ -187,7 +189,7 @@ def _remove_vm(name, force):
 
     res = virdomain.undefine()
     if res == 0:
-        print('The domain have been removed.')
+        print('The domain has been removed.')
         return True
     else:
         App.notice('Error %d: the VM cannot removed.' % res)
@@ -219,6 +221,15 @@ def vm_set(args):
         if args.starting not in ('manual', 'auto'):
             App.fatal("Starting value must be 'manual' or 'auto'")
         domain.set_autostart(args.starting == 'auto')
+
+    if args.os_type:
+        domain.set_os_type(args.os_type)
+
+    if args.os_name:
+        domain.set_os_name(args.os_name)
+
+    if args.os_version:
+        domain.set_os_version(args.os_version)
 
 def vm_console(args):
     domain = _get_domain(args.name)

@@ -107,6 +107,10 @@ def parse_args():
     parser_set.add_argument('--starting', choices=['auto', 'manual'],
         help='set starting auto/manual')
     parser_set.add_argument('--ip', help="set IP address")
+    parser_set.add_argument('--os-type', dest='os_type', help="set OS type")
+    parser_set.add_argument('--os-name', dest='os_name', help="set OS name")
+    parser_set.add_argument('--os-version', dest='os_version',
+        help="set OS version")
     parser_set.set_defaults(func=vm_set)
 
     # Start a VM

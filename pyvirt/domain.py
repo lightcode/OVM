@@ -23,7 +23,7 @@
 import libvirt
 from lxml import etree
 from subprocess import Popen, PIPE
-from .virdomainmeta import virDomainMeta
+from pyvirt.virdomainmeta import virDomainMeta
 
 
 class Volume(object):
@@ -206,6 +206,28 @@ class Domain(object):
         meta = virDomainMeta(self.vir_domain)
         value = 'on' if state else 'off'
         meta.set_value('backup', 'state', value)
+
+    def set_os_type(self, os_type):
+        meta = virDomainMeta(self.vir_domain)
+        meta.set_value('os_info', 'os_type', os_type)
+
+    def set_os_name(self, os_name):
+        meta = virDomainMeta(self.vir_domain)
+        meta.set_value('os_info', 'os_name', os_name)
+
+    def set_os_version(self, os_version):
+        meta = virDomainMeta(self.vir_domain)
+        meta.set_value('os_info', 'os_version', os_version)
+
+    def get_os_info(self):
+        meta = virDomainMeta(self.vir_domain)
+        info = meta.get_os_info()
+        return info
+
+    def get_os_string(self):
+        meta = virDomainMeta(self.vir_domain)
+        string = meta.get_os_string()
+        return string
 
     def set_main_ipv4(self, ip):
         meta = virDomainMeta(self.vir_domain)

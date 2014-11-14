@@ -71,7 +71,7 @@ _vm()
                     vm_list="$(vm list --short)"
                     COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 elif [[ "${COMP_WORDS[1]}" == "set" ]]; then
-                    opts="--ip --backup --starting"
+                    opts="--ip --backup --starting --os-type --os-name --os-version"
                     if [[ "$prev" == "--backup" ]]; then
                         COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                         return 0
