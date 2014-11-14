@@ -152,9 +152,9 @@ def parse_args():
     parser_ping.set_defaults(func=vm_ping)
 
     args = parser.parse_args()
-    try:
+    if hasattr(args, 'func'):
         getattr(args, "func")(args)
-    except AttributeError:
+    else:
         parser.print_help()
         sys.exit(0)
 

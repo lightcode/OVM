@@ -72,9 +72,6 @@ class Interface(object):
         else:
             return mac_xml.attrib.get('address')
 
-    def get_ipv4(self):
-        return self._ips['ipv4']
-
 
 class Domain(object):
     STATES = {1: 'Running', 3: 'Paused', 5: 'Stopped'}
@@ -215,12 +212,6 @@ class Domain(object):
         meta.set_value('ip', 'address', ip)
 
     def get_main_ipv4(self):
-        ipv4 = None
-        for iface in self.get_interfaces():
-            ipv4 = iface.get_ipv4()
-            if ipv4:
-                return ipv4
-
         meta = virDomainMeta(self.vir_domain)
         ipv4 = meta.get_ip_address()
         return ipv4

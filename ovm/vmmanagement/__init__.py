@@ -63,14 +63,13 @@ def print_vm_info(domain):
     print()
 
     print_title('Interfaces')
-    headers = ['MAC address', 'Network', 'Port group', 'IPv4']
+    headers = ['MAC address', 'Network', 'Port group']
     rows = []
     for iface in domain.get_interfaces():
         rows.append((
             iface.get_mac(),
             iface.get_network_name(),
-            iface.get_portgroup(),
-            default(iface.get_ipv4())
+            iface.get_portgroup()
         ))
     print_table(headers, rows)
     print()
