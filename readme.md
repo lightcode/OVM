@@ -36,6 +36,7 @@ OVM is used with the command `vm`. This command take a subcommand like this `vm 
 
 Subcommand    | Description
 ------------- | -------------------------------------------------
+console       | Open a console on the VM
 create        | Create a VM
 info          | Give information about a VM
 ls (list)     | Print the list of VM
