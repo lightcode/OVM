@@ -25,7 +25,9 @@ from pyvirt.domain import Domain
 
 
 class Singleton(object):
+
     _instance = None
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = object.__new__(cls)
@@ -33,9 +35,17 @@ class Singleton(object):
 
 
 class LibvirtConn(Singleton):
+
+    _conn = None
+    _connection_string = 'qemu:///system'
+
     @classmethod
     def open(cls):
-        cls._conn = libvirt.open()
+        cls._conn = libvirt.open(cls._connection_string)
+
+    @classmethod
+    def new_connection(cls):
+        return libvirt.open(cls._connection_string)
 
     @classmethod
     def get_domains(cls):

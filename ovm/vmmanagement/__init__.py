@@ -27,6 +27,7 @@ from subprocess import Popen, PIPE
 from ovm.utils.printer import print_title, si_unit, default, print_table
 from ovm.utils.printer import ColoredString, bcolors
 from ovm.app import App
+from ovm.vmmanagement.libvirt_console import Console
 
 
 ###################################
@@ -227,7 +228,7 @@ def vm_console(args):
     if not virdomain.isActive():
         App.fatal('Cannot connect on an inactive VM.')
 
-    App.fatal('Not implemented yet.')
+    Console.open_console(domain.get_name())
 
 def vm_ssh(args):
     domain = _get_domain(args.name)

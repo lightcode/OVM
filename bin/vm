@@ -48,7 +48,8 @@ def parse_args():
     subparsers = parser.add_subparsers()
 
     # Enter in the VM console
-    parser_console = subparsers.add_parser('console', help='enter in the VM console')
+    parser_console = subparsers.add_parser('console',
+        help='enter in the VM console')
     parser_console.add_argument('name', help='name of the VM')
     parser_console.set_defaults(func=vm_console)
 
@@ -86,7 +87,8 @@ def parse_args():
     parser_networks.set_defaults(func=vm_networks)
 
     # List VMs
-    parser_list = subparsers.add_parser('list', help='list VMs')
+    parser_list = subparsers.add_parser('list', aliases=['ls'],
+        help='list VMs')
     parser_list.add_argument('--short', action='store_true',
         help="print only the list of VM names")
     parser_list.add_argument('--active', action='store_true',
@@ -132,7 +134,8 @@ def parse_args():
     parser_stop.set_defaults(func=vm_stop)
 
     # Remove a VM
-    parser_remove = subparsers.add_parser('rm', help='remove one or many VMs')
+    parser_remove = subparsers.add_parser('remove', aliases=['rm'],
+        help='remove one or many VMs')
     parser_remove.add_argument('name', help='name of VMs', nargs='+')
     parser_remove.add_argument('--yes', '-y', '-f', action='store_true',
         help='Remove VM without asking comfirmation.')
