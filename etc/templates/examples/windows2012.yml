@@ -1,5 +1,9 @@
 id: windows2012r2
 name: Windows 2012 R2
+os_type: windows
+os_name: Windows
+os_version: 2012 R2
+
 vcpu: 1
 memory: 1024
 

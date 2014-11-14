@@ -4,6 +4,11 @@ id: debian-wheezy
 # Name
 name: Debian Wheezy
 
+# OS information
+os_type: linux
+os_name: Debian
+os_version: 7
+
 # Default velues for RAM and CPU count
 vcpu: 1
 memory: 128

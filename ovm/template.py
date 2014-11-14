@@ -54,6 +54,15 @@ class Template(object):
     def get_id(self):
         return self._config['id']
 
+    def get_os_type(self):
+        return self._config.get('os_type')
+
+    def get_os_name(self):
+        return self._config.get('os_name')
+
+    def get_os_version(self):
+        return self._config.get('os_version')
+
     @classmethod
     def load_file(cls, ofile):
         config = yaml.load(ofile.read())

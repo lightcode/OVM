@@ -28,7 +28,7 @@ from glob import iglob
 from pyvirt.libvirtconn import LibvirtConn
 from ovm.app import App
 from ovm.resources import Resources
-from ovm.utils.printer import print_table
+from ovm.utils.printer import print_table, default
 from ovm.vmcreation.vmdefinition import VMDefinition
 from ovm.vmcreation.vmnetwork import VMNetwork
 from ovm.vmcreation.vmstorage import VMStorage
@@ -206,6 +206,9 @@ def vm_create(args):
 
     domain = LibvirtConn.get_domain(vmd.name())
     domain.set_main_ipv4(params['IP'])
+    domain.set_os_type(template.get_os_type())
+    domain.set_os_name(template.get_os_name())
+    domain.set_os_version(template.get_os_version())
 
     # 4. Lock network resources
     network.lock_ip()
@@ -222,10 +225,16 @@ def vm_templates(args):
         print('\n'.join([tpl.get_id() for tpl in templates]))
         return
 
-    headers = ('ID', 'Name')
+    headers = ('ID', 'Name', 'OS type', 'OS name', 'OS version')
     rows = []
     for tpl in templates:
-        rows.append((tpl.get_id(), tpl.get_name()))
+        rows.append((
+            tpl.get_id(),
+            tpl.get_name(),
+            default(tpl.get_os_type(), '-'),
+            default(tpl.get_os_name(), '-'),
+            default(tpl.get_os_version(), '-')
+        ))
     print_table(headers, rows)
 
 def vm_storages(args):

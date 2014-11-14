@@ -1,5 +1,9 @@
 id: centos-7
 name: CentOS 7
+os_type: linux
+os_name: CentOS
+os_version: 7
+
 vcpu: 1
 memory: 128
 

@@ -209,15 +209,18 @@ class Domain(object):
 
     def set_os_type(self, os_type):
         meta = virDomainMeta(self.vir_domain)
-        meta.set_value('os_info', 'os_type', os_type)
+        if os_type is not None:
+            meta.set_value('os_info', 'os_type', str(os_type))
 
     def set_os_name(self, os_name):
         meta = virDomainMeta(self.vir_domain)
-        meta.set_value('os_info', 'os_name', os_name)
+        if os_name is not None:
+            meta.set_value('os_info', 'os_name', str(os_name))
 
     def set_os_version(self, os_version):
         meta = virDomainMeta(self.vir_domain)
-        meta.set_value('os_info', 'os_version', os_version)
+        if os_version is not None:
+            meta.set_value('os_info', 'os_version', str(os_version))
 
     def get_os_info(self):
         meta = virDomainMeta(self.vir_domain)
