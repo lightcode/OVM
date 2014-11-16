@@ -69,7 +69,7 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
         path = os.path.join(App.ETC, 'scripts', path)
 
     if not os.path.exists(path):
-        print('Ignoring script "{0}": not found'.format(path))
+        print('Script ignored "{0}": not found'.format(path))
         return
 
     os.chmod(path, stat.S_IXUSR)
@@ -109,7 +109,7 @@ def _post_install(template, diskpath, env_params, verbose=False):
 
 def _process_args_network(args):
     if args.network not in NETWORKS:
-        App.fatal('Network "%s" does not exists.' % args.network)
+        App.fatal('Network "{0}" doesn\'t exists.'.format(args.network))
 
     network = NETWORKS[args.network]
 
@@ -142,7 +142,7 @@ def _long_netmask(cidr):
 
 def _process_args_storage(args):
     if args.storage not in STORAGES:
-        App.fatal('Storage "%s" does not exists.' % args.storage)
+        App.fatal('Storage "{0}" does\'t exists.'.format(args.storage))
 
     storage = STORAGES[args.storage]
 
@@ -154,7 +154,7 @@ def _process_args_storage(args):
 def vm_create(args):
     domains = [domain.get_name() for domain in LibvirtConn.get_domains()]
     if args.name in domains:
-        App.fatal('This name is already taken by another VM')
+        App.fatal('This name is already taken by another VM.')
 
     verbose = False
     if args.verbose:

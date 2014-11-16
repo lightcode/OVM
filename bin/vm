@@ -41,7 +41,7 @@ LibvirtConn.open()
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Provide functions to create and manage VMs in KVM.',
+        description='Provide functions to create and manage VMs on KVM.',
         prog='OVM (Open Virtualization Manager)')
     parser.add_argument('--version', action='version', version='%(prog)s 2.0')
 
@@ -71,19 +71,19 @@ def parse_args():
     parser_templates = subparsers.add_parser('templates',
         help='list templates')
     parser_templates.add_argument('--short', action='store_true',
-        help="print only the list of template names")
+        help="print only the list of templates names")
     parser_templates.set_defaults(func=vm_templates)
 
     # List storages
     parser_storages = subparsers.add_parser('storages', help='list storages')
     parser_storages.add_argument('--short', action='store_true',
-        help="print only the list of template names")
+        help="print only the list of storages names")
     parser_storages.set_defaults(func=vm_storages)
 
     # List storages
     parser_networks = subparsers.add_parser('networks', help='list networks')
     parser_networks.add_argument('--short', action='store_true',
-        help="print only the list of template names")
+        help="print only the list of networks names")
     parser_networks.set_defaults(func=vm_networks)
 
     # List VMs
@@ -133,7 +133,7 @@ def parse_args():
     # Stop a VM
     parser_stop = subparsers.add_parser('stop', help='stop one or many VMs')
     parser_stop.add_argument('name', nargs='+', help='name of VMs')
-    parser_stop.add_argument('--force', action='store_true',
+    parser_stop.add_argument('--force', '-f', action='store_true',
         help='force the VM shutdown')
     parser_stop.set_defaults(func=vm_stop)
 
