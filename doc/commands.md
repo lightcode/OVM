@@ -34,6 +34,19 @@ Read also [Configure a serial console on your VM](console.md).
 
 
 
+## `vm create`
+
+Create a new VM.
+
+Syntax:
+
+    vm create [-h] [--v] --template TEMPLATE --network NETWORK
+              --storage STORAGE [--ip [IP]] [--size [SIZE]] [--vcpu [VCPU]]
+              [--memory [MEMORY]]
+              name
+
+
+
 ## `vm ping`
 
 Shortcut to ping a VM with the static IP.
