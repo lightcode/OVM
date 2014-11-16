@@ -19,23 +19,28 @@ storages      | Print the list of storages
 templates     | Print the list of templates
 
 
-**Notes**:
-
-* The `ssh` and `ping` work if you set an IP address on the VM
-
-
 
 ## `vm console`
 
 Open a console on the VM.
 
+To close the connection, you have to press `Ctrl+]` or `Ctrl+5`.
+
 Syntax: 
 
     vm console [-h] name
 
-To close the connection, you have to press `Ctrl+]` or `Ctrl+5`.
-
 Read also [Configure a serial console on your VM](console.md).
+
+
+
+## `vm ping`
+
+Shortcut to ping a VM with the static IP.
+
+**Important**: this command only works if you have fixed an IP address on the VM.
+
+    vm ping [-h] name
 
 
 
@@ -57,11 +62,6 @@ Parameters:
 * `--backup {on,off}` : this option allows you to change the _backup_ metadata. This metadata is usefull only if you want to store which VM you back up with your own script. OVM doesn't back up nothing. You can list all backed machine with the command `vm list --short --backup`.
 
 
-## `vm ping`
-
-Shortcut to ping a VM with the static IP.
-
-**Important**: this command only works if you have fixed an IP address on the VM.
 
 ## `vm ssh`
 

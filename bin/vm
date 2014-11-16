@@ -42,7 +42,7 @@ LibvirtConn.open()
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Provide functions to create and manage VMs on KVM.',
-        prog='OVM (Open Virtualization Manager)')
+        prog='vm')
     parser.add_argument('--version', action='version', version='%(prog)s 2.0')
 
     subparsers = parser.add_subparsers()
