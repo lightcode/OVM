@@ -1,6 +1,36 @@
 Configure a serial console on your VM
 =====================================
 
+CentOS 6
+========
+
+The first step is to add the file `/etc/init/ttyS0.conf`. You can directly enter this command:
+
+cat <<EOF > /etc/init/ttyS0.conf
+start on runlevel [345]
+stop on runlevel [S016]
+
+respawn
+instance /dev/ttyS0
+exec /sbin/agetty -8 -L 115200 ttyS0 xterm
+EOF
+
+You need to activate the authentication on the TTY S0:
+
+    echo ttyS0 > /etc/securetty
+
+As you can see, I use the `xterm` terminal, you can install it on your system:
+
+    yum install xterm
+
+It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. So you have to manually resize the screen like this:
+
+    $ resize > /dev/null
+
+Of course, you can add the command above in you `.bashrc`.
+
+
+
 Debian
 ======
 
@@ -22,6 +52,6 @@ As you can see, I use the `xterm` terminal, you can install it on your system:
 
 It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. So you have to manually resize the screen like this:
 
-    $ resize
+    $ resize > /dev/null
 
 Of course, you can add the command above in you `.bashrc`.

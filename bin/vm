@@ -56,7 +56,7 @@ def parse_args():
     # Create a VM
     parser_create = subparsers.add_parser('create', help='create a new VM')
     parser_create.add_argument('name', help='set the name of the VM')
-    parser_create.add_argument('--verbose', '-v', action='store_true',
+    parser_create.add_argument('-v', '--verbose', action='store_true',
         help='print output of post-install scripts')
     parser_create.add_argument('--template', required=True)
     parser_create.add_argument('--network', required=True)
@@ -133,7 +133,7 @@ def parse_args():
     # Stop a VM
     parser_stop = subparsers.add_parser('stop', help='stop one or many VMs')
     parser_stop.add_argument('name', nargs='+', help='name of VMs')
-    parser_stop.add_argument('--force', '-f', action='store_true',
+    parser_stop.add_argument('-f', '--force', action='store_true',
         help='force the VM shutdown')
     parser_stop.set_defaults(func=vm_stop)
 
@@ -141,7 +141,7 @@ def parse_args():
     parser_remove = subparsers.add_parser('remove', aliases=['rm'],
         help='remove one or many VMs')
     parser_remove.add_argument('name', help='name of VMs', nargs='+')
-    parser_remove.add_argument('--yes', '-y', '-f', action='store_true',
+    parser_remove.add_argument('-f', '--yes', '-y', action='store_true',
         help='Remove VM without asking comfirmation.')
     parser_remove.set_defaults(func=vm_remove)
 

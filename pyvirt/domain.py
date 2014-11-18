@@ -22,7 +22,6 @@
 
 import libvirt
 from lxml import etree
-from subprocess import Popen, PIPE
 from pyvirt.virdomainmeta import virDomainMeta
 
 
