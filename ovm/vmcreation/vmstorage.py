@@ -21,7 +21,6 @@
 
 
 import os
-import shutil
 from lxml import etree
 from ovm.utils.copyfile import CopyFile
 from pyvirt.libvirtconn import LibvirtConn
@@ -68,7 +67,7 @@ class VMStorage(object):
         # 3. Copy template image in new pool
         img_path = template.get_path()
         cf = CopyFile('Copying image')
-        cf.copyProgress(img_path, img_target)
+        cf.copy_progress(img_path, img_target)
 
         pool.refresh()
         vol = pool.storageVolLookupByName(vol_name)
@@ -76,7 +75,7 @@ class VMStorage(object):
         # 4. Resize if new size specified
         if 'image_size' in self._params:
             newsize = self._params['image_size']
-            vol.resize(newsize * (1024**3))
+            vol.resize(newsize * (1024 ** 3))
 
         return img_target
 

@@ -48,7 +48,7 @@ class Console(object):
     def error_handler(self, unused, error):
         # The console stream errors on VM shutdown; we don't care
         if (error[0] == libvirt.VIR_ERR_RPC and
-            error[1] == libvirt.VIR_FROM_STREAMS):
+                    error[1] == libvirt.VIR_FROM_STREAMS):
             return
 
     def reset_term(self):
@@ -61,12 +61,12 @@ class Console(object):
         print("Escape character is ^]")
 
         while self.check_console():
-            libvirt.virEventRunDefaultImpl()        
+            libvirt.virEventRunDefaultImpl()
 
     def check_console(self):
         if (self.state[0] == libvirt.VIR_DOMAIN_RUNNING or
-            self.state[0] == libvirt.VIR_DOMAIN_PAUSED):
-            if self.stream == None:
+                    self.state[0] == libvirt.VIR_DOMAIN_PAUSED):
+            if self.stream is None:
                 self.stream = self.connection.newStream(
                     libvirt.VIR_STREAM_NONBLOCK)
                 self.domain.openConsole(None, self.stream, 0)
@@ -91,7 +91,7 @@ class Console(object):
 
     def stdin_callback(self, watch, fd, events, _):
         readbuf = os.read(fd, 1024)
-        # Close connection when we recive a ^[
+        # Close connection when we recieve a ^[
         if readbuf == b'\x1d':
             self.run_console = False
             return

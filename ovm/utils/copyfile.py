@@ -28,7 +28,6 @@ import time
 
 
 class CopyFile:
-
     def __init__(self, text=''):
         self.text = text
         self.pattern = '{0} [{1}%]'
@@ -44,10 +43,10 @@ class CopyFile:
         while src_size != dst_size:
             src_size = os.path.getsize(src)
             dst_size = os.path.getsize(dst)
-            self._updateProgressBar(dst_size, src_size)
+            self._update_progress_bar(dst_size, src_size)
             time.sleep(1)
 
-    def copyProgress(self, src, dst):
+    def copy_progress(self, src, dst):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             threads = []
             threads.append(executor.submit(self._copy, src, dst))
@@ -58,7 +57,7 @@ class CopyFile:
         sys.stdout.write('\n')
         sys.stdout.flush()
 
-    def _updateProgressBar(self, cur, total):
+    def _update_progress_bar(self, cur, total):
         percent = int((cur / total) * 100)
         text = self.pattern.format(self.text, percent)
         sys.stdout.write('\r' + text)

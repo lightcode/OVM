@@ -30,7 +30,6 @@ from ovm.utils.printer import bcolors, ColoredString
 
 
 class App(Singleton):
-
     templates = []
     _templates_loaded = False
     ETC = '/etc/ovm'
@@ -47,7 +46,7 @@ class App(Singleton):
 
         for path in iglob(ETC_TEMPLATES):
             with open(path) as ofile:
-                 cls.templates.append(Template.load_file(ofile))
+                cls.templates.append(Template.load_file(ofile))
 
     @classmethod
     def get_templates(cls):

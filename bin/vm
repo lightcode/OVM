@@ -23,7 +23,6 @@
 import argparse
 import libvirt
 import sys
-import os
 from pyvirt.libvirtconn import LibvirtConn
 from ovm.vmcreation import *
 from ovm.vmmanagement import *
@@ -34,10 +33,12 @@ from ovm.app import App
 def f(ctx, error):
     return 1
 
+
 libvirt.registerErrorHandler(f, None)
 
 App.init()
 LibvirtConn.open()
+
 
 def parse_args():
     parser = argparse.ArgumentParser(

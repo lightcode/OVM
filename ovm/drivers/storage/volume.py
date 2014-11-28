@@ -55,7 +55,7 @@ class VolumeDriver(StorageDriver):
         return etree.tostring(tree)
 
     ####################
-    #  DRIVER SPECIFIC
+    # DRIVER SPECIFIC
     ####################
     def _get_vol_xml(self):
         tree = (

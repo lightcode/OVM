@@ -29,7 +29,6 @@ from ovm.vmcreation.vmstorage import VMStorage
 
 
 class Resources(Singleton):
-
     path = None
     networks = {}
     storages = {}
@@ -46,11 +45,11 @@ class Resources(Singleton):
 
             for name, network in resources['networks'].items():
                 driver = globals()[network.pop('driver')]
-                cls.networks[name]= VMNetwork(driver, **network)
+                cls.networks[name] = VMNetwork(driver, **network)
 
             for name, storage in resources['storages'].items():
                 driver = globals()[storage.pop('driver')]
-                cls.storages[name]= VMStorage(driver, **storage)
+                cls.storages[name] = VMStorage(driver, **storage)
 
     @classmethod
     def get_networks(cls):

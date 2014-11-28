@@ -23,8 +23,6 @@
 import concurrent.futures
 import os
 import stat
-import sys
-from glob import iglob
 from pyvirt.libvirtconn import LibvirtConn
 from ovm.app import App
 from ovm.resources import Resources
@@ -54,6 +52,7 @@ def _resize_fs(template, vol_path, verbose=False):
         _exec_script(options['script'], params, verbose=verbose)
     return vol_path
 
+
 def _thread_logger(fd, level, print_log):
     for line in fd:
         line = line.decode('utf8').rstrip()
@@ -63,6 +62,7 @@ def _thread_logger(fd, level, print_log):
         elif level == LEVEL_INFO:
             if print_log:
                 App.info(line)
+
 
 def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
     if not path.startswith('/'):
@@ -95,6 +95,7 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
             if future.exception() is not None:
                 print(future.exception())
 
+
 def _post_install(template, diskpath, env_params, verbose=False):
     tpl = template._config
     if 'post-install' not in tpl:
@@ -106,6 +107,7 @@ def _post_install(template, diskpath, env_params, verbose=False):
         for i, param in enumerate(params):
             params[i] = param.format(diskpath=diskpath)
         _exec_script(path, params, env_params, verbose)
+
 
 def _process_args_network(args):
     if args.network not in NETWORKS:
@@ -136,9 +138,11 @@ def _process_args_network(args):
             App.fatal(e)
     return network
 
+
 def _long_netmask(cidr):
     mask = 0xFFFFFFFF << (32 - cidr)
-    return '.'.join([str(mask >> (8*i) & 0xFF) for i in range(3, -1, -1)])
+    return '.'.join([str(mask >> (8 * i) & 0xFF) for i in range(3, -1, -1)])
+
 
 def _process_args_storage(args):
     if args.storage not in STORAGES:
@@ -150,6 +154,7 @@ def _process_args_storage(args):
         storage.set_size(args.size)
 
     return storage
+
 
 def vm_create(args):
     domains = [domain.get_name() for domain in LibvirtConn.get_domains()]
@@ -217,6 +222,7 @@ def vm_create(args):
     print('\n')
     print_vm_info(domain)
 
+
 def vm_templates(args):
     App.load_templates()
     templates = App.get_templates()
@@ -237,6 +243,7 @@ def vm_templates(args):
         ))
     print_table(headers, rows)
 
+
 def vm_storages(args):
     if args.short:
         print('\n'.join([k for k in STORAGES]))
@@ -247,6 +254,7 @@ def vm_storages(args):
     for name, storage in STORAGES.items():
         rows.append((name, storage.pool_name()))
     print_table(headers, rows)
+
 
 def vm_networks(args):
     if args.short:

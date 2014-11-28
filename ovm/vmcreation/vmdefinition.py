@@ -99,7 +99,7 @@ class VMDefinition(object):
         devices.append(net)
 
         # Add storage in device
-        stoage_xml = etree.fromstring(self.storage().get_xml())
-        devices.append(stoage_xml)
+        storage_xml = etree.fromstring(self.storage().get_xml())
+        devices.append(storage_xml)
 
         return etree.tostring(root)

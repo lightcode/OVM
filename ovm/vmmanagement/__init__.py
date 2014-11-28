@@ -23,7 +23,7 @@
 import libvirt
 import sys
 from pyvirt.libvirtconn import LibvirtConn
-from subprocess import Popen, PIPE
+from subprocess import Popen
 from ovm.utils.printer import print_title, si_unit, default, print_table
 from ovm.utils.printer import ColoredString, bcolors
 from ovm.app import App
@@ -90,13 +90,15 @@ def print_vm_info(domain):
     print_table(headers, rows, align)
     print()
 
+
 def vm_info(args):
     domain = _get_domain(args.name)
     print_vm_info(domain)
 
+
 def vm_list(args):
     headers = ('Name', 'vCPU', 'Cur. memory', 'Starting',
-        'State', 'Backup', 'IP', 'OS name')
+               'State', 'Backup', 'IP', 'OS name')
     align = ('l', 'r', 'r', 'l', 'l', 'l', 'l', 'l')
     rows = []
 
@@ -107,7 +109,7 @@ def vm_list(args):
         virdomain = domain.vir_domain
 
         if (args.active and not virdomain.isActive()) \
-          or (args.inactive and virdomain.isActive()):
+                or (args.inactive and virdomain.isActive()):
             continue
 
         if args.backup and not domain.get_backup_state():
@@ -131,12 +133,13 @@ def vm_list(args):
         ))
 
     rows.sort(key=lambda e: e[0])
- 
+
     if args.short:
         for line in rows:
             print(line[0])
     else:
         print_table(headers, rows, align)
+
 
 def vm_ping(args):
     domain = _get_domain(args.name)
@@ -148,7 +151,7 @@ def vm_ping(args):
     ipv4 = domain.get_main_ipv4()
     if not ipv4 or ipv4 == 'dhcp':
         App.fatal('Cannot ping a VM with no IP.')
-        
+
     cmd = ['ping', ipv4]
     process = Popen(cmd)
     try:
@@ -156,11 +159,13 @@ def vm_ping(args):
     except KeyboardInterrupt:
         pass
 
+
 def vm_reboot(args):
     virdomain = _get_domain(args.name).vir_domain
     if not virdomain.isActive():
         App.fatal('VM must be active.')
     virdomain.reset()
+
 
 def _remove_vm(name, force):
     domain = _get_domain(name)
@@ -174,7 +179,7 @@ def _remove_vm(name, force):
     if res == 'n':
         App.notice('Deletion of "{0}" aborted by user.'.format(name))
         return False
-    
+
     if virdomain.isActive():
         virdomain.destroy()
 
@@ -195,6 +200,7 @@ def _remove_vm(name, force):
         App.notice('Error %d: the VM cannot removed.' % res)
         return False
 
+
 def vm_remove(args):
     error_count = 0
     for name in args.name:
@@ -203,6 +209,7 @@ def vm_remove(args):
 
     if error_count > 0:
         App.fatal('{0} VMs cannot be deleted.'.format(error_count))
+
 
 def vm_set(args):
     domain = _get_domain(args.name)
@@ -231,6 +238,7 @@ def vm_set(args):
     if args.os_version:
         domain.set_os_version(args.os_version)
 
+
 def vm_console(args):
     domain = _get_domain(args.name)
     virdomain = domain.vir_domain
@@ -239,6 +247,7 @@ def vm_console(args):
         App.fatal('Cannot connect on an inactive VM.')
 
     Console.open_console(domain.get_name())
+
 
 def vm_ssh(args):
     domain = _get_domain(args.name)
@@ -250,7 +259,7 @@ def vm_ssh(args):
     ipv4 = domain.get_main_ipv4()
     if not ipv4:
         App.fatal('Cannot connect on a VM with no IP.')
-        
+
     cmd = ['ssh', '-q', '-o UserKnownHostsFile=/dev/null',
            '-o StrictHostKeyChecking=no', '-lroot', ipv4]
     process = Popen(cmd)
@@ -258,6 +267,7 @@ def vm_ssh(args):
         process.communicate()
     except KeyboardInterrupt:
         pass
+
 
 def vm_start(args):
     error_count = 0
@@ -270,7 +280,7 @@ def vm_start(args):
         else:
             virdomain.create()
             App.success('VM "{0}" started with '.format(name), newline=False)
-            
+
             ipv4 = domain.get_main_ipv4()
             have_ipv4 = not ipv4 or ipv4 == 'dhcp'
             if have_ipv4:
@@ -292,6 +302,7 @@ def vm_start(args):
 
     if error_count > 0:
         App.fatal('{0} VMs cannot be started.'.format(error_count))
+
 
 def vm_stop(args):
     error_count = 0

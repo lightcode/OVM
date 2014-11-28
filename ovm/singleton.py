@@ -21,9 +21,8 @@
 
 
 class Singleton(object):
-
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = object.__new__(cls)

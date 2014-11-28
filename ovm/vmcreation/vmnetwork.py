@@ -21,7 +21,6 @@
 
 
 from ipaddr import IPAddress
-from .utils import xml_template
 
 
 def _iter_range(ipstart, ipend):
@@ -35,13 +34,13 @@ def _iter_range(ipstart, ipend):
 
 class VMNetwork(object):
     def __init__(self, driver, ipv4_allocation=None, ipv4_pool=None,
-                options=None, **params):
-        
+            options=None, **params):
+
         self._method = None
         self._driver = driver()
-        
+
         self._params = params
-        
+
         options_default = {
             'allow_dhcp': False,
             'allow_auto': True
@@ -66,7 +65,7 @@ class VMNetwork(object):
             self._lock_ip()
 
     def is_dhcp(self):
-        return (self._method == 'dhcp')
+        return self._method == 'dhcp'
 
     def _get_used_ips(self):
         autoip_path = self.ipv4_pool['autoip_path']
@@ -117,7 +116,7 @@ class VMNetwork(object):
         ipstart = self.ipv4_pool['ip_start']
         ipend = self.ipv4_pool['ip_end']
         if ip not in _iter_range(ipstart, ipend):
-           raise Exception('"%s" does not match with the pool.' % ip)
+            raise Exception('"%s" does not match with the pool.' % ip)
 
         # Check if the IP has already attributed
         autoip_path = self.ipv4_pool['autoip_path']
