@@ -1,6 +1,36 @@
 Configure a serial console on your VM
 =====================================
 
+CentOS 7
+========
+
+You can run this script to enable a TTY on ttyS0 on CentOS:
+
+```bash
+cp /usr/lib/systemd/system/serial-getty@.service /etc/systemd/system/serial-getty@ttyS0.service
+sed -i 's|115200,38400,9600|115200,38400,9600 xterm|g' /etc/systemd/system/serial-getty@ttyS0.service
+ln -s /etc/systemd/system/serial-getty@ttyS0.service /etc/systemd/system/getty.target.wants/
+systemctl daemon-reload
+systemctl start serial-getty@ttyS0.service
+```
+
+
+As you can see, I use the `xterm` terminal, you can install it on your system:
+
+```console
+# yum install xterm
+```
+
+It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. You can execute this command at the session startup:
+
+```console
+# cat <<EOF > /etc/profile.d/resize-console.sh
+resize > /dev/null
+EOF
+```
+
+
+
 CentOS 6
 ========
 
@@ -29,13 +59,13 @@ As you can see, I use the `xterm` terminal, you can install it on your system:
 # yum install xterm
 ```
 
-It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. So you have to manually resize the screen like this:
+It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. You can execute this command at the session startup:
 
 ```console
-$ resize > /dev/null
+# cat <<EOF > /etc/profile.d/resize-console.sh
+resize > /dev/null
+EOF
 ```
-
-Of course, you can add the command above in you `.bashrc`.
 
 
 
@@ -60,10 +90,10 @@ As you can see, I use the `xterm` terminal, you can install it on your system:
 # apt-get install xterm
 ```
 
-It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. So you have to manually resize the screen like this:
+It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width of the window like SSH. You can execute this command at the session startup:
 
 ```console
-$ resize > /dev/null
+# cat <<EOF > /etc/profile.d/resize-console.sh
+resize > /dev/null
+EOF
 ```
-
-Of course, you can add the command above in you `.bashrc`.
