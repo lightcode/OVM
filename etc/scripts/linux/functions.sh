@@ -28,18 +28,20 @@ fail() {
 }
 
 _nbd_connect() {
-    local i diskfile
+    local i diskfile disk
     diskfile="$1"
 
     modprobe nbd max_part=16 || fail "failed to load nbd module into kernel"
 
     for i in /dev/nbd*; do
-        if qemu-nbd -c $i $diskfile
+        if qemu-nbd -c "$i" "$diskfile"
         then
-            DISK=$i
+            disk="$i"
             break
         fi
     done
 
-    [ "$DISK" == "" ] && fail "no nbd device available"
+    [ "$disk" == "" ] && fail "no nbd device available"
+
+    echo "$disk"
 }

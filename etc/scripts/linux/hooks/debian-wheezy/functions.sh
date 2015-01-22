@@ -21,13 +21,19 @@
 
 
 function _mount_partitions() {
+    local vgname
+    local -r disk="$DISK"
+    local -r boot_part="${disk}p1"
+    local -r lvm_part="${disk}p5"
+
     vgscan
     vgchange -ay
-    VGNAME=$(pvs ${DISK}p5 --noheadings | awk '{ print $2 }')
-    mount /dev/$VGNAME/root $MNT_DIR || fail "cannot mount /"
+    vgname=$(pvs ${lvm_part} --noheadings | awk '{ print $2 }')
+
+    mount "/dev/${vgname}/lv_root" $MNT_DIR || fail "cannot mount /"
     mount --bind /dev/ $MNT_DIR/dev || fail "cannot bind /dev"
     mount --bind /dev/pts/ $MNT_DIR/dev/pts || fail "cannot bind /dev/pts"
-    chroot $MNT_DIR mount -t ext4 ${DISK}p1 /boot || fail "cannot mount /boot"
+    chroot $MNT_DIR mount -t ext4 "${boot_part}p1" /boot || fail "cannot mount /boot"
     chroot $MNT_DIR mount -t proc none /proc || fail "cannot mount /proc"
     chroot $MNT_DIR mount -t sysfs none /sys || fail "cannot mount /sys"
 }
@@ -41,18 +47,23 @@ function _umount_partitions() {
 }
 
 function _resize() {
-    echo ",+," | sfdisk -q -f -L -N2 $DISK
-    echo ",+," | sfdisk -q -f -L -N5 $DISK
+    local vgname
+    local -r disk="$1"
+    local -r lvm_part="${disk}p5"
+    local -r lv_root="lv_root"
+
+    echo ",+," | sfdisk -q -f -L -N2 "$disk"
+    echo ",+," | sfdisk -q -f -L -N5 "$disk"
 
     vgscan
     vgchange -ay
-    VGNAME=$(pvs ${DISK}p5 --noheadings | awk '{ print $2 }')
+    vgname=$(pvs "$lvm_part" --noheadings | awk '{ print $2 }')
 
-    pvresize ${DISK}p5
-    lvextend /dev/$VGNAME/root ${DISK}p5
-    e2fsck -y -f /dev/$VGNAME/root
-    resize2fs /dev/$VGNAME/root
+    pvresize "$lvm_part"
+    lvextend "/dev/$vgname/${lv_root}" "$lvm_part"
+    e2fsck -y -f "/dev/$vgname/${lv_root}"
+    resize2fs "/dev/$vgname/${lv_root}"
 
-    vgchange -an $VGNAME
-    qemu-nbd -d $DISK
+    vgchange -an "${vgname}"
+    qemu-nbd -d "${disk}"
 }

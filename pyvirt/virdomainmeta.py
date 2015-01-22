@@ -110,7 +110,7 @@ class virDomainMeta(object):
             bck = self._get_value('backup').attrib['state']
         except Exception as e:
             bck = 'off'
-        return (bck == 'on')
+        return bck == 'on'
 
     def get_ip_address(self):
         try:

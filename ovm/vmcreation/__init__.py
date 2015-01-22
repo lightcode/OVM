@@ -40,8 +40,8 @@ LEVEL_ERROR, LEVEL_INFO = 0, 1
 
 
 def _resize_fs(template, vol_path, verbose=False):
-    '''Resize VM's filesystem if it defined in template.
-    '''
+    """Resize VM's filesystem if it defined in template.
+    """
     tpl = template._config
     if 'abilities' in tpl and 'resizeDisk' in tpl['abilities']:
         print('Resizing filesystem...')

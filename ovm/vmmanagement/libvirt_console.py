@@ -48,7 +48,7 @@ class Console(object):
     def error_handler(self, unused, error):
         # The console stream errors on VM shutdown; we don't care
         if (error[0] == libvirt.VIR_ERR_RPC and
-                    error[1] == libvirt.VIR_FROM_STREAMS):
+                error[1] == libvirt.VIR_FROM_STREAMS):
             return
 
     def reset_term(self):

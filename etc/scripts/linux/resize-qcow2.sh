@@ -33,6 +33,6 @@ source hooks/${HOOKSET}/functions.sh
 
 echo $FILE
 
-_nbd_connect $FILE
+disk=$(_nbd_connect ${FILE})
 
-_resize
+_resize ${disk}
