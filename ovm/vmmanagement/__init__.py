@@ -318,4 +318,4 @@ def vm_stop(args):
                 virdomain.shutdown()
 
     if error_count > 0:
-        App.fatal('{0} VMs cannot be stopped.'.format(error_count))        
+        App.fatal('{0} VMs cannot be stopped.'.format(error_count))

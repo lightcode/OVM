@@ -85,9 +85,11 @@ def print_table(headers, rows, align=None):
         for i, column in enumerate(line):
             row_width[i] = max(len(column), row_width[i])
 
-    template = TABLE_PADDING.join(['{%d:%s%d}' % (i, '>' if a == 'r' else '<', w) for i, w, a in
-                                   zip(list(range(len(row_width))), row_width, align)])
-    template_headers = TABLE_PADDING.join(['{%d:%d}' % (i, w) for i, w in enumerate(row_width)]) + TABLE_PADDING
+    template = TABLE_PADDING.join(
+        ['{%d:%s%d}' % (i, '>' if a == 'r' else '<', w) for i, w, a in
+            zip(list(range(len(row_width))), row_width, align)])
+    template_headers = TABLE_PADDING.join(
+        ['{%d:%d}' % (i, w) for i, w in enumerate(row_width)]) + TABLE_PADDING
 
     print(underline(template_headers.format(*headers)))
     for line in rows:

@@ -65,7 +65,7 @@ class Console(object):
 
     def check_console(self):
         if (self.state[0] == libvirt.VIR_DOMAIN_RUNNING or
-                    self.state[0] == libvirt.VIR_DOMAIN_PAUSED):
+           self.state[0] == libvirt.VIR_DOMAIN_PAUSED):
             if self.stream is None:
                 self.stream = self.connection.newStream(
                     libvirt.VIR_STREAM_NONBLOCK)

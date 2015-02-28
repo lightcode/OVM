@@ -80,7 +80,7 @@ class virDomainMeta(object):
         info = {'os_type': None, 'os_name': None, 'os_version': None}
         try:
             tag = self._get_value('os_info')
-        except Exception as e:
+        except Exception:
             return info
         else:
             if tag is None:
@@ -108,18 +108,13 @@ class virDomainMeta(object):
     def get_backup_state(self):
         try:
             bck = self._get_value('backup').attrib['state']
-        except Exception as e:
+        except Exception:
             bck = 'off'
         return bck == 'on'
 
     def get_ip_address(self):
         try:
-            network = self._get_value('network').attrib['name']
-        except Exception as e:
-            network = None
-
-        try:
             ip_address = self._get_value('ip').attrib['address']
-        except Exception as e:
+        except Exception:
             ip_address = None
         return ip_address

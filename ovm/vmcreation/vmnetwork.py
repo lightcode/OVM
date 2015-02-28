@@ -34,7 +34,7 @@ def _iter_range(ipstart, ipend):
 
 class VMNetwork(object):
     def __init__(self, driver, ipv4_allocation=None, ipv4_pool=None,
-            options=None, **params):
+                 options=None, **params):
         self._method = None
         self._driver = driver()
 
@@ -118,7 +118,6 @@ class VMNetwork(object):
             raise Exception('"%s" does not match with the pool.' % ip)
 
         # Check if the IP has already attributed
-        autoip_path = self.ipv4_pool['autoip_path']
         used_ips = self._get_used_ips()
         if str(ip) in used_ips:
             raise Exception('This IP address has been provided.')

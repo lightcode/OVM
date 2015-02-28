@@ -189,7 +189,6 @@ class Domain(object):
                 pass
             else:
                 volumes.append(Volume(disk, vol))
-            
         return volumes
 
     def get_backup_state(self):
