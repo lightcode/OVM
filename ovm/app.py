@@ -23,8 +23,9 @@
 import os
 import sys
 from glob import iglob
+
 from ovm.resources import Resources
-from ovm.singleton import Singleton
+from ovm.utils.singleton import Singleton
 from ovm.template import Template
 from ovm.utils.printer import bcolors, ColoredString
 

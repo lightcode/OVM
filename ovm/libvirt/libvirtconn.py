@@ -22,16 +22,7 @@
 
 import libvirt
 from ovm.libvirt.domain import Domain
-
-
-class Singleton(object):
-
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = object.__new__(cls)
-        return cls._instance
+from ovm.utils.singleton import Singleton
 
 
 class LibvirtConn(Singleton):
