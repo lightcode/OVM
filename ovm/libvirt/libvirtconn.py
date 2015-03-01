@@ -20,8 +20,43 @@
 ########################################################################
 
 
-from ovm.drivers.driver import Driver
+import libvirt
+from ovm.libvirt.domain import Domain
 
 
-class StorageDriver(Driver):
-    pass
+class Singleton(object):
+
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = object.__new__(cls)
+        return cls._instance
+
+
+class LibvirtConn(Singleton):
+
+    _conn = None
+    _connection_string = 'qemu:///system'
+
+    @classmethod
+    def open(cls):
+        cls._conn = libvirt.open(cls._connection_string)
+
+    @classmethod
+    def new_connection(cls):
+        return libvirt.open(cls._connection_string)
+
+    @classmethod
+    def get_domains(cls):
+        for domain in cls._conn.listAllDomains():
+            yield Domain(domain)
+
+    @classmethod
+    def get_domain(cls, name):
+        domain = cls._conn.lookupByName(name)
+        return Domain(domain)
+
+    @classmethod
+    def define_domain(cls, xml):
+        cls._conn.defineXML(xml.decode('utf8'))

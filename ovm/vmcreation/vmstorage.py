@@ -21,9 +21,11 @@
 
 
 import os
+
 from lxml import etree
+
 from ovm.utils.copyfile import CopyFile
-from pyvirt.libvirtconn import LibvirtConn
+from ovm.libvirt.libvirtconn import LibvirtConn
 
 
 class VMStorage(object):

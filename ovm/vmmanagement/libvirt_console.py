@@ -21,11 +21,12 @@
 
 
 import atexit
-import libvirt
 import os
-import termios
 import tty
-from pyvirt.libvirtconn import LibvirtConn
+
+import libvirt
+import termios
+from ovm.libvirt.libvirtconn import LibvirtConn
 
 
 class Console(object):

@@ -20,9 +20,10 @@
 ########################################################################
 
 
-import libvirt
 from lxml import etree
-from pyvirt.virdomainmeta import virDomainMeta
+
+import libvirt
+from ovm.libvirt.virdomainmeta import virDomainMeta
 
 
 class Volume(object):

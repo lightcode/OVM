@@ -36,7 +36,7 @@ def main():
         packages=[
             'ovm', 'ovm.vmcreation', 'ovm.vmmanagement', 'ovm.utils',
             'ovm.drivers', 'ovm.drivers.network', 'ovm.drivers.storage',
-            'pyvirt'
+            'ovm.libvirt'
         ],
         scripts=['bin/vm'],
         data_files=[

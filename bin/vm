@@ -21,12 +21,12 @@
 
 
 import argparse
+
 import libvirt
-import sys
-from pyvirt.libvirtconn import LibvirtConn
 from ovm.vmcreation import *
 from ovm.vmmanagement import *
 from ovm.app import App
+
 
 
 # Don't show error message from libvirt

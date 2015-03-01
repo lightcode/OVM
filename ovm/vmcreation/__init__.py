@@ -20,10 +20,12 @@
 ########################################################################
 
 
-import concurrent.futures
 import os
 import stat
-from pyvirt.libvirtconn import LibvirtConn
+from subprocess import PIPE, Popen
+
+import concurrent.futures
+from ovm.libvirt.libvirtconn import LibvirtConn
 from ovm.app import App
 from ovm.resources import Resources
 from ovm.utils.printer import print_table, default
@@ -31,7 +33,6 @@ from ovm.vmcreation.vmdefinition import VMDefinition
 from ovm.vmcreation.vmnetwork import VMNetwork
 from ovm.vmcreation.vmstorage import VMStorage
 from ovm.vmmanagement import print_vm_info
-from subprocess import PIPE, Popen
 
 
 STORAGES = Resources.get_storages()
