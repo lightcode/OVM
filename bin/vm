@@ -29,7 +29,7 @@ from ovm.app import App
 
 
 
-# Don't show error message from libvirt
+# Don't show error message from libvirt_driver
 def f(ctx, error):
     return 1
 
@@ -130,6 +130,16 @@ def parse_args():
     parser_reboot = subparsers.add_parser('reboot', help='reboot a VM')
     parser_reboot.add_argument('name', help='name of the VM')
     parser_reboot.set_defaults(func=vm_reboot)
+
+    # Save a VM
+    parser_save = subparsers.add_parser('save', help='save a VM')
+    parser_save.add_argument('name', nargs='+', help='name of VMs')
+    parser_save.set_defaults(func=vm_save)
+
+    # Restore a VM
+    parser_restore = subparsers.add_parser('restore', help='restore a VM')
+    parser_restore.add_argument('name', nargs='+', help='name of VMs')
+    parser_restore.set_defaults(func=vm_restore)
 
     # Stop a VM
     parser_stop = subparsers.add_parser('stop', help='stop one or many VMs')

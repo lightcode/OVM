@@ -22,8 +22,11 @@
 
 from lxml import etree
 
+import os
+
 import libvirt
-from ovm.libvirt.virdomainmeta import virDomainMeta
+from ovm.libvirt_driver.virdomainmeta import virDomainMeta
+from ovm.app import App
 
 
 class Volume(object):
@@ -89,6 +92,30 @@ class Domain(object):
         lived_desc = self.vir_domain.XMLDesc()
         self._lived_tree = etree.fromstring(lived_desc)
 
+    def is_active(self):
+        return self.vir_domain.isActive()
+
+    def get_save_file(self):
+        return os.path.join(App.SAVED_VMS, self.get_name())
+
+    def save(self):
+        if not self.is_active():
+            raise Exception('the VM must be active.')
+        if self.is_saved():
+            raise Exception('the file to save the VM already exists.')
+        self.vir_domain.save(self.get_save_file())
+
+    def restore(self):
+        if self.is_active():
+            raise Exception('the VM must be inactive.')
+
+        if not self.is_saved():
+            raise Exception('this VM has already been saved.')
+
+        save_file = self.get_save_file()
+        self._libvirt_conn.restore(save_file)
+        os.remove(save_file)
+
     def _get_libvirt_state(self):
         return self.vir_domain.state()[0]
 
@@ -106,8 +133,21 @@ class Domain(object):
     def get_name(self):
         return self.vir_domain.name()
 
+    def is_saved(self):
+        return os.path.exists(self.get_save_file())
+
+    def start(self):
+        if self.is_saved():
+            self.restore()
+        else:
+            self.vir_domain.create()
+
     def get_state_text(self):
         num = self._get_libvirt_state()
+
+        if num == 5 and self.is_saved():
+            return 'Saved'
+
         try:
             return self.STATES[num]
         except KeyError:

@@ -25,7 +25,7 @@ import stat
 from subprocess import PIPE, Popen
 
 import concurrent.futures
-from ovm.libvirt.libvirtconn import LibvirtConn
+from ovm.libvirt_driver.libvirtconn import LibvirtConn
 from ovm.app import App
 from ovm.resources import Resources
 from ovm.utils.printer import print_table, default
@@ -206,7 +206,7 @@ def vm_create(args):
     _resize_fs(template, diskpath, verbose=verbose)
     _post_install(template, diskpath, params, verbose=verbose)
 
-    # 3. Add the VM in libvirt
+    # 3. Add the VM in libvirt_driver
     xml = vmd.get_xml()
     LibvirtConn.define_domain(xml)
 

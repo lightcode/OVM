@@ -24,12 +24,11 @@ import sys
 from subprocess import Popen
 
 import libvirt
-from ovm.libvirt.libvirtconn import LibvirtConn
+from ovm.libvirt_driver.libvirtconn import LibvirtConn
 from ovm.utils.printer import print_title, si_unit, default, print_table
 from ovm.utils.printer import ColoredString, bcolors
 from ovm.app import App
 from ovm.vmmanagement.libvirt_console import Console
-
 
 
 ###################################
@@ -43,6 +42,21 @@ def _get_domain(name):
         App.fatal('Cannot get the VM "%s".' % name)
     else:
         return domain
+
+
+def _apply_on_vms(names, function, success_message, error_message):
+    error_count = 0
+    for name in names:
+        try:
+            function(_get_domain(name))
+        except Exception as e:
+            App.notice('Error on {0}: {1}'.format(name, e))
+            error_count += 1
+        else:
+            App.success(success_message.format(name))
+
+    if error_count > 0:
+        App.fatal(error_message.format(error_count))
 
 
 ###################################
@@ -275,12 +289,11 @@ def vm_start(args):
     error_count = 0
     for name in args.name:
         domain = _get_domain(name)
-        virdomain = domain.vir_domain
-        if virdomain.isActive():
+        if domain.is_active():
             error_count += 1
             App.notice('VM "{0}" is already active.'.format(name))
         else:
-            virdomain.create()
+            domain.start()
             App.success('VM "{0}" started with '.format(name), newline=False)
 
             ipv4 = domain.get_main_ipv4()
@@ -300,10 +313,29 @@ def vm_start(args):
             else:
                 sys.stdout.write('no VNC screen')
 
-            print('.')
+            sys.stdout.write('.\n')
+            sys.stdout.flush()
 
     if error_count > 0:
         App.fatal('{0} VMs cannot be started.'.format(error_count))
+
+
+def vm_save(args):
+    _apply_on_vms(
+        args.name,
+        lambda domain: domain.save(),
+        '{0} is saved.',
+        '{0} VMs cannot be saved.'
+    )
+
+
+def vm_restore(args):
+    _apply_on_vms(
+        args.name,
+        lambda domain: domain.restore(),
+        '{0} is restored.',
+        '{0} VMs cannot be restored.'
+    )
 
 
 def vm_stop(args):

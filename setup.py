@@ -36,7 +36,7 @@ def main():
         packages=[
             'ovm', 'ovm.vmcreation', 'ovm.vmmanagement', 'ovm.utils',
             'ovm.drivers', 'ovm.drivers.network', 'ovm.drivers.storage',
-            'ovm.libvirt'
+            'ovm.libvirt_driver'
         ],
         scripts=['bin/vm'],
         data_files=[
@@ -48,6 +48,9 @@ def main():
         print("Don't change /etc/ovm")
     else:
         shutil.copytree('etc/', '/etc/ovm')
+
+    if not os.path.exists('/var/ovm/saved_vms'):
+        os.makedirs('/var/ovm/saved_vms')
 
 
 if __name__ == '__main__':

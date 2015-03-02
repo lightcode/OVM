@@ -25,7 +25,6 @@ import os
 from lxml import etree
 
 from ovm.utils.copyfile import CopyFile
-from ovm.libvirt.libvirtconn import LibvirtConn
 
 
 class VMStorage(object):
@@ -53,6 +52,8 @@ class VMStorage(object):
         self._driver.set_params(driver_name='qemu')
 
     def create_disk(self, template):
+        from ovm.libvirt_driver.libvirtconn import LibvirtConn
+
         # 1. Find the pool path
         vol_name = self._driver._volume_name
         pool = LibvirtConn._conn.storagePoolLookupByName(self.pool_name())
@@ -64,7 +65,7 @@ class VMStorage(object):
 
         # 2. Add volume into the pool
         xml = self._driver._get_vol_xml()
-        vol = pool.createXML(xml.decode('utf8'))
+        pool.createXML(xml.decode('utf8'))
 
         # 3. Copy template image in new pool
         img_path = template.get_path()

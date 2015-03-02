@@ -21,7 +21,7 @@
 
 
 import libvirt
-from ovm.libvirt.domain import Domain
+from ovm.libvirt_driver.domain import Domain
 from ovm.utils.singleton import Singleton
 
 

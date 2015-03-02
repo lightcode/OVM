@@ -26,7 +26,7 @@ import tty
 
 import libvirt
 import termios
-from ovm.libvirt.libvirtconn import LibvirtConn
+from ovm.libvirt_driver.libvirtconn import LibvirtConn
 
 
 class Console(object):
