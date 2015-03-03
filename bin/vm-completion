@@ -27,11 +27,14 @@ _vm()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     opts="console create info ls ping reboot restore rm save set ssh \
-        start stop storages networks templates --version --help"
+        start stop storages networks templates top --version --help"
 
     if [[ COMP_CWORD -gt 1 ]]; then
         case "${COMP_WORDS[1]}" in
             --version | --help)
+                return 0
+            ;;
+            top)
                 return 0
             ;;
             create)

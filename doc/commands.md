@@ -19,6 +19,7 @@ start         | Start a VM
 stop          | Halt a VM gracefully
 storages      | Print the list of storages
 templates     | Print the list of templates
+top           | Show live stats about VMs
 
 
 

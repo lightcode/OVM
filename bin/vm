@@ -175,6 +175,9 @@ def parse_args():
     parser_ping.add_argument('name', help='name of the VM')
     parser_ping.set_defaults(func=vm_ping)
 
+    parser_top = subparsers.add_parser('top', help='show all VMs and their states')
+    parser_top.set_defaults(func=vm_top)
+
     args = parser.parse_args()
     if hasattr(args, 'func'):
         getattr(args, "func")(args)

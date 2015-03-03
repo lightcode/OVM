@@ -353,3 +353,8 @@ def vm_stop(args):
 
     if error_count > 0:
         App.fatal('{0} VMs cannot be stopped.'.format(error_count))
+
+
+def vm_top(args):
+    from ovm.vmmanagement.vmtop import VMTop
+    VMTop()
