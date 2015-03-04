@@ -98,6 +98,28 @@ class Domain(object):
     def get_save_file(self):
         return os.path.join(App.SAVED_VMS, self.get_name())
 
+    def remove_save(self):
+        if self.is_saved():
+            os.remove(self.get_save_file())
+
+    def remove(self):
+        # We cannot remove vm with snapshots
+        snapshots = self.vir_domain.listAllSnapshots()
+        if snapshots:
+            raise Exception('The VM "{0}" cannot be removed. \
+                Delete snapshots first.'.format(self.get_name()))
+            return False
+
+        if self.vir_domain.isActive():
+            self.vir_domain.destroy()
+
+        for vol in self.get_volumes():
+            vol.vir_vol.delete()
+
+        self.remove_save()
+
+        return self.vir_domain.undefine()
+
     def save(self):
         if not self.is_active():
             raise Exception('the VM must be active.')
@@ -114,7 +136,7 @@ class Domain(object):
 
         save_file = self.get_save_file()
         self._libvirt_conn.restore(save_file)
-        os.remove(save_file)
+        self.remove_save()
 
     def _get_libvirt_state(self):
         return self.vir_domain.state()[0]

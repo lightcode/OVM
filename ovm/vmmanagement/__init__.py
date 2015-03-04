@@ -184,37 +184,28 @@ def vm_reboot(args):
 
 
 def _remove_vm(name, force):
-    domain = _get_domain(name)
-    virdomain = domain.vir_domain
-
     res = None
     while not force and res not in ('y', 'n'):
-        res = input('Delete VM "%s" and all disks? [y/N] ' % domain.get_name())
+        res = input('Delete VM "%s" and all disks? [y/N] ' % name)
         res = res.lower()
 
     if res == 'n':
         App.notice('Deletion of "{0}" aborted by user.'.format(name))
         return False
 
-    if virdomain.isActive():
-        virdomain.destroy()
-
-    for vol in domain.get_volumes():
-        vol.vir_vol.delete()
-
-    snapshots = virdomain.listAllSnapshots()
-    if snapshots:
-        App.notice('The VM "{0}" cannot be removed. \
-            Delete snapshots first.'.format(name))
+    domain = _get_domain(name)
+    try:
+        res = domain.remove()
+    except Exception as e:
+        App.notice('Error: the VM cannot be removed: %s' % e)
         return False
-
-    res = virdomain.undefine()
-    if res == 0:
-        print('The domain has been removed.')
-        return True
     else:
-        App.notice('Error %d: the VM cannot removed.' % res)
-        return False
+        if res == 0:
+            print('The domain has been removed.')
+            return True
+        else:
+            App.notice('Error %d: the VM cannot be removed.' % res)
+            return False
 
 
 def vm_remove(args):
