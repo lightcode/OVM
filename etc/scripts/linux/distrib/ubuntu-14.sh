@@ -89,9 +89,9 @@ fi
 ##################################################
 
 if [ -n "$NAMESERVERS" ]; then
-    echo -n > /etc/resolv.conf
+    echo -n > /etc/resolvconf/resolv.conf.d/base
     for addr in $NAMESERVERS; do
-        echo "nameserver $addr" >> /etc/resolv.conf
+        echo "nameserver $addr" >> /etc/resolvconf/resolv.conf.d/base
     done
 fi
 
