@@ -33,10 +33,10 @@ main_interface:
 # Abilities
 abilities:
   resizeDisk:
-    script: linux/resize-qcow2.sh
-    params: ["ubuntu-server-unicorn", "{vol_path}"]
+    script: linux/resize.sh
+    params: ["{vol_path}", "/dev/ubuntu-vg/root"]
 
 # Post install scripts
 post-install:
-  - path: linux/finish-vm.sh
-    params: ["{diskpath}", "ubuntu-server-unicorn"]
+  - path: linux/setcontext.sh
+    params: ["{diskpath}", "ubuntu-14", "{configuration}", "/dev/ubuntu-vg/root"]

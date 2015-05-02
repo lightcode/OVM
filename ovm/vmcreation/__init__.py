@@ -22,6 +22,7 @@
 
 import os
 import stat
+import tempfile
 from subprocess import PIPE, Popen
 
 import concurrent.futures
@@ -101,13 +102,21 @@ def _post_install(template, diskpath, env_params, verbose=False):
     tpl = template._config
     if 'post-install' not in tpl:
         return
+
+    _, filename = tempfile.mkstemp()
+    with open(filename, 'wb+') as configuration:
+        for name, value in env_params.items():
+            configuration.write(bytes('{}={}\n'.format(name, value), 'utf-8'))
+
     print('Running post-install scripts...')
     for hook in tpl['post-install']:
         path = hook['path']
         params = hook['params']
         for i, param in enumerate(params):
-            params[i] = param.format(diskpath=diskpath)
+            params[i] = param.format(diskpath=diskpath, configuration=filename)
         _exec_script(path, params, env_params, verbose)
+
+    os.remove(filename)
 
 
 def _process_args_network(args):

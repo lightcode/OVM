@@ -19,9 +19,9 @@ main_interface:
 
 abilities:
   resizeDisk:
-    script: linux/resize-qcow2.sh
-    params: ["centos-7", "{vol_path}"]
+    script: linux/resize.sh
+    params: ["{vol_path}", "/dev/centos/lv_root"]
 
 post-install:
-  - path: linux/finish-vm.sh
-    params: ["{diskpath}", "centos-7"]
+  - path: linux/setcontext.sh
+    params: ["{diskpath}", "centos-7", "{configuration}", "/dev/centos/lv_root"]

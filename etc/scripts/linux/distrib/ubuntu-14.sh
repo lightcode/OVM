@@ -19,49 +19,86 @@
 # along with OVM. If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
 
+set -ex
 
-INTERFACE=${INTERFACE:-eth0}
+source /tmp/configuration
 
-NET_FILE="$MNT_DIR/etc/sysconfig/network-scripts/ifcfg-$INTERFACE"
-echo -n > $NET_FILE
 
-cat <<EOF >> $NET_FILE
-DEVICE="$INTERFACE"
-NM_CONTROLLED="yes"
-ONBOOT="yes"
-TYPE="Ethernet"
+##################################################
+# HOSTNAME
+##################################################
+
+echo $HOSTNAME > /etc/hostname
+
+cat <<EOF > /etc/hosts
+127.0.0.1       localhost
+127.0.1.1       $HOSTNAME
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
 EOF
 
 
-# IPv4
+##################################################
+# NETWORKS
+##################################################
+
+INTERFACE=${INTERFACE:-eth0}
+
+NET_FILE="/etc/network/interfaces"
+echo -n > $NET_FILE
+
+# Set interface loopback
+cat <<EOF >> $NET_FILE
+auto lo
+iface lo inet loopback
+
+auto $INTERFACE
+EOF
+
+# IPv4 on eth0
 IP=${IP:-dhcp}
 
 if [ $IP == "dhcp" ]; then
     cat <<EOF >> $NET_FILE
-BOOTPROTO="dhcp"
-DHCP_HOSTNAME="${HOSTNAME}"
+iface $INTERFACE inet dhcp
 EOF
 elif [ -n $IP ] && [ -n $NETMASK ] && [ -n $GATEWAY ]; then
     cat <<EOF >> $NET_FILE
-BOOTPROTO="static"
-IPADDR="$IP"
-NETMASK="$NETMASK"
-GATEWAY="$GATEWAY"
+iface $INTERFACE inet static
+  address $IP
+  netmask $NETMASK
+  gateway $GATEWAY
 EOF
 fi
 
-
-# IPv6
+# IPv6 on eth0
 IPV6=${IPV6:-disabled}
 if [ $IPV6 == "auto" ]; then
     cat <<EOF >> $NET_FILE
-IPV6INIT="yes"
-IPV6_AUTOCONF="yes"
+
+iface $INTERFACE inet6 auto
 EOF
 fi
 
 
-#
-#  Print for debugging
-#
-_debug_file $NET_FILE
+##################################################
+# NAMESERVERS
+##################################################
+
+if [ -n "$NAMESERVERS" ]; then
+    echo -n > /etc/resolv.conf
+    for addr in $NAMESERVERS; do
+        echo "nameserver $addr" >> /etc/resolv.conf
+    done
+fi
+
+
+##################################################
+# CLEAN UP
+##################################################
+
+/usr/bin/find /var/log -type f -delete
+rm -f /root/.bash_history 2> /dev/null

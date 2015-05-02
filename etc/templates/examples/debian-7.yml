@@ -33,10 +33,10 @@ main_interface:
 # Abilities
 abilities:
   resizeDisk:
-    script: linux/resize-qcow2.sh
-    params: ["debian-wheezy", "{vol_path}"]
+    script: linux/resize.sh
+    params: ["{vol_path}", "/dev/debian/root"]
 
 # Post install scripts
 post-install:
-  - path: linux/finish-vm.sh
-    params: ["{diskpath}", "debian-wheezy"]
+  - path: linux/setcontext.sh
+    params: ["{diskpath}", "debian-7", "{configuration}", "/dev/debian/root"]

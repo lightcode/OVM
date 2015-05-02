@@ -14,6 +14,7 @@ You also need to install these packages on your hypervisor:
 
 * libvirt
 * python3-libvirt
+* guestfish
 
 You can simply use your package manager or build them yourself.
 
