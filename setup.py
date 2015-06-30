@@ -28,7 +28,7 @@ from distutils.core import setup
 def main():
     setup(
         name='OVM',
-        version='2.0',
+        version='0.2',
         description='Open Virtualization Manager',
         author='Matthieu Gaigniere',
         author_email='matthieu@lightcode.fr',
