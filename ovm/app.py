@@ -31,6 +31,7 @@ from ovm.utils.printer import bcolors, ColoredString
 
 
 class App(Singleton):
+    VERSION = '0.2'
     templates = []
     _templates_loaded = False
     ETC = '/etc/ovm'

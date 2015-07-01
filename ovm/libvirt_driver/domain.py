@@ -108,7 +108,6 @@ class Domain(object):
         if snapshots:
             raise Exception('The VM "{0}" cannot be removed. \
                 Delete snapshots first.'.format(self.get_name()))
-            return False
 
         if self.vir_domain.isActive():
             self.vir_domain.destroy()

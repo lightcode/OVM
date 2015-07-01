@@ -23,8 +23,8 @@
 import argparse
 
 import libvirt
-from ovm.vmcreation import *
-from ovm.vmmanagement import *
+from ovm.vmcli.creation import *
+from ovm.vmcli.management import *
 from ovm.app import App
 
 
@@ -43,7 +43,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Provide functions to create and manage VMs on KVM.',
         prog='vm')
-    parser.add_argument('--version', action='version', version='%(prog)s 0.2')
+    parser.add_argument('--version', action='version', version='OVM 0.2')
 
     subparsers = parser.add_subparsers()
 
@@ -162,7 +162,7 @@ def parse_args():
     parser_remove.add_argument('name', help='name of VMs', nargs='+')
     parser_remove.add_argument(
         '-f', '--yes', '-y', action='store_true',
-        help='Remove VM without asking comfirmation.')
+        help='Remove VM without asking confirmation.')
     parser_remove.set_defaults(func=vm_remove)
 
     # SSH
@@ -186,5 +186,9 @@ def parse_args():
         sys.exit(0)
 
 
-if __name__ == "__main__":
+def main():
     parse_args()
+
+
+if __name__ == "__main__":
+    main()

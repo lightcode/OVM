@@ -22,26 +22,30 @@
 
 import os
 import shutil
-from distutils.core import setup
+from setuptools import setup, find_packages
+
+from ovm.app import App
 
 
 def main():
+    with open('requirements.txt') as f:
+        requirements = [line.strip() for line in f.readlines()]
+
     setup(
         name='OVM',
-        version='0.2',
+        version=App.VERSION,
         description='Open Virtualization Manager',
         author='Matthieu Gaigniere',
         author_email='matthieu@lightcode.fr',
         url='http://lightcode.fr',
-        packages=[
-            'ovm', 'ovm.vmcreation', 'ovm.vmmanagement', 'ovm.utils',
-            'ovm.drivers', 'ovm.drivers.network', 'ovm.drivers.storage',
-            'ovm.libvirt_driver'
-        ],
-        scripts=['bin/vm'],
+        install_requires=requirements,
+        packages=find_packages(),
         data_files=[
             ('/etc/bash_completion.d', ['bin/vm-completion'])
-        ]
+        ],
+        entry_points={
+            'console_scripts': ['vm = ovm.vmcli.__main__:main']
+        }
     )
 
     if os.path.exists('/etc/ovm'):

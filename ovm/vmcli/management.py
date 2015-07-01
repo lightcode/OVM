@@ -28,7 +28,8 @@ from ovm.libvirt_driver.libvirtconn import LibvirtConn
 from ovm.utils.printer import print_title, si_unit, default, print_table
 from ovm.utils.printer import ColoredString, bcolors
 from ovm.app import App
-from ovm.vmmanagement.libvirt_console import Console
+from ovm.vmcli.libvirt_console import Console
+from ovm.vmcli.vmtop import VMTop
 
 
 ###################################
@@ -347,5 +348,4 @@ def vm_stop(args):
 
 
 def vm_top(args):
-    from ovm.vmmanagement.vmtop import VMTop
     VMTop()

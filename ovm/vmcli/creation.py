@@ -30,10 +30,8 @@ from ovm.libvirt_driver.libvirtconn import LibvirtConn
 from ovm.app import App
 from ovm.resources import Resources
 from ovm.utils.printer import print_table, default
-from ovm.vmcreation.vmdefinition import VMDefinition
-from ovm.vmcreation.vmnetwork import VMNetwork
-from ovm.vmcreation.vmstorage import VMStorage
-from ovm.vmmanagement import print_vm_info
+from ovm.inventory.vmdefinition import VMDefinition
+from ovm.vmcli.management import print_vm_info
 
 
 STORAGES = Resources.get_storages()

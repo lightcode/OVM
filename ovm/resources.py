@@ -23,9 +23,9 @@
 import yaml
 from ovm.drivers.network.openvswitch import OpenvSwitchDriver
 from ovm.drivers.storage.volume import VolumeDriver
-from ovm.singleton import Singleton
-from ovm.vmcreation.vmnetwork import VMNetwork
-from ovm.vmcreation.vmstorage import VMStorage
+from ovm.utils.singleton import Singleton
+from ovm.inventory.vmnetwork import VMNetwork
+from ovm.inventory.vmstorage import VMStorage
 
 
 class Resources(Singleton):
