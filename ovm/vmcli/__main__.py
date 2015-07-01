@@ -76,14 +76,14 @@ def parse_args():
         help="print only the list of templates names")
     parser_templates.set_defaults(func=vm_templates)
 
-    # List storages
-    parser_storages = subparsers.add_parser('storages', help='list storages')
-    parser_storages.add_argument(
+    # List storage
+    parser_storage = subparsers.add_parser('storage', help='list storage')
+    parser_storage.add_argument(
         '--short', action='store_true',
-        help="print only the list of storages names")
-    parser_storages.set_defaults(func=vm_storages)
+        help='print only the list of storage names')
+    parser_storage.set_defaults(func=vm_storage)
 
-    # List storages
+    # List networks
     parser_networks = subparsers.add_parser('networks', help='list networks')
     parser_networks.add_argument(
         '--short', action='store_true',
@@ -175,7 +175,8 @@ def parse_args():
     parser_ping.add_argument('name', help='name of the VM')
     parser_ping.set_defaults(func=vm_ping)
 
-    parser_top = subparsers.add_parser('top', help='show all VMs and their states')
+    parser_top = subparsers.add_parser(
+        'top', help='show all VMs and their states')
     parser_top.set_defaults(func=vm_top)
 
     args = parser.parse_args()

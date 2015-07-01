@@ -49,7 +49,7 @@ Templates are stored into the `/etc/ovm/templates` directory. Templates names ha
 
 # Configure resources
 
-Resources are configured in the YAML file `resources.yml`. This file follow the YAML syntax and there are two mains dictionaries: `storages` and `networks`. Each dictionary is described in this chapter.
+Resources are configured in the YAML file `resources.yml`. This file follow the YAML syntax and there are two mains dictionaries: `storage` and `networks`. Each dictionary is described in this chapter.
 
 
 ## Storage pools
@@ -62,7 +62,7 @@ Storage pools are used by OVM to create the disk of VMs. To add a new storage po
 **Example**:
 
 ```yaml
-storages:
+storage:
   ssd:
     driver: VolumeDriver
     pool_name: pool-vm-ssd

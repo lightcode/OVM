@@ -34,7 +34,7 @@ from ovm.inventory.vmdefinition import VMDefinition
 from ovm.vmcli.management import print_vm_info
 
 
-STORAGES = Resources.get_storages()
+STORAGE = Resources.get_storage()
 NETWORKS = Resources.get_networks()
 LEVEL_ERROR, LEVEL_INFO = 0, 1
 
@@ -153,10 +153,10 @@ def _long_netmask(cidr):
 
 
 def _process_args_storage(args):
-    if args.storage not in STORAGES:
+    if args.storage not in STORAGE:
         App.fatal('Storage "{0}" does\'t exists.'.format(args.storage))
 
-    storage = STORAGES[args.storage]
+    storage = STORAGE[args.storage]
 
     if args.size:
         storage.set_size(args.size)
@@ -252,14 +252,14 @@ def vm_templates(args):
     print_table(headers, rows)
 
 
-def vm_storages(args):
+def vm_storage(args):
     if args.short:
-        print('\n'.join([k for k in STORAGES]))
+        print('\n'.join([k for k in STORAGE]))
         return
 
     headers = ('ID', 'Pool name')
     rows = []
-    for name, storage in STORAGES.items():
+    for name, storage in STORAGE.items():
         rows.append((name, storage.pool_name()))
     print_table(headers, rows)
 

@@ -27,7 +27,7 @@ _vm()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     opts="console create info ls ping reboot restore rm save set ssh \
-        start stop storages networks templates top --version --help"
+        start stop storage networks templates top --version --help"
 
     if [[ COMP_CWORD -gt 1 ]]; then
         case "${COMP_WORDS[1]}" in
@@ -45,7 +45,7 @@ _vm()
                     templates="$(vm networks --short)"
                     COMPREPLY=( $(compgen -W "${templates}" -- ${cur}) )
                 elif [[ "$prev" == "--storage" ]]; then
-                    templates="$(vm storages --short)"
+                    templates="$(vm storage --short)"
                     COMPREPLY=( $(compgen -W "${templates}" -- ${cur}) )
                 elif [[ "$prev" == "--vcpu" ]] || [[ "$prev" == "--ip" ]] || \
                         [[ "$prev" == "--memory" ]] || [[ "$prev" == "--size" ]]; then
@@ -60,7 +60,7 @@ _vm()
                 COMPREPLY=( $(compgen -W "--active --inactive --short --backup" -- ${cur}) )
                 return 0
             ;;
-            templates | storages | networks)
+            templates | storage | networks)
                 COMPREPLY=( $(compgen -W "--short" -- ${cur}) )
                 return 0
             ;;

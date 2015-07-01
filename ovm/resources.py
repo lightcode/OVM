@@ -31,7 +31,7 @@ from ovm.inventory.vmstorage import VMStorage
 class Resources(Singleton):
     path = None
     networks = {}
-    storages = {}
+    storage = {}
 
     @classmethod
     def init(cls, path):
@@ -39,7 +39,7 @@ class Resources(Singleton):
 
     @classmethod
     def load_resources(cls):
-        if not cls.networks or not cls.storages:
+        if not cls.networks or not cls.storage:
             with open(cls.path) as fd:
                 resources = yaml.load(fd)
 
@@ -47,9 +47,9 @@ class Resources(Singleton):
                 driver = globals()[network.pop('driver')]
                 cls.networks[name] = VMNetwork(driver, **network)
 
-            for name, storage in resources['storages'].items():
+            for name, storage in resources['storage'].items():
                 driver = globals()[storage.pop('driver')]
-                cls.storages[name] = VMStorage(driver, **storage)
+                cls.storage[name] = VMStorage(driver, **storage)
 
     @classmethod
     def get_networks(cls):
@@ -57,6 +57,6 @@ class Resources(Singleton):
         return cls.networks
 
     @classmethod
-    def get_storages(cls):
+    def get_storage(cls):
         cls.load_resources()
-        return cls.storages
+        return cls.storage

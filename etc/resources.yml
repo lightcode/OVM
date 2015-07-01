@@ -1,10 +1,10 @@
 #
-# Storages sections
+# Storage section
 #
 # Here you can add the configuration of your
 # storage units. You can write it as followed:
 #
-#    storages:
+#    storage:
 #      ssd:
 #        driver: VolumeDriver
 #        pool_name: pool-vm-ssd
@@ -12,12 +12,12 @@
 #        driver: VolumeDriver
 #        pool_name: pool-vm-nfs
 
-storages: {}  # Replace me
+storage: {}  # Replace me
 
 
 
 #
-# Networks sections
+# Network section
 #
 # Here you can add the configuration of your
 # networks. You can write it as followed:

@@ -17,7 +17,7 @@ set           | Modify some properties of VM
 ssh           | Shortcut to open a SSH session on the VM
 start         | Start a VM
 stop          | Halt a VM gracefully
-storages      | Print the list of storages
+storage       | Print the list of storage
 templates     | Print the list of templates
 top           | Show live stats about VMs
 
@@ -29,7 +29,7 @@ Open a console on the VM.
 
 To close the connection, you have to press `Ctrl+]` or `Ctrl+5`.
 
-Syntax: 
+Syntax:
 
     vm console [-h] name
 
@@ -64,7 +64,7 @@ Shortcut to ping a VM with the static IP.
 
 Modify some properties of VM.
 
-Syntax: 
+Syntax:
 
     vm set [-h] [--backup {on,off}]
                 [--starting {auto,manual}]
