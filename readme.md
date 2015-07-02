@@ -23,7 +23,13 @@ You can simply use your package manager or build them yourself.
 
 We need to install Python libraries (example on Debian):
 
-    # apt-get install python3-lxml python3-ipaddr python3-yaml
+    # apt-get install python3-lxml python3-ipaddr python3-pip
+
+
+We need to install all requirements with pip:
+
+    # pip-3.2 install -r requirements.txt
+
 
 Now, you can download and extract OVM. Then, to achieve the installation, we simply do this command into the `ovm` directory:
 
