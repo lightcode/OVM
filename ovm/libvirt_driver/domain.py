@@ -297,6 +297,25 @@ class Domain(object):
         meta.set_value('ip', 'address', ip)
 
     def get_main_ipv4(self):
+        dhcp = False
+
         meta = virDomainMeta(self.vir_domain)
         ipv4 = meta.get_ip_address()
-        return ipv4
+
+        if ipv4 == 'dhcp':
+            dhcp = True
+        if ipv4 and ipv4 != 'dhcp':
+            return ipv4
+
+        try:
+            ifaces = self.vir_domain.interfaceAddresses(
+                libvirt.VIR_DOMAIN_INTERFACE_ADDRESSES_SRC_AGENT)
+            ipv4 = [e['addr'] for e in ifaces['eth0']['addrs']
+                    if e['type'] == 0][0]
+        except:
+            pass
+        else:
+            return ipv4
+
+        if dhcp:
+            return 'dhcp'
