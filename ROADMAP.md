@@ -1,6 +1,6 @@
 # Version 0.3
 
-- New metadata API: store arbitrary key/value data
+- New metadata API: store arbitrary key/value data (done: 07/02/15)
 - Cleanup the core project
 - Store drivers name as metadata
 - Create a generic storage and network driver

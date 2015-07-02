@@ -36,7 +36,6 @@ Syntax:
 Read also [Configure a serial console on your VM](console.md).
 
 
-
 ## `vm create`
 
 Create a new VM.
@@ -49,7 +48,6 @@ Syntax:
               name
 
 
-
 ## `vm ping`
 
 Shortcut to ping a VM with the static IP.
@@ -57,26 +55,6 @@ Shortcut to ping a VM with the static IP.
 **Important**: this command only works if you have fixed an IP address on the VM.
 
     vm ping [-h] name
-
-
-
-## `vm set`
-
-Modify some properties of VM.
-
-Syntax:
-
-    vm set [-h] [--backup {on,off}]
-                [--starting {auto,manual}]
-                [--ip IP] [--os-type OS_TYPE]
-                [--os-name OS_NAME]
-                [--os-version OS_VERSION]
-                name
-
-Parameters:
-
-* `--backup {on,off}` : this option allows you to change the _backup_ metadata. This metadata is usefull only if you want to store which VM you back up with your own script. OVM doesn't back up nothing. You can list all backed machine with the command `vm list --short --backup`.
-
 
 
 ## `vm ssh`

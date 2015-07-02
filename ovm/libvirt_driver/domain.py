@@ -20,12 +20,12 @@
 ########################################################################
 
 
-from lxml import etree
-
 import os
 
 import libvirt
-from ovm.libvirt_driver.virdomainmeta import virDomainMeta
+from lxml import etree
+
+from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.app import App
 
 
@@ -82,6 +82,8 @@ class Domain(object):
     def __init__(self, vir_domain, libvirt_conn=None):
         self.vir_domain = vir_domain
 
+        self._cached_metadata = None
+
         if libvirt_conn:
             self._libvirt_conn = libvirt_conn
         else:
@@ -91,6 +93,12 @@ class Domain(object):
         self._saved_tree = etree.fromstring(saved_desc)
         lived_desc = self.vir_domain.XMLDesc()
         self._lived_tree = etree.fromstring(lived_desc)
+
+    @property
+    def metadata(self):
+        if not self._cached_metadata:
+            self._cached_metadata = DomainMetadata(self.vir_domain)
+        return self._cached_metadata
 
     def is_active(self):
         return self.vir_domain.isActive()
@@ -253,50 +261,32 @@ class Domain(object):
                 volumes.append(Volume(disk, vol))
         return volumes
 
-    def get_backup_state(self):
-        meta = virDomainMeta(self.vir_domain)
-        state = meta.get_backup_state()
-        return state
-
-    def get_backup_text(self):
-        state = self.get_backup_state()
-        return 'On' if state else 'Off'
-
-    def set_backup(self, state):
-        meta = virDomainMeta(self.vir_domain)
-        value = 'on' if state else 'off'
-        meta.set_value('backup', 'state', value)
-
-    def set_os_type(self, os_type):
-        meta = virDomainMeta(self.vir_domain)
-        if os_type is not None:
-            meta.set_value('os_info', 'os_type', str(os_type))
-
-    def set_os_name(self, os_name):
-        meta = virDomainMeta(self.vir_domain)
-        if os_name is not None:
-            meta.set_value('os_info', 'os_name', str(os_name))
-
-    def set_os_version(self, os_version):
-        meta = virDomainMeta(self.vir_domain)
-        if os_version is not None:
-            meta.set_value('os_info', 'os_version', str(os_version))
-
     def get_os_info(self):
-        meta = virDomainMeta(self.vir_domain)
-        info = meta.get_os_info()
+        # os-type : linux/windows/bsd/...
+        # os-name : Debian/Windows/CentOS/...
+        # os-version : text version of the OS
+
+        info = {
+            'os_type': self.metadata.get('os_type'),
+            'os_name': self.metadata.get('os_name'),
+            'os_version': self.metadata.get('os_version')
+        }
+
         return info
 
     def get_os_string(self):
-        meta = virDomainMeta(self.vir_domain)
-        string = meta.get_os_string()
+        info = self.get_os_info()
+        if info['os_name'] is None:
+            return
+
+        string = info['os_name']
+        if info['os_version'] is not None:
+            string += ' ' + info['os_version']
+
         return string
 
     def set_main_ipv4(self, ip):
-        meta = virDomainMeta(self.vir_domain)
-        meta.set_value('ip', 'address', ip)
+        self.metadata.update(ipv4_addr=ip)
 
     def get_main_ipv4(self):
-        meta = virDomainMeta(self.vir_domain)
-        ipv4 = meta.get_ip_address()
-        return ipv4
+        return self.metadata.get('ipv4_addr')

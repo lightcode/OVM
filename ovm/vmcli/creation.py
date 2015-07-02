@@ -219,9 +219,11 @@ def vm_create(args):
 
     domain = LibvirtConn.get_domain(vmd.name())
     domain.set_main_ipv4(params['IP'])
-    domain.set_os_type(template.get_os_type())
-    domain.set_os_name(template.get_os_name())
-    domain.set_os_version(template.get_os_version())
+    domain.metadata.update({
+        'os_type': template.get_os_type(),
+        'os_name': template.get_os_name(),
+        'os_version': template.get_os_version()
+    })
 
     # 4. Lock network resources
     network.lock_ip()

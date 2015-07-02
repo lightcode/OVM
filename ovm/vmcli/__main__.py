@@ -102,24 +102,13 @@ def parse_args():
     parser_list.add_argument(
         '--inactive', action='store_true',
         help="print only the list of inactive VM")
-    parser_list.add_argument(
-        '--backup', action='store_true',
-        help="print only the list of VM with active backup")
     parser_list.set_defaults(func=vm_list)
 
     # Set option to a VM
     parser_set = subparsers.add_parser('set', help='set options to a VM')
     parser_set.add_argument('name', help='name of the VM')
-    parser_set.add_argument(
-        '--backup', choices=['on', 'off'], help='set backup on/off')
-    parser_set.add_argument(
-        '--starting', choices=['auto', 'manual'],
-        help='set starting auto/manual')
-    parser_set.add_argument('--ip', help="set IP address")
-    parser_set.add_argument('--os-type', dest='os_type', help="set OS type")
-    parser_set.add_argument('--os-name', dest='os_name', help="set OS name")
-    parser_set.add_argument(
-        '--os-version', dest='os_version', help="set OS version")
+    parser_set.add_argument('key')
+    parser_set.add_argument('value')
     parser_set.set_defaults(func=vm_set)
 
     # Start a VM

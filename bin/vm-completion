@@ -57,7 +57,7 @@ _vm()
                 return 0
             ;;
             list | ls)
-                COMPREPLY=( $(compgen -W "--active --inactive --short --backup" -- ${cur}) )
+                COMPREPLY=( $(compgen -W "--active --inactive --short" -- ${cur}) )
                 return 0
             ;;
             templates | storage | networks)
@@ -73,18 +73,6 @@ _vm()
                 if [[ COMP_CWORD -eq 2 ]]; then
                     vm_list="$(vm list --short)"
                     COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
-                elif [[ "${COMP_WORDS[1]}" == "set" ]]; then
-                    opts="--ip --backup --starting --os-type --os-name --os-version"
-                    if [[ "$prev" == "--backup" ]]; then
-                        COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
-                        return 0
-                    elif [[ "$prev" == "--starting" ]]; then
-                        COMPREPLY=( $(compgen -W "auto manual" -- ${cur}) )
-                        return 0
-                    elif [[ "$prev" == "--*" ]]; then
-                        return 0
-                    fi
-                    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
                 fi
                 return 0
             ;;
