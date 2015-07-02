@@ -4,9 +4,10 @@
 - Cleanup the core project
 - Store drivers name as metadata
 - Create a generic storage and network driver
+- Add metadata support in templates
 
 
-# Version 0.3
+# Version 0.4
 
 - Add `clone` command
 - Get the IPv4 through the Qemu Guest Agent
