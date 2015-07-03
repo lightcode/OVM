@@ -20,22 +20,27 @@
 ########################################################################
 
 
-class StoragePool(object):
+from subprocess import Popen, PIPE
 
-    def __init__(self, name, driver, **params):
-        self._driver = driver
-        self._params = params
-        self.root = params.get('root')
-        self.name = name
 
-    def create_disk(self, name, params):
-        driver = self._driver()
-        params.update(self._params)
-        driver.set_params(**params)
-        driver.set_params(driver_name='qemu')
-        image = params.get('image')
-        driver.create_disk(name, image)
-        return driver
+class ImageTemplate:
 
-    def get_device(self, diskpath):
-        return self._driver(diskpath)
+    def __init__(self, config):
+        print(config)
+        self.path = config.get('path')
+        self.format = config.get('format')
+        self.size = int(config.get('size'))
+
+    def copy_on_device(self, dest, dest_format):
+        args = [
+            'qemu-img', 'convert',
+            '-f', str(self.format),
+            '-O', str(dest_format),
+            self.path,
+            dest
+        ]
+
+        with Popen(args, stderr=PIPE) as process:
+            process.wait()
+            if process.returncode != 0:
+                print(process.stderr.read())

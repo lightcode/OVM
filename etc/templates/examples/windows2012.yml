@@ -10,11 +10,13 @@ metadata:
   os_version: 2012 R2
 
 main_disk:
-  path: /mnt/pool-templates/win2012r2.qcow2
-  image_bus: sata
-  image_dev: hdb
-  image_format: qcow2
-  image_size: 25
+  target_bus: sata
+  target_dev: hdb
+
+  image:
+    path: /mnt/pool-templates/win2012r2.qcow2
+    size: 25
+    format: qcow2
 
 main_interface:
   model: rtl8139

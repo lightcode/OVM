@@ -22,6 +22,8 @@
 
 import yaml
 
+from ovm.templates.image_template import ImageTemplate
+
 
 class Template(object):
 
@@ -35,13 +37,22 @@ class Template(object):
         self.vcpu = int(config.get('vcpu', Template.DEFAULT_VCPU))
         self.memory = int(config.get('memory', Template.DEFAULT_MEMORY))
         self.metadata = dict(config.get('metadata', {}))
-        self.main_disk = dict(config.get('main_disk', {}))
         self.main_interface = dict(config.get('main_interface', {}))
         self.post_install = list(config.get('post_install', []))
+
+        self._process_main_disk(config)
 
         abilities = Template.DEFAULT_ABILITIES.copy()
         abilities.update(config.get('abilities', {}))
         self.abilities = abilities
+
+    def _process_main_disk(self, config):
+        main_disk = dict(config.get('main_disk', {}))
+        print(main_disk)
+        image_config = dict(main_disk.get('image', {}))
+        print(image_config)
+        main_disk['image'] = ImageTemplate(image_config)
+        self.main_disk = main_disk
 
     def get_os_type(self):
         return self.metadata.get('os_type')

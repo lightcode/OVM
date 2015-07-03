@@ -49,7 +49,10 @@ class App(Singleton):
 
         for path in iglob(ETC_TEMPLATES):
             with open(path) as ofile:
-                cls.templates.append(Template.load_file(ofile))
+                try:
+                    cls.templates.append(Template.load_file(ofile))
+                except Exception as e:
+                    print('Error with template "{}": {}'.format(path, e))
 
     @classmethod
     def get_templates(cls):

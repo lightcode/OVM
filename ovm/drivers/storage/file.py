@@ -26,7 +26,6 @@ from lxml import etree
 from lxml.builder import E
 
 from ovm.drivers.storage.generic import StorageDriver
-from ovm.utils.copyfile import CopyFile
 
 
 __all__ = ['FileDriver']
@@ -39,20 +38,23 @@ class FileDriver(StorageDriver):
 
         self.path = path
 
+        self.driver_name = 'qemu'
+        self.driver_type = 'qcow2'
+
     def generate_xml(self):
         tree = (
             E.disk(
                 E.driver(
-                    name=self._params.get('driver_name'),
-                    type=self._params.get('image_format'),
+                    name=self.driver_name,
+                    type=self.driver_type,
                     cache='writeback'
                 ),
                 E.source(
                     file=self.path
                 ),
                 E.target(
-                    dev=self._params.get('image_dev'),
-                    bus=self._params.get('image_bus')
+                    dev=self._params.get('target_dev'),
+                    bus=self._params.get('target_bus')
                 ),
                 type='file',
                 device='disk'
@@ -60,20 +62,15 @@ class FileDriver(StorageDriver):
         )
         return etree.tostring(tree).decode('utf-8')
 
-    def _copy_image(self, destination):
-        source = self._params.get('path')
-        cf = CopyFile('Copying image')
-        cf.copy_progress(source, destination)
-
     def resize_disk(self, new_size):
         args = ['qemu-img', 'resize', self.path, '{}G'.format(new_size)]
         process = Popen(args)
         process.wait()
 
-    def create_disk(self, name):
+    def create_disk(self, name, image):
         path = os.path.join(self._params.get('root'), name)
         self.path = path
-        self._copy_image(path)
+        image.copy_on_device(path, self.driver_type)
 
     def remove(self):
         try:

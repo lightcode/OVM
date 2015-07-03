@@ -10,11 +10,13 @@ metadata:
   os_version: 14
 
 main_disk:
-  path: /mnt/pool-templates/ubuntu-server-unicorn.qcow2
-  image_bus: virtio
-  image_dev: vda
-  image_format: qcow2
-  image_size: 8
+  target_bus: virtio
+  target_dev: vda
+
+  image:
+    path: /mnt/pool-templates/ubuntu-server-unicorn.qcow2
+    size: 8
+    format: qcow2
 
 main_interface:
   model: virtio
