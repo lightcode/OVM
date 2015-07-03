@@ -32,7 +32,7 @@ def _iter_range(ipstart, ipend):
         currentip += 1
 
 
-class VMNetwork(object):
+class Network(object):
     def __init__(self, driver, ipv4_allocation=None, ipv4_pool=None,
                  options=None, **params):
         self._method = None

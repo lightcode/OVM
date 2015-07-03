@@ -22,7 +22,11 @@
 
 from lxml import etree
 from lxml.builder import E
+
 from ovm.drivers.storage.generic import StorageDriver
+
+
+__all__ = ['VolumeDriver']
 
 
 class VolumeDriver(StorageDriver):

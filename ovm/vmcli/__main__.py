@@ -26,6 +26,7 @@ import libvirt
 from ovm.vmcli.creation import *
 from ovm.vmcli.management import *
 from ovm.app import App
+from ovm.inventory import Inventory
 
 
 # Don't show error message from libvirt_driver
@@ -36,7 +37,7 @@ def f(ctx, error):
 libvirt.registerErrorHandler(f, None)
 
 App.init()
-LibvirtConn.open()
+Inventory.open()
 
 
 def parse_args():

@@ -23,34 +23,35 @@
 import atexit
 import os
 import tty
-
 import libvirt
 import termios
-from ovm.libvirt_driver.libvirtconn import LibvirtConn
+
+from ovm.inventory import Inventory
+
+
+def error_handler(_, error):
+    # The console stream errors on VM shutdown; we don't care
+    if (error[0] == libvirt.VIR_ERR_RPC and
+            error[1] == libvirt.VIR_FROM_STREAMS):
+        return
 
 
 class Console(object):
     def __init__(self, domain_name):
         libvirt.virEventRegisterDefaultImpl()
-        libvirt.registerErrorHandler(self.error_handler, None)
+        libvirt.registerErrorHandler(error_handler, None)
 
         atexit.register(self.reset_term)
         self.attrs = termios.tcgetattr(0)
         tty.setraw(0)
 
         self.domain_name = domain_name
-        self.connection = LibvirtConn.new_connection()
+        self.connection = Inventory.new_connection()
         self.domain = self.connection.lookupByName(domain_name)
         self.state = self.domain.state(0)
         self.connection.domainEventRegister(self.lifecycle_callback, self)
         self.stream = None
         self.run_console = True
-
-    def error_handler(self, unused, error):
-        # The console stream errors on VM shutdown; we don't care
-        if (error[0] == libvirt.VIR_ERR_RPC and
-                error[1] == libvirt.VIR_FROM_STREAMS):
-            return
 
     def reset_term(self):
         termios.tcsetattr(0, termios.TCSADRAIN, self.attrs)
@@ -92,7 +93,7 @@ class Console(object):
 
     def stdin_callback(self, watch, fd, events, _):
         readbuf = os.read(fd, 1024)
-        # Close connection when we recieve a ^[
+        # Close connection when we receive a ^[
         if readbuf == b'\x1d':
             self.run_console = False
             return

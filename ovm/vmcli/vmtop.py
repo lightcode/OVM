@@ -23,13 +23,13 @@
 import curses
 import threading
 import time
-import fcntl
-import termios
 import struct
 
 import psutil
 
-from ovm.libvirt_driver.libvirtconn import LibvirtConn
+import fcntl
+import termios
+from ovm.inventory import Inventory
 from ovm.utils.printer import si_unit
 
 
@@ -111,7 +111,7 @@ class VMTop:
         vms = {}
         mem_vms_total = 0
 
-        for domain in LibvirtConn.get_domains():
+        for domain in Inventory.get_domains():
             name = domain.get_name()
             infos = {
                 'name': name,

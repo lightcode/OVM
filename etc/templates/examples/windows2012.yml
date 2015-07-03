@@ -1,11 +1,13 @@
-id: windows2012r2
+uid: windows2012r2
 name: Windows 2012 R2
-os_type: windows
-os_name: Windows
-os_version: 2012 R2
 
 vcpu: 1
 memory: 1024
+
+metadata:
+  os_type: windows
+  os_name: Windows
+  os_version: 2012 R2
 
 main_disk:
   path: /mnt/pool-templates/win2012r2.qcow2

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 ########################################################################
-# Copyright 2014 Matthieu Gaignière                  http://lightcode.fr
+# Copyright 2015 Matthieu Gaignière                  http://lightcode.fr
 ########################################################################
 # This file is part of OVM.
 #
@@ -20,7 +20,22 @@
 ########################################################################
 
 
-from ovm.inventory.inventory import Inventory
+class NetworkInterface(object):
+    def __init__(self, xmldesc):
+        self.xmldesc = xmldesc
 
+    def get_network_name(self):
+        source = self.xmldesc.xpath('source')[0]
+        return source.attrib.get('network')
 
-__all__ = ['Inventory']
+    def get_portgroup(self):
+        source = self.xmldesc.xpath('source')[0]
+        return source.attrib.get('portgroup')
+
+    def get_mac(self):
+        try:
+            mac_xml = self.xmldesc.xpath('mac')[0]
+        except:
+            return
+        else:
+            return mac_xml.attrib.get('address')

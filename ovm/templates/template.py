@@ -23,49 +23,39 @@
 import yaml
 
 
-DEFAULT_ABILITIES = {
-    'resizeDisk': False
-}
-
-
 class Template(object):
+
+    DEFAULT_VCPU = 1
+    DEFAULT_MEMORY = 256
+    DEFAULT_ABILITIES = {'resizeDisk': False}
+
     def __init__(self, config):
+        self.uid = config.get('uid')
+        self.name = config.get('name')
+        self.vcpu = int(config.get('vcpu', Template.DEFAULT_VCPU))
+        self.memory = int(config.get('memory', Template.DEFAULT_MEMORY))
+        self.metadata = dict(config.get('metadata', {}))
+
+        abilities = Template.DEFAULT_ABILITIES.copy()
+        abilities.update(config.get('abilities', {}))
+        config['abilities'] = abilities
+
+        # TODO: remove me
         self._config = config
-
-    def get_name(self):
-        return self._config['name']
-
-    def get_default_vcpu(self):
-        vcpu = None
-        if 'vcpu' in self._config:
-            vcpu = self._config['vcpu']
-        return vcpu
-
-    def get_default_memory(self):
-        memory = None
-        if 'memory' in self._config:
-            memory = self._config['memory']
-        return memory
 
     def get_path(self):
         return self._config['main_disk']['path']
 
-    def get_id(self):
-        return self._config['id']
-
     def get_os_type(self):
-        return self._config.get('os_type')
+        return self.metadata.get('os_type')
 
     def get_os_name(self):
-        return self._config.get('os_name')
+        return self.metadata.get('os_name')
 
     def get_os_version(self):
-        return self._config.get('os_version')
+        return self.metadata.get('os_version')
 
     @classmethod
     def load_file(cls, ofile):
         config = yaml.load(ofile.read())
-        abilities = DEFAULT_ABILITIES.copy()
-        if 'abilities' in config:
-            abilities.update(config['abilities'])
         return cls(config)

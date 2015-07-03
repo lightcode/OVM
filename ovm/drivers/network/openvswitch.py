@@ -22,7 +22,11 @@
 
 from lxml import etree
 from lxml.builder import E
+
 from ovm.drivers.network.generic import NetworkDriver
+
+
+__all__ = ['OpenvSwitchDriver']
 
 
 class OpenvSwitchDriver(NetworkDriver):

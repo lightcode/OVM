@@ -34,9 +34,6 @@ class CopyFile:
         sys.stdout.write('\n')
         sys.stdout.flush()
 
-    def _copy(self, src, dst):
-        shutil.copyfile(src, dst)
-
     def _monitor(self, src, dst):
         src_size = 0
         dst_size = 1
@@ -49,7 +46,7 @@ class CopyFile:
     def copy_progress(self, src, dst):
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
             threads = []
-            threads.append(executor.submit(self._copy, src, dst))
+            threads.append(executor.submit(shutil.copyfile, src, dst))
             threads.append(executor.submit(self._monitor, src, dst))
             for future in concurrent.futures.as_completed(threads):
                 if future.exception() is not None:

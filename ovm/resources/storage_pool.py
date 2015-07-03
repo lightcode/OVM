@@ -21,13 +21,12 @@
 
 
 import os
-
 from lxml import etree
 
 from ovm.utils.copyfile import CopyFile
 
 
-class VMStorage(object):
+class StoragePool(object):
     def __init__(self, driver, **params):
         self._template = None
         self._vmd = None
@@ -37,7 +36,7 @@ class VMStorage(object):
 
     def set_vmd(self, vmd):
         self._vmd = vmd
-        self._driver.set_volume_name('%s-main.qcow2' % vmd.name())
+        self._driver.set_volume_name('%s-main.qcow2' % vmd.name)
 
     def pool_name(self):
         return self._params.get('pool_name')
@@ -52,11 +51,11 @@ class VMStorage(object):
         self._driver.set_params(driver_name='qemu')
 
     def create_disk(self, template):
-        from ovm.libvirt_driver.libvirtconn import LibvirtConn
+        from ovm.inventory import Inventory
 
         # 1. Find the pool path
         vol_name = self._driver._volume_name
-        pool = LibvirtConn._conn.storagePoolLookupByName(self.pool_name())
+        pool = Inventory._conn.storagePoolLookupByName(self.pool_name())
         xml = pool.XMLDesc()
         pool_xml = etree.fromstring(xml)
         path_xml = pool_xml.xpath('/pool/target/path')[0]

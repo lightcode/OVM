@@ -1,24 +1,14 @@
-# ID of the template
-id: ubuntu-server-unicorn
-
-# Name
+uid: ubuntu-server-unicorn
 name: Ubuntu server 14.10
 
-# OS information
-os_type: linux
-os_name: Ubuntu
-os_version: 14
-
-# Default velues for RAM and CPU count
 vcpu: 1
 memory: 256
 
-# Choose the main disk
-#
-# path
-# bus : virtio, ide...
-# dev
-# type
+metadata:
+  os_type: linux
+  os_name: Ubuntu
+  os_version: 14
+
 main_disk:
   path: /mnt/pool-templates/ubuntu-server-unicorn.qcow2
   image_bus: virtio
@@ -26,17 +16,14 @@ main_disk:
   image_format: qcow2
   image_size: 8
 
-# Main interface
 main_interface:
   model: virtio
 
-# Abilities
 abilities:
   resizeDisk:
     script: linux/resize.sh
     params: ["{vol_path}", "/dev/ubuntu-vg/root"]
 
-# Post install scripts
 post-install:
   - path: linux/setcontext.sh
     params: ["{diskpath}", "ubuntu-14", "{configuration}", "/dev/ubuntu-vg/root"]

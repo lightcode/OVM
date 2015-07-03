@@ -20,7 +20,26 @@
 ########################################################################
 
 
-from ovm.inventory.inventory import Inventory
+class Volume(object):
+    def __init__(self, xmldesc, vir_vol):
+        self.vir_vol = vir_vol
+        self.xmldesc = xmldesc
 
+    def get_name(self):
+        return self.vir_vol.name()
 
-__all__ = ['Inventory']
+    def get_capacity(self):
+        try:
+            return self.vir_vol.info()[1]
+        except:
+            return 0
+
+    def get_allocation(self):
+        try:
+            return self.vir_vol.info()[2]
+        except:
+            return 0
+
+    def get_pool_name(self):
+        source = self.xmldesc.xpath('source')[0]
+        return source.attrib.get('pool')

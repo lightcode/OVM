@@ -1,11 +1,13 @@
-id: centos-6
+uid: centos-6
 name: CentOS 6
-os_type: linux
-os_name: CentOS
-os_version: 6
 
 vcpu: 1
 memory: 128
+
+metadata:
+  os_type: linux
+  os_name: CentOS
+  os_version: 6
 
 main_disk:
   path: /mnt/pool-templates/centos-6.qcow2

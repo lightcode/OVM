@@ -18,9 +18,3 @@
 # You should have received a copy of the GNU General Public License
 # along with OVM. If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
-
-
-from ovm.inventory.inventory import Inventory
-
-
-__all__ = ['Inventory']

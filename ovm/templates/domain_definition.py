@@ -25,25 +25,15 @@ from ovm.app import App
 from lxml import etree
 
 
-class VMDefinition(object):
+class DomainDefinition(object):
     def __init__(self, template, name):
-        self._name = name
+        self.name = name
         self._template = template
         self._network = None
         self._storage = None
-        self._vcpu = 1
-        self._memory = 256
 
-        default_vcpu = self._template.get_default_vcpu()
-        if default_vcpu:
-            self._vcpu = default_vcpu
-
-        default_memory = self._template.get_default_memory()
-        if default_memory:
-            self._memory = default_memory
-
-    def name(self):
-        return self._name
+        self._vcpu = self._template.vcpu
+        self._memory = self._template.memory
 
     def network(self):
         return self._network
@@ -57,16 +47,20 @@ class VMDefinition(object):
     def set_storage(self, storage):
         self._storage = storage
 
+    @property
     def vcpu(self):
         return self._vcpu
 
-    def set_vcpu(self, vcpu):
-        self._vcpu = vcpu
+    @vcpu.setter
+    def vcpu(self, vcpu):
+        self._vcpu = int(vcpu)
 
+    @property
     def memory(self):
         return self._memory
 
-    def set_memory(self, memory):
+    @memory.setter
+    def memory(self, memory):
         self._memory = int(memory)
 
     def _get_basevm(self):
@@ -85,12 +79,12 @@ class VMDefinition(object):
 
         # Add VM params
         name = etree.SubElement(domain, 'name')
-        name.text = self.name()
+        name.text = str(self.name)
         memory = etree.SubElement(domain, 'memory')
-        memory.text = str(self.memory())
+        memory.text = str(self.memory)
         memory.attrib['unit'] = 'MiB'
         vcpu = etree.SubElement(domain, 'vcpu')
-        vcpu.text = str(self.vcpu())
+        vcpu.text = str(self.vcpu)
 
         devices = root.find('devices')
 

@@ -21,59 +21,13 @@
 
 
 import os
-
 import libvirt
 from lxml import etree
 
 from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.app import App
-
-
-class Volume(object):
-    def __init__(self, xmldesc, vir_vol):
-        self.vir_vol = vir_vol
-        self.xmldesc = xmldesc
-
-    def get_name(self):
-        return self.vir_vol.name()
-
-    def get_capacity(self):
-        try:
-            return self.vir_vol.info()[1]
-        except:
-            return 0
-
-    def get_allocation(self):
-        try:
-            return self.vir_vol.info()[2]
-        except:
-            return 0
-
-    def get_pool_name(self):
-        source = self.xmldesc.xpath('source')[0]
-        return source.attrib.get('pool')
-
-
-class Interface(object):
-    def __init__(self, xmldesc, ips=None):
-        self.xmldesc = xmldesc
-        self._ips = ips
-
-    def get_network_name(self):
-        source = self.xmldesc.xpath('source')[0]
-        return source.attrib.get('network')
-
-    def get_portgroup(self):
-        source = self.xmldesc.xpath('source')[0]
-        return source.attrib.get('portgroup')
-
-    def get_mac(self):
-        try:
-            mac_xml = self.xmldesc.xpath('mac')[0]
-        except:
-            return
-        else:
-            return mac_xml.attrib.get('address')
+from ovm.inventory.volume import Volume
+from ovm.inventory.network_interface import NetworkInterface
 
 
 class Domain(object):
@@ -204,7 +158,7 @@ class Domain(object):
             try:
                 port = int(node.attrib.get('port'))
             except:
-                port = None
+                pass
             else:
                 if port >= 5900:
                     vnc_infos['screen'] = port - 5900
@@ -228,18 +182,11 @@ class Domain(object):
         return mem
 
     def get_interfaces(self):
-        all_ips = {}
         interfaces = []
         xml_ifaces = self._saved_tree.xpath(
             "/domain/devices/interface[@type='network']")
         for iface in xml_ifaces:
-            inter = Interface(iface)
-            mac = inter.get_mac()
-            if mac in all_ips:
-                ips = all_ips[mac]
-            else:
-                ips = {'ipv4': None}
-            interfaces.append(Interface(iface, ips=ips))
+            interfaces.append(NetworkInterface(iface))
         return interfaces
 
     def get_volumes(self):

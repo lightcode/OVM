@@ -20,17 +20,17 @@
 ########################################################################
 
 
+import concurrent.futures
 import os
 import stat
 import tempfile
 from subprocess import PIPE, Popen
 
-import concurrent.futures
-from ovm.libvirt_driver.libvirtconn import LibvirtConn
 from ovm.app import App
-from ovm.resources import Resources
+from ovm.inventory import Inventory
+from ovm.resources.resources import Resources
+from ovm.templates.domain_definition import DomainDefinition
 from ovm.utils.printer import print_table, default
-from ovm.inventory.vmdefinition import VMDefinition
 from ovm.vmcli.management import print_vm_info
 
 
@@ -165,7 +165,7 @@ def _process_args_storage(args):
 
 
 def vm_create(args):
-    domains = [domain.get_name() for domain in LibvirtConn.get_domains()]
+    domains = [domain.get_name() for domain in Inventory.get_domains()]
     if args.name in domains:
         App.fatal('This name is already taken by another VM.')
 
@@ -189,41 +189,36 @@ def vm_create(args):
     # 1. Find the template
     App.load_templates()
     template = App.get_template(args.template)
-    print('You choose the template {0}.'.format(template.get_name()))
+    print('You choose the template {0}.'.format(template.name))
 
     network.import_template_spec(template)
 
-    vmd = VMDefinition(template, args.name)
-    vmd.set_network(network)
-    vmd.set_storage(storage)
+    domdef = DomainDefinition(template, args.name)
+    domdef.set_network(network)
+    domdef.set_storage(storage)
+
+    if args.vcpu:
+        domdef.vcpu = args.vcpu
+
+    if args.memory:
+        domdef.memory = args.memory
 
     print("Creating VM's disk...")
     storage.import_template(template)
-    storage.set_vmd(vmd)
+    storage.set_vmd(domdef)
     diskpath = storage.create_disk(template)
 
-    if args.vcpu:
-        vmd.set_vcpu(args.vcpu)
-
-    if args.memory:
-        vmd.set_memory(args.memory)
-
     # 2. Running post-install scripts
-    params['HOSTNAME'] = vmd.name()
+    params['HOSTNAME'] = domdef.name
     _resize_fs(template, diskpath, verbose=verbose)
     _post_install(template, diskpath, params, verbose=verbose)
 
     # 3. Add the VM in libvirt_driver
-    xml = vmd.get_xml()
-    LibvirtConn.define_domain(xml)
+    Inventory.add_domain(domdef)
 
-    domain = LibvirtConn.get_domain(vmd.name())
+    domain = Inventory.get_domain(domdef.name)
     domain.set_main_ipv4(params['IP'])
-    domain.metadata.update({
-        'os_type': template.get_os_type(),
-        'os_name': template.get_os_name(),
-        'os_version': template.get_os_version()
-    })
+    domain.metadata.update(template.metadata)
 
     # 4. Lock network resources
     network.lock_ip()
@@ -238,15 +233,15 @@ def vm_templates(args):
     templates = App.get_templates()
 
     if args.short:
-        print('\n'.join([tpl.get_id() for tpl in templates]))
+        print('\n'.join([tpl.uid for tpl in templates]))
         return
 
     headers = ('ID', 'Name', 'OS type', 'OS name', 'OS version')
     rows = []
     for tpl in templates:
         rows.append((
-            tpl.get_id(),
-            tpl.get_name(),
+            tpl.uid,
+            tpl.name,
             default(tpl.get_os_type(), '-'),
             default(tpl.get_os_name(), '-'),
             default(tpl.get_os_version(), '-')

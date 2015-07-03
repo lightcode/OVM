@@ -24,9 +24,9 @@ import os
 import sys
 from glob import iglob
 
-from ovm.resources import Resources
+from ovm.resources.resources import Resources
 from ovm.utils.singleton import Singleton
-from ovm.template import Template
+from ovm.templates.template import Template
 from ovm.utils.printer import bcolors, ColoredString
 
 
@@ -56,9 +56,9 @@ class App(Singleton):
         return cls.templates
 
     @classmethod
-    def get_template(cls, id_):
+    def get_template(cls, uid):
         for tpl in cls.get_templates():
-            if tpl.get_id() == id_:
+            if tpl.uid == uid:
                 return tpl
 
     @classmethod

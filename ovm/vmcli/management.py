@@ -20,11 +20,12 @@
 ########################################################################
 
 
+import libvirt
 import sys
+
 from subprocess import Popen
 
-import libvirt
-from ovm.libvirt_driver.libvirtconn import LibvirtConn
+from ovm.inventory import Inventory
 from ovm.utils.printer import print_title, si_unit, default, print_table
 from ovm.utils.printer import ColoredString, bcolors
 from ovm.app import App
@@ -38,7 +39,7 @@ from ovm.vmcli.vmtop import VMTop
 
 def _get_domain(name):
     try:
-        domain = LibvirtConn.get_domain(name)
+        domain = Inventory.get_domain(name)
     except libvirt.libvirtError:
         App.fatal('Cannot get the VM "%s".' % name)
     else:
@@ -127,7 +128,7 @@ def vm_list(args):
     if args.active and args.inactive:
         App.fatal('A VM cannot be active and inactive.')
 
-    for domain in LibvirtConn.get_domains():
+    for domain in Inventory.get_domains():
         virdomain = domain.vir_domain
 
         if (args.active and not virdomain.isActive()) \
@@ -325,5 +326,5 @@ def vm_stop(args):
         App.fatal('{0} VMs cannot be stopped.'.format(error_count))
 
 
-def vm_top(args):
+def vm_top(_):
     VMTop()

@@ -21,11 +21,20 @@
 
 
 import yaml
-from ovm.drivers.network.openvswitch import OpenvSwitchDriver
-from ovm.drivers.storage.volume import VolumeDriver
+import importlib
+
+import ovm.drivers.network      # flake8: noqa
+import ovm.drivers.storage      # flake8: noqa
 from ovm.utils.singleton import Singleton
-from ovm.inventory.vmnetwork import VMNetwork
-from ovm.inventory.vmstorage import VMStorage
+from ovm.resources.network import Network
+from ovm.resources.storage_pool import StoragePool
+
+
+def get_driver(driver_type, driver_name):
+    module_name = driver_name.lower().replace('driver', '')
+    pkg = importlib.import_module(
+        'ovm.drivers.{}.{}'.format(driver_type, module_name))
+    return pkg.__dict__[driver_name]
 
 
 class Resources(Singleton):
@@ -44,12 +53,14 @@ class Resources(Singleton):
                 resources = yaml.load(fd)
 
             for name, network in resources['networks'].items():
-                driver = globals()[network.pop('driver')]
-                cls.networks[name] = VMNetwork(driver, **network)
+                driver_name = network.pop('driver')
+                driver = get_driver('network', driver_name)
+                cls.networks[name] = Network(driver, **network)
 
             for name, storage in resources['storage'].items():
-                driver = globals()[storage.pop('driver')]
-                cls.storage[name] = VMStorage(driver, **storage)
+                driver_name = storage.pop('driver')
+                driver = get_driver('storage', driver_name)
+                cls.storage[name] = StoragePool(driver, **storage)
 
     @classmethod
     def get_networks(cls):
