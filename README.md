@@ -63,7 +63,7 @@ Resources are configured in the YAML file `resources.yml`. This file follow the 
 Storage pools are used by OVM to create the disk of VMs. To add a new storage pool, we add a dictionary where the key is the **pool name**. This dictionary contains another dictionary with different parameters:
 
 * **driver**: is the name of the storage driver. OVM uses it, when you create your VMs, to create disks.
-* **root**: this parameter specifies the root of the pool. Note: don't create several storage pools with the same @root@ path.
+* **root**: this parameter specifies the root of the pool. Note: don't create several storage pools with the same `root` path.
 
 **Example**:
 
