@@ -48,9 +48,7 @@ class Template(object):
 
     def _process_main_disk(self, config):
         main_disk = dict(config.get('main_disk', {}))
-        print(main_disk)
         image_config = dict(main_disk.get('image', {}))
-        print(image_config)
         main_disk['image'] = ImageTemplate(image_config)
         self.main_disk = main_disk
 

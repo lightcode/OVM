@@ -26,7 +26,6 @@ from subprocess import Popen, PIPE
 class ImageTemplate:
 
     def __init__(self, config):
-        print(config)
         self.path = config.get('path')
         self.format = config.get('format')
         self.size = int(config.get('size'))

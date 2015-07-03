@@ -2,10 +2,10 @@
 
 - New metadata API: store arbitrary key/value data (done: 07/02/15)
 - Add metadata support in templates (done: 07/03/15)
+- Storage: LVM driver (done: 07/03/15)
 - Cleanup the core project
 - Create a generic storage driver
 - Create a generic network driver
-- Storage: LVM driver
 - Add a default storage driver
 
 

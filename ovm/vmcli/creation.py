@@ -98,8 +98,6 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
 def _post_install(template, diskpath, env_params, verbose=False):
     post_install = template.post_install
 
-    print(post_install)
-
     if not post_install:
         return
 

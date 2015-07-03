@@ -204,9 +204,11 @@ class Domain(object):
                 continue
 
             diskpath = ''
+            src = disk.xpath('source')[0]
             if disk_type == 'file':
-                src = disk.xpath('source')[0]
                 diskpath = src.attrib.get('file')
+            elif disk_type == 'block':
+                diskpath = src.attrib.get('dev')
 
             if not diskpath:
                 continue

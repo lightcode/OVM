@@ -1,3 +1,10 @@
+# 0.3 (not released yet)
+
+- New metadata API: store arbitrary key/value data
+- Add metadata support in templates
+- Storage: LVM driver
+
+
 # 0.2 (06/30/2015)
 
 - Replace JSON configuration file by YAML configuration file

@@ -106,7 +106,6 @@ class DomainDefinition(object):
         devices.append(net)
 
         for device_xml in self._devices:
-            print(type(device_xml))
             node = etree.fromstring(device_xml)
             devices.append(node)
 
