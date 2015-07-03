@@ -125,7 +125,7 @@ class Network(object):
         self.ipv4_pool['ip'] = str(ip)
 
     def import_template_spec(self, template):
-        model = template._config['main_interface']['model']
+        model = template.main_interface['model']
         self._driver.set_params(driver_type=model)
 
     def get_xml(self):

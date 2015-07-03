@@ -21,25 +21,21 @@
 
 
 class Volume(object):
-    def __init__(self, xmldesc, vir_vol):
-        self.vir_vol = vir_vol
-        self.xmldesc = xmldesc
 
-    def get_name(self):
-        return self.vir_vol.name()
+    def __init__(self, storage, diskpath, target):
+        self._storage_pool = storage
+        self._driver = storage.get_device(diskpath)
+        self.path = diskpath
+        self.pool_name = storage.name
+        self.target = target
 
-    def get_capacity(self):
-        try:
-            return self.vir_vol.info()[1]
-        except:
-            return 0
+    def remove(self):
+        self._driver.remove()
 
-    def get_allocation(self):
-        try:
-            return self.vir_vol.info()[2]
-        except:
-            return 0
+    @property
+    def capacity(self):
+        return self._driver.capacity
 
-    def get_pool_name(self):
-        source = self.xmldesc.xpath('source')[0]
-        return source.attrib.get('pool')
+    @property
+    def allocated(self):
+        return self._driver.allocated

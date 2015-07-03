@@ -21,8 +21,9 @@
 
 
 import os.path
-from ovm.app import App
 from lxml import etree
+
+from ovm.app import App
 
 
 class DomainDefinition(object):
@@ -31,9 +32,11 @@ class DomainDefinition(object):
         self._template = template
         self._network = None
         self._storage = None
+        self._devices = []
 
         self._vcpu = self._template.vcpu
         self._memory = self._template.memory
+        self._main_disk = None
 
     def network(self):
         return self._network
@@ -73,6 +76,16 @@ class DomainDefinition(object):
         else:
             return tree.getroot()
 
+    def create_main_disk(self):
+        name = '{}-main'.format(self.name)
+        driver = self._storage.create_disk(name, self._template.main_disk)
+        self._devices.append(driver.generate_xml())
+        self._main_disk = driver
+        return driver.path
+
+    def resize_main_disk(self, new_size):
+        self._main_disk.resize_disk(new_size)
+
     def get_xml(self):
         root = self._get_basevm()
         domain = root
@@ -92,8 +105,9 @@ class DomainDefinition(object):
         net = etree.fromstring(self.network().get_xml())
         devices.append(net)
 
-        # Add storage in device
-        storage_xml = etree.fromstring(self.storage().get_xml())
-        devices.append(storage_xml)
+        for device_xml in self._devices:
+            print(type(device_xml))
+            node = etree.fromstring(device_xml)
+            devices.append(node)
 
         return etree.tostring(root)

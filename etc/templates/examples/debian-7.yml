@@ -24,6 +24,6 @@ abilities:
     script: linux/resize.sh
     params: ["{vol_path}", "/dev/debian/root"]
 
-post-install:
+post_install:
   - path: linux/setcontext.sh
     params: ["{diskpath}", "debian-7", "{configuration}", "/dev/debian/root"]

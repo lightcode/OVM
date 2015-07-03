@@ -60,7 +60,7 @@ class Resources(Singleton):
             for name, storage in resources['storage'].items():
                 driver_name = storage.pop('driver')
                 driver = get_driver('storage', driver_name)
-                cls.storage[name] = StoragePool(driver, **storage)
+                cls.storage[name] = StoragePool(name, driver, **storage)
 
     @classmethod
     def get_networks(cls):

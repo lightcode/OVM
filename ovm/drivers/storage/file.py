@@ -20,24 +20,26 @@
 ########################################################################
 
 
+import os.path
+from subprocess import Popen
 from lxml import etree
 from lxml.builder import E
 
 from ovm.drivers.storage.generic import StorageDriver
+from ovm.utils.copyfile import CopyFile
 
 
-__all__ = ['VolumeDriver']
+__all__ = ['FileDriver']
 
 
-class VolumeDriver(StorageDriver):
-    def __init__(self):
-        super(VolumeDriver, self).__init__()
-        self._volume_name = None
+class FileDriver(StorageDriver):
 
-    def set_volume_name(self, name):
-        self._volume_name = name
+    def __init__(self, path=None):
+        super(FileDriver, self).__init__()
 
-    def get_disk_xml(self):
+        self.path = path
+
+    def generate_xml(self):
         tree = (
             E.disk(
                 E.driver(
@@ -46,29 +48,47 @@ class VolumeDriver(StorageDriver):
                     cache='writeback'
                 ),
                 E.source(
-                    pool=self._params.get('pool_name'),
-                    volume=self._volume_name
+                    file=self.path
                 ),
                 E.target(
                     dev=self._params.get('image_dev'),
                     bus=self._params.get('image_bus')
                 ),
-                type='volume', device='disk'
+                type='file',
+                device='disk'
             )
         )
-        return etree.tostring(tree)
+        return etree.tostring(tree).decode('utf-8')
 
-    ####################
-    # DRIVER SPECIFIC
-    ####################
-    def _get_vol_xml(self):
-        tree = (
-            E.volume(
-                E.name(self._volume_name),
-                E.capacity(str(self._params.get('image_size'))),
-                E.target(
-                    E.format(type='qcow2')
-                )
-            )
-        )
-        return etree.tostring(tree)
+    def _copy_image(self, destination):
+        source = self._params.get('path')
+        cf = CopyFile('Copying image')
+        cf.copy_progress(source, destination)
+
+    def resize_disk(self, new_size):
+        args = ['qemu-img', 'resize', self.path, '{}G'.format(new_size)]
+        process = Popen(args)
+        process.wait()
+
+    def create_disk(self, name):
+        path = os.path.join(self._params.get('root'), name)
+        self.path = path
+        self._copy_image(path)
+
+    def remove(self):
+        try:
+            os.remove(self.path)
+        except OSError as err:
+            print('Cannot remove disk "{}": {}'.format(self.path, err))
+        else:
+            print('Disk "{}" removed'.format(self.path))
+
+    @property
+    def capacity(self):
+        # TODO: implement that
+        return 0
+
+    @property
+    def allocated(self):
+        # TODO: implement that
+        return 0

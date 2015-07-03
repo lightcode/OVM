@@ -28,6 +28,11 @@ from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.app import App
 from ovm.inventory.volume import Volume
 from ovm.inventory.network_interface import NetworkInterface
+from ovm.resources.resources import Resources
+
+
+class DomainException(Exception):
+    pass
 
 
 class Domain(object):
@@ -68,14 +73,14 @@ class Domain(object):
         # We cannot remove vm with snapshots
         snapshots = self.vir_domain.listAllSnapshots()
         if snapshots:
-            raise Exception('The VM "{0}" cannot be removed. \
+            raise DomainException('The VM "{0}" cannot be removed. \
                 Delete snapshots first.'.format(self.get_name()))
 
         if self.vir_domain.isActive():
             self.vir_domain.destroy()
 
         for vol in self.get_volumes():
-            vol.vir_vol.delete()
+            vol.remove()
 
         self.remove_save()
 
@@ -194,18 +199,25 @@ class Domain(object):
         disks = self._saved_tree.xpath(
             "/domain/devices/disk[@device='disk']")
         for disk in disks:
-            src = disk.xpath('source')[0]
-            poolname = src.attrib.get('pool')
-            volname = src.attrib.get('volume')
-            if not poolname or not poolname:
+            disk_type = disk.attrib.get('type')
+            if disk.attrib.get('type') is None:
                 continue
-            pool = self._libvirt_conn.storagePoolLookupByName(poolname)
-            try:
-                vol = pool.storageVolLookupByName(volname)
-            except Exception:
-                pass
-            else:
-                volumes.append(Volume(disk, vol))
+
+            diskpath = ''
+            if disk_type == 'file':
+                src = disk.xpath('source')[0]
+                diskpath = src.attrib.get('file')
+
+            if not diskpath:
+                continue
+
+            target_dev = disk.xpath('target')[0].attrib.get('dev')
+
+            for storage in Resources.get_storage().values():
+                if diskpath.startswith(storage.root):
+                    volumes.append(Volume(storage, diskpath, target_dev))
+                    break
+
         return volumes
 
     def get_os_info(self):

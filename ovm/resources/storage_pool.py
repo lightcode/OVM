@@ -20,66 +20,21 @@
 ########################################################################
 
 
-import os
-from lxml import etree
-
-from ovm.utils.copyfile import CopyFile
-
-
 class StoragePool(object):
-    def __init__(self, driver, **params):
-        self._template = None
-        self._vmd = None
-        self._driver = driver()
+
+    def __init__(self, name, driver, **params):
+        self._driver = driver
         self._params = params
-        self._driver.set_params(**params)
+        self.root = params.get('root')
+        self.name = name
 
-    def set_vmd(self, vmd):
-        self._vmd = vmd
-        self._driver.set_volume_name('%s-main.qcow2' % vmd.name)
+    def create_disk(self, name, params):
+        driver = self._driver()
+        params.update(self._params)
+        driver.set_params(**params)
+        driver.set_params(driver_name='qemu')
+        driver.create_disk(name)
+        return driver
 
-    def pool_name(self):
-        return self._params.get('pool_name')
-
-    def set_size(self, size):
-        self._params['image_size'] = int(size)
-
-    def import_template(self, template):
-        self._template = template
-        main_disk = template._config['main_disk']
-        self._driver.set_params(**main_disk)
-        self._driver.set_params(driver_name='qemu')
-
-    def create_disk(self, template):
-        from ovm.inventory import Inventory
-
-        # 1. Find the pool path
-        vol_name = self._driver._volume_name
-        pool = Inventory._conn.storagePoolLookupByName(self.pool_name())
-        xml = pool.XMLDesc()
-        pool_xml = etree.fromstring(xml)
-        path_xml = pool_xml.xpath('/pool/target/path')[0]
-        pool_path = path_xml.text
-        img_target = os.path.join(pool_path, vol_name)
-
-        # 2. Add volume into the pool
-        xml = self._driver._get_vol_xml()
-        pool.createXML(xml.decode('utf8'))
-
-        # 3. Copy template image in new pool
-        img_path = template.get_path()
-        cf = CopyFile('Copying image')
-        cf.copy_progress(img_path, img_target)
-
-        pool.refresh()
-        vol = pool.storageVolLookupByName(vol_name)
-
-        # 4. Resize if new size specified
-        if 'image_size' in self._params:
-            newsize = self._params['image_size']
-            vol.resize(newsize * (1024 ** 3))
-
-        return img_target
-
-    def get_xml(self):
-        return self._driver.get_disk_xml()
+    def get_device(self, diskpath):
+        return self._driver(diskpath)

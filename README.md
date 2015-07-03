@@ -60,21 +60,21 @@ Resources are configured in the YAML file `resources.yml`. This file follow the 
 
 ## Storage pools
 
-Storage pools are used by OVM to create the disk of VMs. To add a new storage pool, we add a dictionary where the key is the **Pool ID**. This dictionary contains another dictionary with different parameters:
+Storage pools are used by OVM to create the disk of VMs. To add a new storage pool, we add a dictionary where the key is the **pool name**. This dictionary contains another dictionary with different parameters:
 
-* **driver**: is the name of the storage driver. OVM uses it to create new VMs with the right configuration. Today, only the driver `VolumeDriver` exists.
-* **pool_name**: this parameter specifies the name of the pool in libvirt.
+* **driver**: is the name of the storage driver. OVM uses it, when you create your VMs, to create disks.
+* **root**: this parameter specifies the root of the pool. Note: don't create several storage pools with the same @root@ path.
 
 **Example**:
 
 ```yaml
 storage:
   ssd:
-    driver: VolumeDriver
-    pool_name: pool-vm-ssd
+    driver: FileDriver
+    root: /mnt/pool-vm-ssd
 ```
 
-Here we create the storage pool *ssd*. We use the driver *VolumeDriver* to access it. The other parameter, _pool-vm-ssd_ is the name of the libvirt pool.
+Here we create the storage pool *ssd*. We use the driver *FileDriver* to access it.
 
 
 ## Networks

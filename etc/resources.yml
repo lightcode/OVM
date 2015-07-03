@@ -4,13 +4,13 @@
 # Here you can add the configuration of your
 # storage units. You can write it as followed:
 #
-#    storage:
-#      ssd:
-#        driver: VolumeDriver
-#        pool_name: pool-vm-ssd
-#      nfs:
-#        driver: VolumeDriver
-#        pool_name: pool-vm-nfs
+#   storage:
+#     hdd:
+#       driver: FileDriver
+#       root: /mnt/pool-vm-hdd
+#     ssd:
+#       driver: FileDriver
+#       root: /mnt/pool-vm-ssd
 
 storage: {}  # Replace me
 

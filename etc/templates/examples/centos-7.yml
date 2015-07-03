@@ -24,6 +24,6 @@ abilities:
     script: linux/resize.sh
     params: ["{vol_path}", "/dev/centos/lv_root"]
 
-post-install:
+post_install:
   - path: linux/setcontext.sh
     params: ["{diskpath}", "centos-7", "{configuration}", "/dev/centos/lv_root"]

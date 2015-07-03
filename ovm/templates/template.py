@@ -35,16 +35,13 @@ class Template(object):
         self.vcpu = int(config.get('vcpu', Template.DEFAULT_VCPU))
         self.memory = int(config.get('memory', Template.DEFAULT_MEMORY))
         self.metadata = dict(config.get('metadata', {}))
+        self.main_disk = dict(config.get('main_disk', {}))
+        self.main_interface = dict(config.get('main_interface', {}))
+        self.post_install = list(config.get('post_install', []))
 
         abilities = Template.DEFAULT_ABILITIES.copy()
         abilities.update(config.get('abilities', {}))
-        config['abilities'] = abilities
-
-        # TODO: remove me
-        self._config = config
-
-    def get_path(self):
-        return self._config['main_disk']['path']
+        self.abilities = abilities
 
     def get_os_type(self):
         return self.metadata.get('os_type')

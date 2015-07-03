@@ -42,10 +42,9 @@ LEVEL_ERROR, LEVEL_INFO = 0, 1
 def _resize_fs(template, vol_path, verbose=False):
     """Resize VM's filesystem if it defined in template.
     """
-    tpl = template._config
-    if 'abilities' in tpl and 'resizeDisk' in tpl['abilities']:
+    if template.abilities['resizeDisk']:
         print('Resizing filesystem...')
-        options = tpl['abilities']['resizeDisk']
+        options = template.abilities['resizeDisk']
         params = []
         for param in options['params']:
             params.append(param.format(vol_path=vol_path))
@@ -97,8 +96,11 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
 
 
 def _post_install(template, diskpath, env_params, verbose=False):
-    tpl = template._config
-    if 'post-install' not in tpl:
+    post_install = template.post_install
+
+    print(post_install)
+
+    if not post_install:
         return
 
     _, filename = tempfile.mkstemp()
@@ -107,7 +109,7 @@ def _post_install(template, diskpath, env_params, verbose=False):
             configuration.write(bytes('{}={}\n'.format(name, value), 'utf-8'))
 
     print('Running post-install scripts...')
-    for hook in tpl['post-install']:
+    for hook in post_install:
         path = hook['path']
         params = hook['params']
         for i, param in enumerate(params):
@@ -158,9 +160,6 @@ def _process_args_storage(args):
 
     storage = STORAGE[args.storage]
 
-    if args.size:
-        storage.set_size(args.size)
-
     return storage
 
 
@@ -204,9 +203,10 @@ def vm_create(args):
         domdef.memory = args.memory
 
     print("Creating VM's disk...")
-    storage.import_template(template)
-    storage.set_vmd(domdef)
-    diskpath = storage.create_disk(template)
+    diskpath = '/mnt/pool-vm-hdd/beta/test1-main'
+    diskpath = domdef.create_main_disk()
+    if args.size:
+        domdef.resize_main_disk(args.size)
 
     # 2. Running post-install scripts
     params['HOSTNAME'] = domdef.name

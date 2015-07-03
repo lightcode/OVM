@@ -22,7 +22,6 @@
 
 import libvirt
 import sys
-
 from subprocess import Popen
 
 from ovm.inventory import Inventory
@@ -31,6 +30,7 @@ from ovm.utils.printer import ColoredString, bcolors
 from ovm.app import App
 from ovm.vmcli.libvirt_console import Console
 from ovm.vmcli.vmtop import VMTop
+from ovm.inventory.domain import DomainException
 
 
 ###################################
@@ -94,15 +94,16 @@ def print_vm_info(domain):
     print()
 
     print_title('Volumes')
-    headers = ['Name', 'Pool', 'Capacity', 'Allocation']
-    align = ('l', 'l', 'r', 'r')
+    headers = ['Target', 'Path', 'Pool', 'Capacity', 'Allocation']
+    align = ('l', 'l', 'l', 'r', 'r')
     rows = []
     for vol in domain.get_volumes():
         rows.append((
-            vol.get_name(),
-            vol.get_pool_name(),
-            '%sB' % si_unit(vol.get_capacity(), True),
-            '%sB' % si_unit(vol.get_allocation(), True)
+            vol.target,
+            vol.path,
+            vol.pool_name,
+            '%sB' % si_unit(vol.capacity, True),
+            '%sB' % si_unit(vol.allocated, True)
         ))
     print_table(headers, rows, align)
     print()
@@ -199,7 +200,7 @@ def _remove_vm(name, force):
     domain = _get_domain(name)
     try:
         res = domain.remove()
-    except Exception as e:
+    except DomainException as e:
         App.notice('Error: the VM cannot be removed: %s' % e)
         return False
     else:
