@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim: set encoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 ########################################################################
-# Copyright 2014 Matthieu Gaignière                  http://lightcode.fr
+# Copyright 2015 Matthieu Gaignière                  http://lightcode.fr
 ########################################################################
 # This file is part of OVM.
 #
