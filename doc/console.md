@@ -10,14 +10,14 @@ Firstly, we need to install `xterm`:
 # yum install xterm
 ```
 
-You can run this script to enable a TTY on ttyS0 on CentOS:
+You can run the following script to enable a TTY on ttyS0:
 
 ```bash
-cp /usr/lib/systemd/system/serial-getty@.service /etc/systemd/system/serial-getty@ttyS0.service
-sed -i 's|115200,38400,9600|115200,38400,9600 xterm|g' /etc/systemd/system/serial-getty@ttyS0.service
-ln -s /etc/systemd/system/serial-getty@ttyS0.service /etc/systemd/system/getty.target.wants/
+cp "/usr/lib/systemd/system/serial-getty@.service" "/etc/systemd/system/serial-getty@ttyS0.service"
+sed -i 's|115200,38400,9600|115200,38400,9600 xterm|g' "/etc/systemd/system/serial-getty@ttyS0.service"
+ln -s "/etc/systemd/system/serial-getty@ttyS0.service" /etc/systemd/system/getty.target.wants
 systemctl daemon-reload
-systemctl start serial-getty@ttyS0.service
+systemctl start "serial-getty@ttyS0.service"
 ```
 
 
@@ -70,6 +70,26 @@ You have to edit the file `/etc/inittab` :
 
 I add the line after the serial line documentation. It will add a TTY on the interface ttyS0, the serial port 0.
 
+
+
+Debian 8
+========
+
+Firstly, we need to install `xterm`:
+
+```console
+# apt-get install xterm
+```
+
+You can run the following script to enable a TTY on ttyS0:
+
+```bash
+cp "/lib/systemd/system/serial-getty@.service" "/etc/systemd/system/serial-getty@ttyS0.service"
+sed -i 's|$TERM|xterm|g' "/etc/systemd/system/serial-getty@ttyS0.service"
+ln -s "/etc/systemd/system/serial-getty@ttyS0.service" /etc/systemd/system/getty.target.wants
+systemctl daemon-reload
+systemctl start "serial-getty@ttyS0.service"
+```
 
 
 Bonus: resize automatically the terminal
