@@ -4,6 +4,12 @@ Configure a serial console on your VM
 CentOS 7
 ========
 
+Firstly, we need to install `xterm`:
+
+```console
+# yum install xterm
+```
+
 You can run this script to enable a TTY on ttyS0 on CentOS:
 
 ```bash
@@ -15,29 +21,20 @@ systemctl start serial-getty@ttyS0.service
 ```
 
 
-As you can see, I use the `xterm` terminal, you can install it on your system:
+CentOS 6
+========
+
+Firstly, we need to install `xterm`:
 
 ```console
 # yum install xterm
 ```
 
-It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. You can execute this command at the session startup:
-
-```console
-# cat <<EOF > /etc/profile.d/resize-console.sh
-resize > /dev/null
-EOF
-```
-
-
-
-CentOS 6
-========
 
 The first step is to add the file `/etc/init/ttyS0.conf`. You can directly enter this command:
 
-```console
-# cat <<EOF > /etc/init/ttyS0.conf
+```bash
+cat <<EOF > /etc/init/ttyS0.conf
 start on runlevel [345]
 stop on runlevel [S016]
 
@@ -47,30 +44,23 @@ exec /sbin/agetty -8 -L 115200 ttyS0 xterm
 EOF
 ```
 
-You need to activate the authentication on the TTY S0:
+You need to activate the authentication on the ttyS0:
 
 ```console
 # echo ttyS0 > /etc/securetty
 ```
 
-As you can see, I use the `xterm` terminal, you can install it on your system:
-
-```console
-# yum install xterm
-```
-
-It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width like SSH. You can execute this command at the session startup:
-
-```console
-# cat <<EOF > /etc/profile.d/resize-console.sh
-resize > /dev/null
-EOF
-```
-
-
 
 Debian
 ======
+
+Firstly, we need to install `xterm`:
+
+```console
+# apt-get install xterm
+```
+
+
 
 This tutorial is tested on Debian Wheezy.
 
@@ -84,16 +74,17 @@ You have to edit the file `/etc/inittab` :
 
 I add the line after the serial line documentation. It will add a TTY on the interface ttyS0, the serial port 0.
 
-As you can see, I use the `xterm` terminal, you can install it on your system:
 
-```console
-# apt-get install xterm
-```
+
+Bonus: resize automatically the terminal
+=========================================
 
 It's more comfortable to resize the screen in applications like `less` or `vim`. To achieve that, you can use the command `resize` from the xterm package. A serial interface don't send the height and the width of the window like SSH. You can execute this command at the session startup:
 
-```console
-# cat <<EOF > /etc/profile.d/resize-console.sh
-resize > /dev/null
+```bash
+cat <<EOF > /etc/profile.d/resize-console.sh
+if [ "$(tty)" == "/dev/ttyS0" ]; then
+  resize &> /dev/null
+fi
 EOF
 ```
