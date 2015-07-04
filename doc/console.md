@@ -83,7 +83,7 @@ It's more comfortable to resize the screen in applications like `less` or `vim`.
 
 ```bash
 cat <<EOF > /etc/profile.d/resize-console.sh
-if [ "$(tty)" == "/dev/ttyS0" ]; then
+if [ "\$(tty)" == "/dev/ttyS0" ]; then
   resize &> /dev/null
 fi
 EOF
