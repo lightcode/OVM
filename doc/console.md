@@ -51,18 +51,14 @@ You need to activate the authentication on the ttyS0:
 ```
 
 
-Debian
-======
+Debian 7
+========
 
 Firstly, we need to install `xterm`:
 
 ```console
 # apt-get install xterm
 ```
-
-
-
-This tutorial is tested on Debian Wheezy.
 
 You have to edit the file `/etc/inittab` :
 
