@@ -112,6 +112,13 @@ def parse_args():
     parser_set.add_argument('value')
     parser_set.set_defaults(func=vm_set)
 
+    # Autostart
+    parser_set = subparsers.add_parser(
+        'autostart', help='choose if the VM starts automatically at boot')
+    parser_set.add_argument('name', help='name of the VM')
+    parser_set.add_argument('value', choices=['on', 'off'])
+    parser_set.set_defaults(func=vm_autostart)
+
     # Start a VM
     parser_start = subparsers.add_parser(
         'start', help='start one or many VMs')

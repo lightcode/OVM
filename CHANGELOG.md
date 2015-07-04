@@ -3,6 +3,7 @@
 - New metadata API: store arbitrary key/value data
 - Add metadata support in templates
 - Storage: LVM driver
+- New command: `vm autostart`
 
 
 # 0.2 (06/30/2015)

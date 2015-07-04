@@ -22,15 +22,17 @@
 
 _vm()
 {
-    local cur prev opts vm_list
+    local cur prev opts cmd vm_list
     COMPREPLY=()
+    cmd=${COMP_WORDS[1]}
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="console create info ls ping reboot restore rm save set ssh \
-        start stop storage networks templates top --version --help"
+    opts="autostart console create info ls ping reboot restore rm \
+          save set ssh start stop storage networks templates top \
+          --version --help"
 
     if [[ COMP_CWORD -gt 1 ]]; then
-        case "${COMP_WORDS[1]}" in
+        case "$cmd" in
             --version | --help)
                 return 0
             ;;
@@ -69,10 +71,12 @@ _vm()
                 COMPREPLY=( $(compgen -W "--yes ${vm_list}" -- ${cur}) )
                 return 0
             ;;
-            set | info)
+            autostart | set | info)
                 if [[ COMP_CWORD -eq 2 ]]; then
                     vm_list="$(vm list --short)"
                     COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
+                elif [[ COMP_CWORD -eq 3 ]] && [[ "$cmd" == "autostart" ]]; then
+                    COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
                 fi
                 return 0
             ;;

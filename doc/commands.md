@@ -3,6 +3,7 @@ OVM commands
 
 Subcommand    | Description
 ------------- | -------------------------------------------------
+autostart     | Choose if the VM starts automatically at boot
 console       | Open a console on the VM
 create        | Create a VM
 info          | Give information about a VM

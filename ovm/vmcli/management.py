@@ -115,6 +115,14 @@ def print_vm_info(domain):
     print()
 
 
+def vm_autostart(args):
+    domain = _get_domain(args.name)
+    if args.value == 'on':
+        domain.set_autostart(True)
+    else:
+        domain.set_autostart(False)
+
+
 def vm_info(args):
     domain = _get_domain(args.name)
     print_vm_info(domain)
