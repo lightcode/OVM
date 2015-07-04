@@ -21,7 +21,7 @@
 
 
 import os.path
-from subprocess import Popen
+from subprocess import Popen, PIPE
 from lxml import etree
 from lxml.builder import E
 
@@ -64,8 +64,10 @@ class FileDriver(StorageDriver):
 
     def resize_disk(self, new_size):
         args = ['qemu-img', 'resize', self.path, '{}G'.format(new_size)]
-        process = Popen(args)
-        process.wait()
+        with Popen(args, stdout=PIPE, stderr=PIPE) as process:
+            process.wait()
+            if process.returncode != 0:
+                print(process.stderr.read())
 
     def create_disk(self, name, image):
         path = os.path.join(self._params.get('root'), name)
