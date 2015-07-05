@@ -20,6 +20,7 @@
 ########################################################################
 
 
+import os
 from subprocess import Popen, PIPE
 
 
@@ -31,6 +32,9 @@ class ImageTemplate:
         self.size = int(config.get('size'))
 
     def copy_on_device(self, dest, dest_format):
+        if not os.path.exists(dest):
+            raise Exception('copy_on_device: destination must exists.')
+
         args = [
             'qemu-img', 'convert',
             '-f', str(self.format),

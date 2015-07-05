@@ -75,6 +75,10 @@ class FileDriver(StorageDriver):
 
     def import_image(self, image, name):
         path = os.path.join(self._params.get('root'), name)
+        try:
+            fd = open(path, 'w+')
+        finally:
+            fd.close()
         image.copy_on_device(path, self._params['disk_format'])
         return path
 
