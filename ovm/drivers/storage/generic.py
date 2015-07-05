@@ -19,9 +19,17 @@
 # along with OVM. If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
 
+import os
 
 from ovm.drivers.driver import Driver
 
 
 class StorageDriver(Driver):
-    pass
+
+    def disk_real_size(self, disk):
+        "Get the file size by seeking at end"
+        try:
+            with open(disk.path, 'rb') as fd:
+                return fd.seek(0, os.SEEK_END)
+        finally:
+            pass

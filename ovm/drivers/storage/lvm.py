@@ -22,9 +22,9 @@
 
 import os.path
 from subprocess import Popen, PIPE
-from lxml import etree
 from lxml.builder import E
 
+from ovm.drivers import DriverError
 from ovm.drivers.storage.generic import StorageDriver
 
 
@@ -33,71 +33,63 @@ __all__ = ['LvmDriver']
 
 class LvmDriver(StorageDriver):
 
-    def __init__(self, path=None):
+    DISK_FORMAT = 'raw'
+
+    def __init__(self):
         super(LvmDriver, self).__init__()
 
-        self.path = path
-
-        self.driver_name = 'qemu'
-        self.driver_type = 'raw'
-
-    def _create_logical_volume(self, name):
-        image = self._params.get('image')
-        size = '{}G'.format(image.size)
+    def _create_logical_volume(self, name, size):
+        size = '{}G'.format(size)
         vgname = self._params.get('volume_group')
+
+        if not vgname:
+            DriverError('Volume Groupe not set.')
+
         args = ['lvcreate', '--size', size, '--name', str(name), vgname]
         with Popen(args, stdout=PIPE, stderr=PIPE) as process:
             process.wait()
             if process.returncode != 0:
-                print(process.stderr.read())
+                DriverError(process.stderr.read().decode('utf-8'))
 
-    def generate_xml(self):
-        tree = (
+    def generate_xml(self, disk):
+        domdef = (
             E.disk(
                 E.driver(
-                    name=self.driver_name,
-                    type=self.driver_type,
+                    name='qemu',
+                    type=LvmDriver.DISK_FORMAT,
                     cache='writeback'
                 ),
                 E.source(
-                    dev=self.path
-                ),
-                E.target(
-                    dev=self._params.get('target_dev'),
-                    bus=self._params.get('target_bus')
+                    dev=disk.path
                 ),
                 type='block',
                 device='disk'
             )
         )
-        return etree.tostring(tree).decode('utf-8')
 
-    def resize_disk(self, new_size):
-        args = ['lvresize', '--size', '{}G'.format(new_size), self.path]
+        return domdef
+
+    def resize_disk(self, disk, new_size):
+        args = ['lvresize', '--size', '{}G'.format(new_size), disk.path]
         with Popen(args, stdout=PIPE, stderr=PIPE) as process:
             process.wait()
             if process.returncode != 0:
-                print(process.stderr.read())
+                DriverError(process.stderr.read().decode('utf-8'))
 
-    def create_disk(self, name, image):
+    def import_image(self, image, name):
         path = os.path.join(self._params.get('root'), name)
-        self.path = path
-        self._create_logical_volume(name)
-        image.copy_on_device(path, self.driver_type)
+        self._create_logical_volume(name, image.size)
 
-    def remove(self):
-        args = ['lvremove', '--force', self.path]
+        if not os.path.exists(path):
+            raise DriverError('Volume group not created.')
+
+        image.copy_on_device(path, LvmDriver.DISK_FORMAT)
+
+        return path
+
+    def remove_disk(self, disk):
+        args = ['lvremove', '--force', disk.path]
         with Popen(args, stdout=PIPE, stderr=PIPE) as process:
             process.wait()
             if process.returncode != 0:
-                print(process.stderr.read())
-
-    @property
-    def capacity(self):
-        # TODO: implement that
-        return 0
-
-    @property
-    def allocated(self):
-        # TODO: implement that
-        return 0
+                DriverError(process.stderr.read().decode('utf-8'))

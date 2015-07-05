@@ -22,7 +22,6 @@
 
 import os.path
 from subprocess import Popen, PIPE
-from lxml import etree
 from lxml.builder import E
 
 from ovm.drivers import DriverError
@@ -34,7 +33,7 @@ __all__ = ['FileDriver']
 
 class FileDriver(StorageDriver):
 
-    def __init__(self, path=None):
+    def __init__(self):
         super(FileDriver, self).__init__()
         self._params = {'disk_format': 'qcow2'}
 
@@ -47,8 +46,8 @@ class FileDriver(StorageDriver):
 
         super(FileDriver, self).set_params(**params)
 
-    def generate_xml(self):
-        tree = (
+    def generate_xml(self, disk):
+        xmldef = (
             E.disk(
                 E.driver(
                     name='qemu',
@@ -56,47 +55,33 @@ class FileDriver(StorageDriver):
                     cache='writeback'
                 ),
                 E.source(
-                    file=self.path
-                ),
-                E.target(
-                    dev=self._params.get('target_dev'),
-                    bus=self._params.get('target_bus')
+                    file=disk.path
                 ),
                 type='file',
                 device='disk'
             )
         )
-        return etree.tostring(tree).decode('utf-8')
+        return xmldef
 
-    def resize_disk(self, new_size):
-        if not os.path.exists(self.path):
-            raise DriverError('Path "{0}" does not exists'.format(self.path))
+    def resize_disk(self, disk, new_size):
+        if not os.path.exists(disk.path):
+            raise DriverError('Path "{0}" does not exists'.format(disk.path))
 
-        args = ['qemu-img', 'resize', self.path, '{}G'.format(new_size)]
+        args = ['qemu-img', 'resize', disk.path, '{}G'.format(new_size)]
         with Popen(args, stdout=PIPE, stderr=PIPE) as process:
             process.wait()
             if process.returncode != 0:
                 print(process.stderr.read())
 
-    def create_disk(self, name, image):
+    def import_image(self, image, name):
         path = os.path.join(self._params.get('root'), name)
-        self.path = path
         image.copy_on_device(path, self._params['disk_format'])
+        return path
 
-    def remove(self):
+    def remove_disk(self, disk):
         try:
-            os.remove(self.path)
+            os.remove(disk.path)
         except OSError as err:
-            print('Cannot remove disk "{}": {}'.format(self.path, err))
+            print('Cannot remove disk "{}": {}'.format(disk.path, err))
         else:
-            print('Disk "{}" removed'.format(self.path))
-
-    @property
-    def capacity(self):
-        # TODO: implement that
-        return 0
-
-    @property
-    def allocated(self):
-        # TODO: implement that
-        return 0
+            print('Disk "{}" removed'.format(disk.path))

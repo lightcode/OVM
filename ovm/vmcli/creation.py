@@ -201,7 +201,6 @@ def vm_create(args):
         domdef.memory = args.memory
 
     print("Creating VM's disk...")
-    diskpath = '/mnt/pool-vm-hdd/beta/test1-main'
     diskpath = domdef.create_main_disk()
     if args.size:
         domdef.resize_main_disk(args.size)
@@ -255,7 +254,7 @@ def vm_storage(args):
     headers = ('ID', 'Pool name')
     rows = []
     for name, storage in STORAGE.items():
-        rows.append((name, storage.pool_name()))
+        rows.append((name, storage.name))
     print_table(headers, rows)
 
 

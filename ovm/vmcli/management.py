@@ -80,7 +80,7 @@ def print_vm_info(domain):
     print()
     print()
 
-    print_title('Interfaces')
+    print_title('Network')
     headers = ['MAC address', 'Network', 'Port group']
     rows = []
     for iface in domain.get_interfaces():
@@ -93,17 +93,16 @@ def print_vm_info(domain):
     print()
     print()
 
-    print_title('Volumes')
-    headers = ['Target', 'Path', 'Pool', 'Capacity', 'Allocation']
-    align = ('l', 'l', 'l', 'r', 'r')
+    print_title('Storage')
+    headers = ['Target', 'Path', 'Pool', 'Real size']
+    align = ('l', 'l', 'l', 'l')
     rows = []
-    for vol in domain.get_volumes():
+    for vol in domain.get_disks():
         rows.append((
-            vol.target,
+            vol.guest_dev,
             vol.path,
-            vol.pool_name,
-            '%sB' % si_unit(vol.capacity, True),
-            '%sB' % si_unit(vol.allocated, True)
+            vol.pool.name,
+            '%sB' % si_unit(vol.size, True)
         ))
     print_table(headers, rows, align)
     print()

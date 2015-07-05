@@ -20,23 +20,19 @@
 ########################################################################
 
 
+from ovm.inventory.disk import Disk
+
+
 class StoragePool(object):
 
     def __init__(self, name, driver, **params):
-        self._driver = driver()
-
         self._params = params
         self.root = params.get('root')
         self.name = name
 
-        self._driver.set_params(**params)
+        self.driver = driver()
+        self.driver.set_params(**params)
 
     def create_disk(self, name, params):
-        driver = self._driver
-        driver.set_params(**params)
-        image = params.get('image')
-        driver.create_disk(name, image)
-        return driver
-
-    def get_device(self, diskpath):
-        return self._driver
+        device = Disk(storage_pool=self, name=name, template_params=params)
+        return device

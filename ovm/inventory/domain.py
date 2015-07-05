@@ -25,10 +25,8 @@ import libvirt
 from lxml import etree
 
 from ovm.inventory.domain_metadata import DomainMetadata
-from ovm.app import App
-from ovm.inventory.volume import Volume
 from ovm.inventory.network_interface import NetworkInterface
-from ovm.resources.resources import Resources
+from ovm.inventory.disk import Disk
 
 
 class DomainException(Exception):
@@ -63,6 +61,7 @@ class Domain(object):
         return self.vir_domain.isActive()
 
     def get_save_file(self):
+        from ovm.app import App
         return os.path.join(App.SAVED_VMS, self.get_name())
 
     def remove_save(self):
@@ -79,8 +78,8 @@ class Domain(object):
         if self.vir_domain.isActive():
             self.vir_domain.destroy()
 
-        for vol in self.get_volumes():
-            vol.remove()
+        for disk in self.get_disks():
+            disk.remove()
 
         self.remove_save()
 
@@ -194,33 +193,14 @@ class Domain(object):
             interfaces.append(NetworkInterface(iface))
         return interfaces
 
-    def get_volumes(self):
-        volumes = []
-        disks = self._saved_tree.xpath(
+    def get_disks(self):
+        disks = []
+        xml_disks = self._saved_tree.xpath(
             "/domain/devices/disk[@device='disk']")
-        for disk in disks:
-            disk_type = disk.attrib.get('type')
-            if disk.attrib.get('type') is None:
-                continue
+        for disk in xml_disks:
+            disks.append(Disk(xmldef=disk))
 
-            diskpath = ''
-            src = disk.xpath('source')[0]
-            if disk_type == 'file':
-                diskpath = src.attrib.get('file')
-            elif disk_type == 'block':
-                diskpath = src.attrib.get('dev')
-
-            if not diskpath:
-                continue
-
-            target_dev = disk.xpath('target')[0].attrib.get('dev')
-
-            for storage in Resources.get_storage().values():
-                if diskpath.startswith(storage.root):
-                    volumes.append(Volume(storage, diskpath, target_dev))
-                    break
-
-        return volumes
+        return disks
 
     def get_os_info(self):
         # os-type : linux/windows/bsd/...

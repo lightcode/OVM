@@ -78,13 +78,13 @@ class DomainDefinition(object):
 
     def create_main_disk(self):
         name = '{}-main'.format(self.name)
-        driver = self._storage.create_disk(name, self._template.main_disk)
-        self._devices.append(driver.generate_xml())
-        self._main_disk = driver
-        return driver.path
+        disk = self._storage.create_disk(name, self._template.main_disk)
+        self._devices.append(disk.xml_definition)
+        self._main_disk = disk
+        return disk.path
 
     def resize_main_disk(self, new_size):
-        self._main_disk.resize_disk(new_size)
+        self._main_disk.resize(new_size)
 
     def get_xml(self):
         root = self._get_basevm()

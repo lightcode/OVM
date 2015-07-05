@@ -42,4 +42,4 @@ class ImageTemplate:
         with Popen(args, stderr=PIPE) as process:
             process.wait()
             if process.returncode != 0:
-                print(process.stderr.read())
+                raise Exception(process.stderr.read().decode('utf-8'))
