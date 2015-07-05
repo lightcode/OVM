@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; OVM 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="OVM 0.2 documentation" href="index.html" />
+    <link rel="next" title="Configure OS templates" href="templates.html" />
+    <link rel="prev" title="Welcome to OVM" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>This project use Python 3, you can install it on Debian with this
+command:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">#</span> apt-get install python3
+</pre></div>
+</div>
+<p>You also need to install these packages on your hypervisor:</p>
+<ul class="simple">
+<li>libvirt</li>
+<li>python3-libvirt</li>
+<li>guestfish</li>
+</ul>
+<p>You can simply use your package manager or build them yourself.</p>
+<p><strong>Note</strong>: libvirt must have volume and Qemu metadata support.</p>
+<p>We need to install Python libraries (example on Debian):</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">#</span> apt-get install python3-lxml python3-ipaddr python3-pip
+</pre></div>
+</div>
+<p>We need to install all requirements with pip:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">#</span> pip-3.2 install -r requirements.txt
+</pre></div>
+</div>
+<p>Now, you can download and extract OVM. Then, to achieve the
+installation, we simply do this command into the <code class="docutils literal"><span class="pre">ovm</span></code> directory:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">#</span> python3 setup.py install
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to OVM</a></li>
+      <li>Next: <a href="templates.html" title="next chapter">Configure OS templates</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Matthieu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/install.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

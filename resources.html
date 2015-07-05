@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configure resources &mdash; OVM 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="OVM 0.2 documentation" href="index.html" />
+    <link rel="next" title="Command reference" href="commands.html" />
+    <link rel="prev" title="Configure OS templates" href="templates.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="configure-resources">
+<h1>Configure resources<a class="headerlink" href="#configure-resources" title="Permalink to this headline">¶</a></h1>
+<p>Resources are configured in the YAML file <code class="docutils literal"><span class="pre">resources.yml</span></code>. This file
+follow the YAML syntax and there are two mains dictionaries: <code class="docutils literal"><span class="pre">storage</span></code>
+and <code class="docutils literal"><span class="pre">networks</span></code>. Each dictionary is described in this chapter.</p>
+<div class="section" id="storage-pools">
+<h2>Storage pools<a class="headerlink" href="#storage-pools" title="Permalink to this headline">¶</a></h2>
+<p>Storage pools are used by OVM to create the disk of VMs. To add a new
+storage pool, we add a dictionary where the key is the <strong>pool name</strong>.
+This dictionary contains another dictionary with parameters.</p>
+<p>There are two commons parameters, there are not optional :</p>
+<dl class="docutils">
+<dt><strong>driver</strong></dt>
+<dd>is the name of the storage driver. OVM uses it, when you
+create your VMs, to create disks.</dd>
+<dt><strong>root</strong></dt>
+<dd>this parameter specifies the root of the pool. Note: don’t
+create several storage pools with the same <code class="docutils literal"><span class="pre">root</span></code> path.</dd>
+</dl>
+<p>Currently, there are two drivers as you can see below.</p>
+<div class="section" id="filedriver">
+<h3>FileDriver<a class="headerlink" href="#filedriver" title="Permalink to this headline">¶</a></h3>
+<p>To use flat file to store VM disks.</p>
+<p><strong>Configuration example</strong>:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">storage</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">ssd</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">FileDriver</span>
+    <span class="l-Scalar-Plain">root</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/mnt/pool-vm-ssd</span>
+</pre></div>
+</div>
+<p>Here we create the storage pool <strong>ssd</strong>. We use the driver <strong>FileDriver</strong> to
+access it.</p>
+</div>
+<div class="section" id="lvmdriver">
+<h3>LvmDriver<a class="headerlink" href="#lvmdriver" title="Permalink to this headline">¶</a></h3>
+<p>To use a LVM volume group to store VM disks. OVM create automatically
+one logical volume per disk. You have to create the volume group
+yourself. For example:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">vgcreate OVM_VG /dev/sda /dev/sdb</span>
+</pre></div>
+</div>
+<p><strong>Configuration example</strong>:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">storage</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">lvm</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">LvmDriver</span>
+    <span class="l-Scalar-Plain">root</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/dev/OVM_VG</span>
+    <span class="l-Scalar-Plain">volume_group</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">OVM_VG</span>
+</pre></div>
+</div>
+<p>Here we create the storage pool <strong>lvm</strong>. We use the driver <strong>LvmDriver</strong>. We
+need to specify the <cite>root</cite>, with LVM it is the path to the volume group.
+The third parameter is the name of the volume group (<cite>volume_group</cite>).</p>
+</div>
+</div>
+<div class="section" id="networks">
+<h2>Networks<a class="headerlink" href="#networks" title="Permalink to this headline">¶</a></h2>
+<p>Networks are used by OVM to add an interface in the VM and eventually to
+configure the IP stack. To add a new network, we add a dictionary where
+the key is the <strong>Network ID</strong>. This dictionary contains another dictionary
+with different parameters:</p>
+<dl class="docutils">
+<dt><strong>driver</strong></dt>
+<dd>is the name of the network driver. OVM uses it to create new VMs
+with the right configuration. Today, only the driver
+<cite>OpenvSwitchDriver</cite> exists.</dd>
+<dt><strong>net_name</strong></dt>
+<dd>the parameter <cite>net_name</cite> defines the name of the network in libvirt.</dd>
+<dt><strong>net_portgroup</strong></dt>
+<dd>this term is used in libvirt configuration network.
+<em>This option is facultative</em>.</dd>
+<dt><strong>ipv4_allocation</strong></dt>
+<dd>this parameter is used to precise to OVM the type of IPv4 allocation.
+You can choose <cite>static</cite> and precise the <cite>ipv4_pool</cite> parameter or you
+can choose <cite>dhcp</cite> and let the DHCP server on your network allocate the IPv4.</dd>
+<dt><strong>ipv4_pool</strong></dt>
+<dd>it&#8217;s a set of parameters to configure the IP allocation.</dd>
+</dl>
+<p><strong>Configuration example</strong>:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">networks</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">OpenvSwitchDriver</span>
+    <span class="l-Scalar-Plain">net_name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">net-ovs</span>
+    <span class="l-Scalar-Plain">net_portgroup</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">local</span>
+    <span class="l-Scalar-Plain">ipv4_allocation</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">static</span>
+    <span class="l-Scalar-Plain">ipv4_pool</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">ip_start</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.1.30</span>
+      <span class="l-Scalar-Plain">ip_end</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.1.63</span>
+      <span class="l-Scalar-Plain">netmask</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">24</span>
+      <span class="l-Scalar-Plain">gateway</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.1.1</span>
+      <span class="l-Scalar-Plain">nameservers</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="s">&#39;192.168.1.1&#39;</span><span class="p-Indicator">]</span>
+      <span class="l-Scalar-Plain">autoip_path</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/etc/autoip/ovm/local.dat</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Configure resources</a><ul>
+<li><a class="reference internal" href="#storage-pools">Storage pools</a><ul>
+<li><a class="reference internal" href="#filedriver">FileDriver</a></li>
+<li><a class="reference internal" href="#lvmdriver">LvmDriver</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#networks">Networks</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="templates.html" title="previous chapter">Configure OS templates</a></li>
+      <li>Next: <a href="commands.html" title="next chapter">Command reference</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/resources.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Matthieu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/resources.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

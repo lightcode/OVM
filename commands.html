@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Command reference &mdash; OVM 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="OVM 0.2 documentation" href="index.html" />
+    <link rel="next" title="Configure a serial console on your VM" href="console.html" />
+    <link rel="prev" title="Configure resources" href="resources.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="command-reference">
+<h1>Command reference<a class="headerlink" href="#command-reference" title="Permalink to this headline">¶</a></h1>
+<p>OVM includes the command <code class="docutils literal"><span class="pre">vm</span></code>. This command take a subcommand like
+this <code class="docutils literal"><span class="pre">vm</span> <span class="pre">start...</span></code> or <code class="docutils literal"><span class="pre">vm</span> <span class="pre">create...</span></code>.</p>
+<p>Here, you have the list of subcommands:</p>
+<dl class="option">
+<dt id="cmdoption-arg-autostart">
+<code class="descname">autostart</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-autostart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Choose if the VM starts automatically at boot</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-console">
+<code class="descname">console</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-console" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a console on the VM.</p>
+<p>To close the connection, you have to press <cite>Ctrl+]</cite> or <cite>Ctrl+5</cite>.</p>
+<p>See <a class="reference internal" href="console.html#configure-serial"><span>Configure a serial console on your VM</span></a>.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-create">
+<code class="descname">create</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-info">
+<code class="descname">info</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give information about a VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-list">
+<code class="descname">list</code><code class="descclassname"> (ls)</code><a class="headerlink" href="#cmdoption-arg-list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the list of VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-networks">
+<code class="descname">networks</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-networks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the list of networks</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-ping">
+<code class="descname">ping</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-ping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut to ping a VM with the static IP</p>
+<p>Important: this command only works if you have fixed an IP address on the VM.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-reboot">
+<code class="descname">reboot</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-reboot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reboot a VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-restore">
+<code class="descname">restore</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-restore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore a VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-remove">
+<code class="descname">remove</code><code class="descclassname"> (rm)</code><a class="headerlink" href="#cmdoption-arg-remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-save">
+<code class="descname">save</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-set">
+<code class="descname">set</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify some properties of VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-ssh">
+<code class="descname">ssh</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-ssh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut to open a SSH session on the VM</p>
+<p>Important: this command only works if you have fixed an IP address on the VM.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-start">
+<code class="descname">start</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a VM</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-stop">
+<code class="descname">stop</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Halt a VM gracefully</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-storage">
+<code class="descname">storage</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-storage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the list of storage</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-templates">
+<code class="descname">templates</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-templates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the list of templates</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-arg-top">
+<code class="descname">top</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-arg-top" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show live stats about VMs</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="resources.html" title="previous chapter">Configure resources</a></li>
+      <li>Next: <a href="console.html" title="next chapter">Configure a serial console on your VM</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/commands.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Matthieu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/commands.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
