@@ -1,0 +1,4 @@
+[submodule "docs-html"]
+	path = docs-html
+	url = git@github.com:lightcode/OVM
+	branch = gh-pages
