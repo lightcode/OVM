@@ -88,17 +88,17 @@ class Domain(object):
 
     def save(self):
         if not self.is_active():
-            raise Exception('the VM must be active.')
+            raise DomainException('the VM must be active.')
         if self.is_saved():
-            raise Exception('the file to save the VM already exists.')
+            raise DomainException('the file to save the VM already exists.')
         self.vir_domain.save(self.get_save_file())
 
     def restore(self):
         if self.is_active():
-            raise Exception('the VM must be inactive.')
+            raise DomainException('the VM must be inactive.')
 
         if not self.is_saved():
-            raise Exception('this VM has already been saved.')
+            raise DomainException('this VM has already been saved.')
 
         save_file = self.get_save_file()
         self._libvirt_conn.restore(save_file)
