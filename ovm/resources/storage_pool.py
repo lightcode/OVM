@@ -23,19 +23,20 @@
 class StoragePool(object):
 
     def __init__(self, name, driver, **params):
-        self._driver = driver
+        self._driver = driver()
+
         self._params = params
         self.root = params.get('root')
         self.name = name
 
+        self._driver.set_params(**params)
+
     def create_disk(self, name, params):
-        driver = self._driver()
-        params.update(self._params)
+        driver = self._driver
         driver.set_params(**params)
-        driver.set_params(driver_name='qemu')
         image = params.get('image')
         driver.create_disk(name, image)
         return driver
 
     def get_device(self, diskpath):
-        return self._driver(diskpath)
+        return self._driver

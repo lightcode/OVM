@@ -25,6 +25,7 @@ from subprocess import Popen, PIPE
 from lxml import etree
 from lxml.builder import E
 
+from ovm.drivers import DriverError
 from ovm.drivers.storage.generic import StorageDriver
 
 
@@ -35,18 +36,23 @@ class FileDriver(StorageDriver):
 
     def __init__(self, path=None):
         super(FileDriver, self).__init__()
+        self._params = {'disk_format': 'qcow2'}
 
-        self.path = path
+    def set_params(self, **params):
+        if 'disk_format' in params:
+            disk_format = str(params['disk_format'])
+            if disk_format not in ('raw', 'qcow2'):
+                raise DriverError('Disk format not supported')
+            params['disk_format'] = disk_format
 
-        self.driver_name = 'qemu'
-        self.driver_type = 'qcow2'
+        super(FileDriver, self).set_params(**params)
 
     def generate_xml(self):
         tree = (
             E.disk(
                 E.driver(
-                    name=self.driver_name,
-                    type=self.driver_type,
+                    name='qemu',
+                    type=self._params['disk_format'],
                     cache='writeback'
                 ),
                 E.source(
@@ -63,6 +69,9 @@ class FileDriver(StorageDriver):
         return etree.tostring(tree).decode('utf-8')
 
     def resize_disk(self, new_size):
+        if not os.path.exists(self.path):
+            raise DriverError('Path "{0}" does not exists'.format(self.path))
+
         args = ['qemu-img', 'resize', self.path, '{}G'.format(new_size)]
         with Popen(args, stdout=PIPE, stderr=PIPE) as process:
             process.wait()
@@ -72,7 +81,7 @@ class FileDriver(StorageDriver):
     def create_disk(self, name, image):
         path = os.path.join(self._params.get('root'), name)
         self.path = path
-        image.copy_on_device(path, self.driver_type)
+        image.copy_on_device(path, self._params['disk_format'])
 
     def remove(self):
         try:

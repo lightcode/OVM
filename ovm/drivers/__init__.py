@@ -18,3 +18,11 @@
 # You should have received a copy of the GNU General Public License
 # along with OVM. If not, see <http://www.gnu.org/licenses/>.
 ########################################################################
+
+
+__all__ = ['DriverError']
+
+
+class DriverError(Exception):
+
+    pass
