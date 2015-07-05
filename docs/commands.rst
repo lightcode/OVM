@@ -16,7 +16,7 @@ Here, you have the list of subcommands:
 
    Open a console on the VM.
 
-   To close the connection, you have to press `Ctrl+]` or `Ctrl+5`.
+   To close the connection, you have to press ``Ctrl+]`` or ``Ctrl+5``.
 
    See :ref:`configure-serial`.
 
@@ -70,7 +70,9 @@ Here, you have the list of subcommands:
 
 .. option:: set
 
-   Modify some properties of VM
+   Edit VM's metadata entries.
+
+   You can edit several metadata items in one command: ``vm set vmname os_type=linux os_name=Debian os_version=7``.
 
 
 .. option:: ssh
@@ -103,3 +105,10 @@ Here, you have the list of subcommands:
 .. option:: top
 
    Show live stats about VMs
+
+
+.. option:: unset
+
+   Remove VM's metadata entries.
+
+   You can remove several metadata entries in one command: ``vm unset vmname os_type os_name os_version``.
