@@ -12,7 +12,10 @@
 #       driver: FileDriver
 #       root: /mnt/pool-vm-ssd
 
-storage: {}  # Replace me
+storage:
+  default:
+    driver: FileDriver
+    root: /var/lib/ovm/storage-pools/default
 
 
 

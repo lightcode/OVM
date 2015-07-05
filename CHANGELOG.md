@@ -1,12 +1,18 @@
-# 0.3 (not released yet)
+# Changelog
+
+
+## Version 0.3 (not released yet)
 
 - New metadata API: store arbitrary key/value data
 - Add metadata support in templates
 - Storage: LVM driver
 - New command: `vm autostart`
+- Add a default storage driver
+- New command: `vm unset`
+- Modify the command `vm set`
 
 
-# 0.2 (06/30/2015)
+## Version 0.2 (06/30/2015)
 
 - Replace JSON configuration file by YAML configuration file
 - Add bulk operations : remove, start and stop
@@ -15,6 +21,6 @@
 - Refactor contextualization scripts with guestfish
 
 
-# 0.1
+## Version 0.1
 
 - First version of the project

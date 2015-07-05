@@ -27,35 +27,34 @@ from setuptools import setup, find_packages
 from ovm.app import App
 
 
-def main():
-    with open('requirements.txt') as f:
-        requirements = [line.strip() for line in f.readlines()]
+with open('requirements.txt') as f:
+    requirements = [line.strip() for line in f.readlines()]
 
-    setup(
-        name='OVM',
-        version=App.VERSION,
-        description='Open Virtualization Manager',
-        author='Matthieu Gaigniere',
-        author_email='matthieu@lightcode.fr',
-        url='http://lightcode.fr',
-        install_requires=requirements,
-        packages=find_packages(),
-        data_files=[
-            ('/etc/bash_completion.d', ['bin/vm-completion'])
-        ],
-        entry_points={
-            'console_scripts': ['vm = ovm.vmcli.__main__:main']
-        }
-    )
+setup(
+    name='OVM',
+    version=App.VERSION,
+    description='Open Virtualization Manager',
+    author='Matthieu Gaigniere',
+    author_email='matthieu@lightcode.fr',
+    url='http://lightcode.fr',
+    install_requires=requirements,
+    packages=find_packages(),
+    data_files=[
+        ('/etc/bash_completion.d', ['bin/vm-completion'])
+    ],
+    entry_points={
+        'console_scripts': ['vm = ovm.vmcli.__main__:main']
+    }
+)
 
-    if os.path.exists('/etc/ovm'):
-        print("Don't change /etc/ovm")
-    else:
-        shutil.copytree('etc/', '/etc/ovm')
+if os.path.exists(App.ETC):
+    print("Don't change {0}".format(App.ETC))
+else:
+    shutil.copytree('etc/', '/etc/ovm')
 
-    if not os.path.exists('/var/ovm/saved_vms'):
-        os.makedirs('/var/ovm/saved_vms')
+if not os.path.exists(App.SAVED_VMS):
+    os.makedirs(App.SAVED_VMS)
 
-
-if __name__ == '__main__':
-    main()
+DEFAULT_STORAGE_POOL = '/var/lib/ovm/storage-pools/default'
+if not os.path.exists(DEFAULT_STORAGE_POOL):
+    os.makedirs(DEFAULT_STORAGE_POOL)

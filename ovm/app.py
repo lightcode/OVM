@@ -35,7 +35,7 @@ class App(Singleton):
     templates = []
     _templates_loaded = False
     ETC = '/etc/ovm'
-    SAVED_VMS = '/var/ovm/saved_vms'
+    SAVED_VMS = '/var/lib/ovm/saved-vms'
     LOG_TYPE_SIZE = 7
 
     @classmethod
