@@ -232,7 +232,24 @@ def vm_remove(args):
 
 def vm_set(args):
     domain = _get_domain(args.name)
-    domain.metadata[args.key] = args.value
+    for metadata in args.metadata:
+        try:
+            key, value = metadata.split('=', 1)
+        except ValueError:
+            App.info('Ignore "{0}": not in a good format.'.format(metadata))
+        else:
+            domain.metadata[key] = value
+    domain.metadata.save()
+
+
+def vm_unset(args):
+    domain = _get_domain(args.name)
+    for key in args.key:
+        try:
+            del domain.metadata[str(key)]
+        except KeyError:
+            App.info('Cannot delete "{0}: key does not exist."'.format(key))
+    domain.metadata.save()
 
 
 def vm_console(args):

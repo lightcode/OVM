@@ -56,7 +56,9 @@ class DomainMetadata(object):
 
     def __setitem__(self, key, value):
         self._metadata[str(key).lower()] = str(value)
-        self.save()
+
+    def __delitem__(self, key):
+        del self._metadata[str(key)]
 
     def get(self, name):
         return self._metadata.get(str(name).lower())

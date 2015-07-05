@@ -105,19 +105,27 @@ def parse_args():
         help="print only the list of inactive VM")
     parser_list.set_defaults(func=vm_list)
 
-    # Set option to a VM
-    parser_set = subparsers.add_parser('set', help='set options to a VM')
-    parser_set.add_argument('name', help='name of the VM')
-    parser_set.add_argument('key')
-    parser_set.add_argument('value')
-    parser_set.set_defaults(func=vm_set)
+    # Set metadata on a vm
+    subcommand = subparsers.add_parser('set', help='set a metadata on a vm')
+    subcommand.add_argument('name', help='name of the VM')
+    subcommand.add_argument('metadata',
+                            nargs='+',
+                            help='enter metadata as <key>=<value>')
+    subcommand.set_defaults(func=vm_set)
+
+    # Unset metadata on a vm
+    subcommand = subparsers.add_parser(
+        'unset', help='unset a metadata on a vm')
+    subcommand.add_argument('name', help='name of the VM')
+    subcommand.add_argument('key', nargs='+')
+    subcommand.set_defaults(func=vm_unset)
 
     # Autostart
-    parser_set = subparsers.add_parser(
+    subcommand = subparsers.add_parser(
         'autostart', help='choose if the VM starts automatically at boot')
-    parser_set.add_argument('name', help='name of the VM')
-    parser_set.add_argument('value', choices=['on', 'off'])
-    parser_set.set_defaults(func=vm_autostart)
+    subcommand.add_argument('name', help='name of the VM')
+    subcommand.add_argument('value', choices=['on', 'off'])
+    subcommand.set_defaults(func=vm_autostart)
 
     # Start a VM
     parser_start = subparsers.add_parser(
