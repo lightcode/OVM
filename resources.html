@@ -76,8 +76,8 @@
 <li class="toctree-l1"><a class="reference internal" href="templates.html">Configure OS templates</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Configure resources</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#storage-pools">Storage pools</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#filedriver">FileDriver</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#lvmdriver">LvmDriver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-file-driver">The file driver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-lvm-driver">The LVM driver</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#networks">Networks</a></li>
@@ -155,36 +155,36 @@ create your VMs, to create disks.</dd>
 create several storage pools with the same <code class="docutils literal"><span class="pre">root</span></code> path.</dd>
 </dl>
 <p>Currently, there are two drivers as you can see below.</p>
-<div class="section" id="filedriver">
-<h3>FileDriver<a class="headerlink" href="#filedriver" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="the-file-driver">
+<h3>The file driver<a class="headerlink" href="#the-file-driver" title="Permalink to this headline">¶</a></h3>
 <p>To use flat file to store VM disks.</p>
 <p><strong>Configuration example</strong>:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">storage</span><span class="p-Indicator">:</span>
   <span class="l-Scalar-Plain">ssd</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">FileDriver</span>
+    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">file</span>
     <span class="l-Scalar-Plain">root</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/mnt/pool-vm-ssd</span>
 </pre></div>
 </div>
-<p>Here we create the storage pool <strong>ssd</strong>. We use the driver <strong>FileDriver</strong> to
+<p>Here we create the storage pool <strong>ssd</strong>. We use the driver <strong>file</strong> to
 access it.</p>
 </div>
-<div class="section" id="lvmdriver">
-<h3>LvmDriver<a class="headerlink" href="#lvmdriver" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="the-lvm-driver">
+<h3>The LVM driver<a class="headerlink" href="#the-lvm-driver" title="Permalink to this headline">¶</a></h3>
 <p>To use a LVM volume group to store VM disks. OVM create automatically
 one logical volume per disk. You have to create the volume group
 yourself. For example:</p>
-<div class="highlight-console"><div class="highlight"><pre><span class="go">vgcreate OVM_VG /dev/sda /dev/sdb</span>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">#</span> vgcreate OVM_VG /dev/sda /dev/sdb
 </pre></div>
 </div>
 <p><strong>Configuration example</strong>:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">storage</span><span class="p-Indicator">:</span>
   <span class="l-Scalar-Plain">lvm</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">LvmDriver</span>
+    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">lvm</span>
     <span class="l-Scalar-Plain">root</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/dev/OVM_VG</span>
     <span class="l-Scalar-Plain">volume_group</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">OVM_VG</span>
 </pre></div>
 </div>
-<p>Here we create the storage pool <strong>lvm</strong>. We use the driver <strong>LvmDriver</strong>. We
+<p>Here we create the storage pool <strong>lvm</strong>. We use the driver <strong>lvm</strong>. We
 need to specify the <cite>root</cite>, with LVM it is the path to the volume group.
 The third parameter is the name of the volume group (<cite>volume_group</cite>).</p>
 </div>
@@ -199,7 +199,7 @@ with different parameters:</p>
 <dt><strong>driver</strong></dt>
 <dd>is the name of the network driver. OVM uses it to create new VMs
 with the right configuration. Today, only the driver
-<cite>OpenvSwitchDriver</cite> exists.</dd>
+<cite>openvswitch</cite> exists.</dd>
 <dt><strong>net_name</strong></dt>
 <dd>the parameter <cite>net_name</cite> defines the name of the network in libvirt.</dd>
 <dt><strong>net_portgroup</strong></dt>
@@ -215,7 +215,7 @@ can choose <cite>dhcp</cite> and let the DHCP server on your network allocate th
 <p><strong>Configuration example</strong>:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">networks</span><span class="p-Indicator">:</span>
   <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">OpenvSwitchDriver</span>
+    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">openvswitch</span>
     <span class="l-Scalar-Plain">net_name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">net-ovs</span>
     <span class="l-Scalar-Plain">net_portgroup</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">local</span>
     <span class="l-Scalar-Plain">ipv4_allocation</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">static</span>

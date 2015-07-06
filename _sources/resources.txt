@@ -27,8 +27,8 @@ Currently, there are two drivers as you can see below.
 
 
 
-FileDriver
-~~~~~~~~~~
+The file driver
+~~~~~~~~~~~~~~~
 
 To use flat file to store VM disks.
 
@@ -38,17 +38,17 @@ To use flat file to store VM disks.
 
     storage:
       ssd:
-        driver: FileDriver
+        driver: file
         root: /mnt/pool-vm-ssd
 
 
-Here we create the storage pool **ssd**. We use the driver **FileDriver** to
+Here we create the storage pool **ssd**. We use the driver **file** to
 access it.
 
 
 
-LvmDriver
-~~~~~~~~~
+The LVM driver
+~~~~~~~~~~~~~~
 
 To use a LVM volume group to store VM disks. OVM create automatically
 one logical volume per disk. You have to create the volume group
@@ -56,7 +56,7 @@ yourself. For example:
 
 .. code-block:: console
 
-    vgcreate OVM_VG /dev/sda /dev/sdb
+    # vgcreate OVM_VG /dev/sda /dev/sdb
 
 
 **Configuration example**:
@@ -65,12 +65,12 @@ yourself. For example:
 
    storage:
      lvm:
-       driver: LvmDriver
+       driver: lvm
        root: /dev/OVM_VG
        volume_group: OVM_VG
 
 
-Here we create the storage pool **lvm**. We use the driver **LvmDriver**. We
+Here we create the storage pool **lvm**. We use the driver **lvm**. We
 need to specify the `root`, with LVM it is the path to the volume group.
 The third parameter is the name of the volume group (`volume_group`).
 
@@ -88,7 +88,7 @@ with different parameters:
 **driver**
    is the name of the network driver. OVM uses it to create new VMs
    with the right configuration. Today, only the driver
-   `OpenvSwitchDriver` exists.
+   `openvswitch` exists.
 **net_name**
    the parameter `net_name` defines the name of the network in libvirt.
 **net_portgroup**
@@ -107,7 +107,7 @@ with different parameters:
 
    networks:
      local:
-       driver: OpenvSwitchDriver
+       driver: openvswitch
        net_name: net-ovs
        net_portgroup: local
        ipv4_allocation: static
