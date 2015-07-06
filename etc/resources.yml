@@ -6,15 +6,15 @@
 #
 #   storage:
 #     hdd:
-#       driver: FileDriver
+#       driver: file
 #       root: /mnt/pool-vm-hdd
 #     ssd:
-#       driver: FileDriver
+#       driver: file
 #       root: /mnt/pool-vm-ssd
 
 storage:
   default:
-    driver: FileDriver
+    driver: file
     root: /var/lib/ovm/storage-pools/default
 
 
@@ -26,12 +26,12 @@ storage:
 # networks. You can write it as followed:
 #    networks:
 #      local:
-#        driver: OpenvSwitchDriver
+#        driver: openvswitch
 #        net_name: net-ovs
 #        net_portgroup: local
 #        ipv4_allocation: dhcp
 #      prod:
-#        driver: OpenvSwitchDriver
+#        driver: openvswitch
 #        net_name: net-ovs
 #        net_portgroup: prod
 #        ipv4_allocation: static
