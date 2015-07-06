@@ -1,0 +1,20 @@
+storage:
+
+  lvm_storage:
+    driver: lvm
+
+  file_storage:
+    driver: file
+
+
+
+networks:
+
+  prod-1:
+    driver: openvswitch
+
+  prod-2:
+    driver: openvswitch
+
+  labs:
+    driver: openvswitch
