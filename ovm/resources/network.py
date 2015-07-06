@@ -20,16 +20,23 @@
 ########################################################################
 
 
-from ipaddr import IPAddress
+def is_ipv4_valid(ip):
+    try:
+        ip = [i for i in map(int, ip.split('.', 3)) if 0 <= i <= 255]
+    except ValueError:
+        return False
+    return len(ip) == 4
 
 
-def _iter_range(ipstart, ipend):
-    ipstart = IPAddress(ipstart)
-    ipend = IPAddress(ipend)
-    currentip = ipstart
-    while currentip != ipend:
-        yield currentip
-        currentip += 1
+def iprange(a, b):
+    if not is_ipv4_valid(a) or not is_ipv4_valid(b):
+        raise ValueError('Bap IP address')
+    a = int(''.join(['{0:08b}'.format(int(i)) for i in a.split('.')]), 2)
+    b = int(''.join(['{0:08b}'.format(int(i)) for i in b.split('.')]), 2)
+    if a > b:
+        raise ValueError('Invalid range')
+    for ip in range(a, b + 1):
+        yield '.'.join([str(ip >> (8 * i) & 255) for i in range(3, -1, -1)])
 
 
 class Network(object):
@@ -87,7 +94,7 @@ class Network(object):
         ipstart = self.ipv4_pool['ip_start']
         ipend = self.ipv4_pool['ip_end']
 
-        for ip in _iter_range(ipstart, ipend):
+        for ip in iprange(ipstart, ipend):
             if str(ip) not in used_ips:
                 ipchoose = str(ip)
                 break
@@ -109,14 +116,14 @@ class Network(object):
     def set_ip_manual(self, ip):
         self._method = 'manual'
         try:
-            ip = IPAddress(ip)
+            is_ipv4_valid(ip)
         except ValueError:
             raise Exception('"%s" is not a valid IP address.' % ip)
 
         # Check if the IP is in the ipv4_pool
         ipstart = self.ipv4_pool['ip_start']
         ipend = self.ipv4_pool['ip_end']
-        if ip not in _iter_range(ipstart, ipend):
+        if ip not in iprange(ipstart, ipend):
             raise Exception('"%s" does not match with the pool.' % ip)
 
         # Check if the IP has already attributed
