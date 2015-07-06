@@ -26,6 +26,7 @@ import stat
 import tempfile
 from subprocess import PIPE, Popen
 
+from ovm.exceptions import OVMException
 from ovm.app import App
 from ovm.inventory import Inventory
 from ovm.resources.resources import Resources
@@ -34,8 +35,6 @@ from ovm.utils.printer import print_table, default
 from ovm.vmcli.management import print_vm_info
 
 
-STORAGE = Resources.get_storage()
-NETWORKS = Resources.get_networks()
 LEVEL_ERROR, LEVEL_INFO = 0, 1
 
 
@@ -118,10 +117,10 @@ def _post_install(template, diskpath, env_params, verbose=False):
 
 
 def _process_args_network(args):
-    if args.network not in NETWORKS:
-        App.fatal('Network "{0}" doesn\'t exists.'.format(args.network))
-
-    network = NETWORKS[args.network]
+    try:
+        network = Resources.get_network(args.network)
+    except OVMException as e:
+        App.fatal(e.message)
 
     if args.ip == 'auto':
         network.set_ip_auto()
@@ -153,12 +152,10 @@ def _long_netmask(cidr):
 
 
 def _process_args_storage(args):
-    if args.storage not in STORAGE:
-        App.fatal('Storage "{0}" does\'t exists.'.format(args.storage))
-
-    storage = STORAGE[args.storage]
-
-    return storage
+    try:
+        return Resources.get_storage_pool(args.storage)
+    except OVMException as e:
+        App.fatal(e.message)
 
 
 def vm_create(args):
@@ -248,23 +245,23 @@ def vm_templates(args):
 
 def vm_storage(args):
     if args.short:
-        print('\n'.join([k for k in STORAGE]))
+        print('\n'.join([p.name for p in Resources.get_storage_pools()]))
         return
 
-    headers = ('ID', 'Pool name')
+    headers = ('Pool name',)
     rows = []
-    for name, storage in STORAGE.items():
-        rows.append((name, storage.name))
+    for storage in Resources.get_storage_pools():
+        rows.append((storage.name,))
     print_table(headers, rows)
 
 
 def vm_networks(args):
     if args.short:
-        print('\n'.join([k for k in NETWORKS]))
+        print('\n'.join([n.name for n in Resources.get_networks()]))
         return
 
-    headers = ('ID',)
+    headers = ('Network name',)
     rows = []
-    for name, network in NETWORKS.items():
-        rows.append((name,))
+    for network in Resources.get_networks():
+        rows.append((network.name,))
     print_table(headers, rows)

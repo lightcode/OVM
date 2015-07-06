@@ -48,7 +48,7 @@ class Disk(object):
 
             from ovm.resources.resources import Resources
             storage_pool = None
-            for storage in Resources.get_storage().values():
+            for storage in Resources.get_storage_pools():
                 if disk_path.startswith(storage.root):
                     storage_pool = storage
                     break

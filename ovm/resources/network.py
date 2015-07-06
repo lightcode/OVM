@@ -33,8 +33,10 @@ def _iter_range(ipstart, ipend):
 
 
 class Network(object):
-    def __init__(self, driver, ipv4_allocation=None, ipv4_pool=None,
+    def __init__(self, name, driver, ipv4_allocation=None, ipv4_pool=None,
                  options=None, **params):
+
+        self.name = name
         self._method = None
         self._driver = driver()
 

@@ -21,53 +21,72 @@
 
 
 import yaml
-import importlib
 
-import ovm.drivers.network      # flake8: noqa
-import ovm.drivers.storage      # flake8: noqa
+from ovm.exceptions import OVMException
+from ovm.drivers.driver_loader import DriverLoader
 from ovm.utils.singleton import Singleton
 from ovm.resources.network import Network
 from ovm.resources.storage_pool import StoragePool
 
 
-def get_driver(driver_type, driver_name):
-    module_name = driver_name.lower().replace('driver', '')
-    pkg = importlib.import_module(
-        'ovm.drivers.{}.{}'.format(driver_type, module_name))
-    return pkg.__dict__[driver_name]
-
-
 class Resources(Singleton):
-    path = None
-    networks = {}
-    storage = {}
+
+    resources = None
+    _cache = {}
 
     @classmethod
     def init(cls, path):
-        cls.path = path
+        try:
+            with open(path) as fd:
+                cls.resources = yaml.load(fd)
+        except OSError:
+            raise OVMException(
+                'Cannot access to resources configuration file.')
 
     @classmethod
-    def load_resources(cls):
-        if not cls.networks or not cls.storage:
-            with open(cls.path) as fd:
-                resources = yaml.load(fd)
+    def get_resources_ty_type(cls, resource_type):
+        map_vars = {
+            'storage': (DriverLoader.STORAGE, StoragePool),
+            'networks': (DriverLoader.NETWORK, Network)
+        }
 
-            for name, network in resources['networks'].items():
-                driver_name = network.pop('driver')
-                driver = get_driver('network', driver_name)
-                cls.networks[name] = Network(driver, **network)
+        resource_var = map_vars[resource_type]
+        driver_loader_type = resource_var[0]
+        resource_class = resource_var[1]
 
-            for name, storage in resources['storage'].items():
-                driver_name = storage.pop('driver')
-                driver = get_driver('storage', driver_name)
-                cls.storage[name] = StoragePool(name, driver, **storage)
+        if resource_type in cls._cache:
+            return cls._cache[resource_type]
+
+        resources_list = []
+
+        dl = DriverLoader(driver_loader_type)
+        for name, options in cls.resources[resource_type].items():
+            driver_name = options.pop('driver')
+            driver = dl.load(driver_name)
+            resources_list.append(resource_class(name, driver, **options))
+
+        cls._cache[resource_type] = resources_list
+        return resources_list
 
     @classmethod
     def get_networks(cls):
-        cls.load_resources()
-        return cls.networks
+        return cls.get_resources_ty_type('networks')
 
     @classmethod
-    def get_storage(cls):
-        cls.load_resources()
-        return cls.storage
+    def get_storage_pools(cls):
+        return cls.get_resources_ty_type('storage')
+
+    @classmethod
+    def get_storage_pool(cls, name):
+        for storage in cls.get_storage_pools():
+            if storage.name == name:
+                return storage
+        raise OVMException(
+            'Cannot find storage pool named "{0}".'.format(name))
+
+    @classmethod
+    def get_network(cls, name):
+        for network in cls.get_networks():
+            if network.name == name:
+                return network
+        raise OVMException('Cannot find network named "{0}".'.format(name))
