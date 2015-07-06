@@ -22,7 +22,7 @@
 
 import yaml
 
-from ovm.exceptions import OVMException
+from ovm.exceptions import OVMError
 from ovm.drivers.driver_loader import DriverLoader
 from ovm.utils.singleton import Singleton
 from ovm.resources.network import Network
@@ -40,7 +40,7 @@ class Resources(Singleton):
             with open(path) as fd:
                 cls.resources = yaml.load(fd)
         except OSError:
-            raise OVMException(
+            raise OVMError(
                 'Cannot access to resources configuration file.')
 
     @classmethod
@@ -81,7 +81,7 @@ class Resources(Singleton):
         for storage in cls.get_storage_pools():
             if storage.name == name:
                 return storage
-        raise OVMException(
+        raise OVMError(
             'Cannot find storage pool named "{0}".'.format(name))
 
     @classmethod
@@ -89,4 +89,4 @@ class Resources(Singleton):
         for network in cls.get_networks():
             if network.name == name:
                 return network
-        raise OVMException('Cannot find network named "{0}".'.format(name))
+        raise OVMError('Cannot find network named "{0}".'.format(name))

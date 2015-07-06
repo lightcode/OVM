@@ -20,6 +20,11 @@
 ########################################################################
 
 
-class OVMException(Exception):
+class OVMError(Exception):
+
+    pass
+
+
+class DomainException(Exception):
 
     pass

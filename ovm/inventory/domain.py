@@ -27,10 +27,7 @@ from lxml import etree
 from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.inventory.network_interface import NetworkInterface
 from ovm.inventory.disk import Disk
-
-
-class DomainException(Exception):
-    pass
+from ovm.exceptions import DomainException
 
 
 class Domain(object):

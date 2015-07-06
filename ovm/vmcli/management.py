@@ -30,7 +30,7 @@ from ovm.utils.printer import ColoredString, bcolors
 from ovm.app import App
 from ovm.vmcli.libvirt_console import Console
 from ovm.vmcli.vmtop import VMTop
-from ovm.inventory.domain import DomainException
+from ovm.exceptions import DomainException
 
 
 ###################################

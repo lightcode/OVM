@@ -26,7 +26,7 @@ import stat
 import tempfile
 from subprocess import PIPE, Popen
 
-from ovm.exceptions import OVMException
+from ovm.exceptions import OVMError
 from ovm.app import App
 from ovm.inventory import Inventory
 from ovm.resources.resources import Resources
@@ -119,7 +119,7 @@ def _post_install(template, diskpath, env_params, verbose=False):
 def _process_args_network(args):
     try:
         network = Resources.get_network(args.network)
-    except OVMException as e:
+    except OVMError as e:
         App.fatal(e.message)
 
     if args.ip == 'auto':
@@ -154,7 +154,7 @@ def _long_netmask(cidr):
 def _process_args_storage(args):
     try:
         return Resources.get_storage_pool(args.storage)
-    except OVMException as e:
+    except OVMError as e:
         App.fatal(e.message)
 
 

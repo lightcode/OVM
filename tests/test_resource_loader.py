@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from ovm.exceptions import OVMException
+from ovm.exceptions import OVMError
 from ovm.resources.resources import Resources
 
 
@@ -42,9 +42,9 @@ class TestResourceLoader(unittest.TestCase):
             self.assertEqual(network.name, name)
 
     def test_to_load_non_existing_driver(self):
-        """this should raise an OVMException"""
+        """this should raise an OVMError"""
         Resources.init(CONFIG)
-        with self.assertRaises(OVMException):
+        with self.assertRaises(OVMError):
             Resources.get_storage_pool('non-existing-pool')
 
 
