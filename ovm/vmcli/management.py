@@ -57,8 +57,14 @@ def bulk_command(func):
             vmnames = [vmnames]
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            tasks = {}
             for name in vmnames:
-                executor.submit(func, name, cli_args)
+                tasks[executor.submit(func, name, cli_args)] = name
+
+            for future in concurrent.futures.as_completed(tasks):
+                if future.exception() is not None:
+                    logger.error('Unhandled error for %s: %s',
+                                 name, future.exception())
     return wrapper
 
 
