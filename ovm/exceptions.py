@@ -20,6 +20,9 @@
 ########################################################################
 
 
+__all__ = ['OVMError', 'DomainException', 'DriverError']
+
+
 class OVMError(Exception):
 
     def __init__(self, message):
@@ -27,5 +30,10 @@ class OVMError(Exception):
 
 
 class DomainException(OVMError):
+
+    pass
+
+
+class DriverError(OVMError):
 
     pass
