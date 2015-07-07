@@ -24,7 +24,7 @@ import os.path
 from subprocess import Popen, PIPE
 from lxml.builder import E
 
-from ovm.drivers import DriverError
+from ovm.exceptions import DriverError
 from ovm.drivers.storage.generic import StorageDriver
 from ovm.utils.logger import logger
 
