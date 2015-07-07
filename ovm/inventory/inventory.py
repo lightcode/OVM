@@ -23,6 +23,7 @@
 import libvirt
 
 from ovm.inventory.domain import Domain
+from ovm.utils.logger import logger
 
 
 class Inventory:
@@ -33,6 +34,7 @@ class Inventory:
     @classmethod
     def open(cls):
         cls._conn = libvirt.open(cls._connection_string)
+        logger.debug('New connection to libvirt opened.')
 
     @classmethod
     def new_connection(cls):

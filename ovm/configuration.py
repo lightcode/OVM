@@ -20,41 +20,12 @@
 ########################################################################
 
 
-import os
-import shutil
-from setuptools import setup, find_packages
-
-from ovm.configuration import Configuration
+__all__ = ['Configuration']
 
 
-with open('requirements.txt') as f:
-    requirements = [line.strip() for line in f.readlines()]
+class Configuration:
 
-setup(
-    name='OVM',
-    version=Configuration.VERSION,
-    description='Open Virtualization Manager',
-    author='Matthieu Gaigniere',
-    author_email='matthieu@lightcode.fr',
-    url='http://lightcode.fr',
-    install_requires=requirements,
-    packages=find_packages(),
-    data_files=[
-        ('/etc/bash_completion.d', ['bin/vm-completion'])
-    ],
-    entry_points={
-        'console_scripts': ['vm = ovm.vmcli.__main__:main']
-    }
-)
-
-if os.path.exists(Configuration.ETC):
-    print("Don't change {0}".format(Configuration.ETC))
-else:
-    shutil.copytree('etc/', '/etc/ovm')
-
-if not os.path.exists(Configuration.SAVED_VMS):
-    os.makedirs(Configuration.SAVED_VMS)
-
-DEFAULT_STORAGE_POOL = '/var/lib/ovm/storage-pools/default'
-if not os.path.exists(DEFAULT_STORAGE_POOL):
-    os.makedirs(DEFAULT_STORAGE_POOL)
+    VERSION = '0.2'
+    ETC = '/etc/ovm'
+    SAVED_VMS = '/var/lib/ovm/saved-vms'
+    ETC_TEMPLATES = ETC + '/templates'

@@ -24,6 +24,7 @@ import os.path
 from lxml import etree
 
 from ovm.app import App
+from ovm.configuration import Configuration
 
 
 class DomainDefinition:
@@ -67,7 +68,7 @@ class DomainDefinition:
         self._memory = int(memory)
 
     def _get_basevm(self):
-        basevm_path = os.path.join(App.ETC, 'base-vm.xml')
+        basevm_path = os.path.join(Configuration.ETC, 'base-vm.xml')
         try:
             with open(basevm_path) as file_:
                 tree = etree.parse(file_)

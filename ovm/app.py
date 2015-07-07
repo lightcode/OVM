@@ -27,11 +27,8 @@ from ovm.utils.printer import bcolors, ColoredString
 
 
 class App:
-    VERSION = '0.2'
-    ETC = '/etc/ovm'
-    SAVED_VMS = '/var/lib/ovm/saved-vms'
+
     LOG_TYPE_SIZE = 7
-    ETC_TEMPLATES = ETC + '/templates'
 
     @classmethod
     def notice(cls, text, newline=True):

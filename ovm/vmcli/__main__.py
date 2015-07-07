@@ -24,10 +24,11 @@ import argparse
 import libvirt
 import logging
 
+from ovm.configuration import Configuration
 from ovm.inventory import Inventory
 from ovm.utils.logger import logger
-from ovm.vmcli.creation import *
-from ovm.vmcli.management import *
+from ovm.vmcli.creation import *    # noqa
+from ovm.vmcli.management import *  # noqa
 
 
 def add_subparsers(parser):
@@ -197,13 +198,11 @@ def f(ctx, error):
 def main():
     libvirt.registerErrorHandler(f, None)
 
-    Resources.init(os.path.join(App.ETC, 'resources.yml'))
-    Inventory.open()
-
     parser = argparse.ArgumentParser(
         description='Provide functions to create and manage VMs on KVM.',
         prog='vm')
-    parser.add_argument('--version', action='version', version='OVM 0.2')
+    parser.add_argument('--version', action='version',
+                        version=Configuration.VERSION)
     parser.add_argument('-v', '--verbose', action='store_true')
 
     add_subparsers(parser)
@@ -212,6 +211,9 @@ def main():
 
     if args.verbose:
         logger.setLevel(logging.DEBUG)
+
+    Resources.init(os.path.join(Configuration.ETC, 'resources.yml'))
+    Inventory.open()
 
     if hasattr(args, 'func'):
         getattr(args, 'func')(args)

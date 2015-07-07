@@ -24,14 +24,14 @@ import glob
 import os.path
 import yaml
 
-from ovm.app import App
+from ovm.configuration import Configuration
 from ovm.exceptions import OVMError
 from ovm.templates.image_template import ImageTemplate
 
 
 class Template:
 
-    TEMPLATES_PATH = App.ETC_TEMPLATES
+    TEMPLATES_PATH = Configuration.ETC_TEMPLATES
     DEFAULT_VCPU = 1
     DEFAULT_MEMORY = 256
     DEFAULT_ABILITIES = {'resizeDisk': False}

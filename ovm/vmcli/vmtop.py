@@ -46,7 +46,7 @@ class VMTop:
     def __init__(self):
         self.sort_param = 'cpu'
         self.term_width = 0
-        self.term_heigth = 0
+        self.term_height = 0
 
         self.stats = Stats()
 
@@ -153,7 +153,7 @@ class VMTop:
     def resize(self):
         w, h = VMTop.terminal_size()
         self.term_width = w
-        self.term_heigth = h
+        self.term_height = h
         curses.resizeterm(h, w)
 
     def print_line(self, text, style=curses.A_NORMAL):

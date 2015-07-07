@@ -24,6 +24,7 @@ import os
 import libvirt
 from lxml import etree
 
+from ovm.configuration import Configuration
 from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.inventory.network_interface import NetworkInterface
 from ovm.inventory.disk import Disk
@@ -58,8 +59,7 @@ class Domain:
         return self.vir_domain.isActive()
 
     def get_save_file(self):
-        from ovm.app import App
-        return os.path.join(App.SAVED_VMS, self.get_name())
+        return os.path.join(Configuration.SAVED_VMS, self.get_name())
 
     def remove_save(self):
         if self.is_saved():

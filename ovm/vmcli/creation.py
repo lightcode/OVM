@@ -28,11 +28,12 @@ import tempfile
 from subprocess import PIPE, Popen
 
 from ovm.app import App
+from ovm.configuration import Configuration
 from ovm.exceptions import OVMError
 from ovm.inventory import Inventory
 from ovm.resources.resources import Resources
-from ovm.templates.template import Template
 from ovm.templates.domain_definition import DomainDefinition
+from ovm.templates.template import Template
 from ovm.utils.logger import logger
 from ovm.utils.printer import print_table, default
 from ovm.vmcli.management import print_vm_info
@@ -67,7 +68,7 @@ def _thread_logger(fd, level, print_log):
 
 def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
     if not path.startswith('/'):
-        path = os.path.join(App.ETC, 'scripts', path)
+        path = os.path.join(Configuration.ETC, 'scripts', path)
 
     if not os.path.exists(path):
         logger.warning('Script ignored "%s": not found', path)
