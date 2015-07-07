@@ -23,8 +23,7 @@
 class OVMError(Exception):
 
     def __init__(self, message):
-        super(OVMError, self).__init__()
-        self.message = message
+        super(OVMError, self).__init__(message)
 
 
 class DomainException(OVMError):

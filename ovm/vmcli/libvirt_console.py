@@ -36,7 +36,7 @@ def error_handler(_, error):
         return
 
 
-class Console(object):
+class Console:
     def __init__(self, domain_name):
         libvirt.virEventRegisterDefaultImpl()
         libvirt.registerErrorHandler(error_handler, None)

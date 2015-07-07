@@ -22,8 +22,10 @@
 
 from lxml import etree
 
+from ovm.exceptions import OVMError
 
-class Disk(object):
+
+class Disk:
 
     def __init__(self, **kargs):
         self.guest_dev = None
@@ -33,11 +35,11 @@ class Disk(object):
 
             disk_type = xmldef.attrib.get('type')
             if disk_type not in ('file', 'block'):
-                raise Exception('Unknown disk type.')
+                raise OVMError('Unknown disk type.')
 
             source = xmldef.find('source')
             if source is None:
-                raise Exception('Source is missing on the libvirt device.')
+                raise OVMError('Source is missing on the libvirt device.')
 
             disk_path_attr = dict(file='file', block='dev').get(disk_type)
             disk_path = source.attrib.get(disk_path_attr)
@@ -54,7 +56,7 @@ class Disk(object):
                     break
 
             if storage_pool is None:
-                raise Exception('Cannot find storage pool.')
+                raise OVMError('Cannot find storage pool.')
 
             driver = storage_pool.driver
 
@@ -69,7 +71,7 @@ class Disk(object):
             disk_path = driver.import_image(image, name)
 
         else:
-            raise Exception('Not enough arguments are passed to Disk.')
+            raise OVMError('Not enough arguments are passed to Disk.')
 
         self.path = disk_path
         self.pool = storage_pool

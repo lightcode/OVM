@@ -44,7 +44,7 @@ def _get_domain(name):
     try:
         domain = Inventory.get_domain(name)
     except libvirt.libvirtError:
-        App.fatal('Cannot get the VM "%s".' % name)
+        raise OVMError('Cannot get the VM "%s".' % name)
     else:
         return domain
 

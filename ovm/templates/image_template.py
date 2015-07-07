@@ -23,6 +23,8 @@
 import os
 from subprocess import Popen, PIPE
 
+from ovm.exceptions import OVMError
+
 
 class ImageTemplate:
 
@@ -33,7 +35,7 @@ class ImageTemplate:
 
     def copy_on_device(self, dest, dest_format):
         if not os.path.exists(dest):
-            raise Exception('copy_on_device: destination must exists.')
+            raise OVMError('copy_on_device: destination must exists.')
 
         args = [
             'qemu-img', 'convert',
@@ -46,4 +48,4 @@ class ImageTemplate:
         with Popen(args, stderr=PIPE) as process:
             process.wait()
             if process.returncode != 0:
-                raise Exception(process.stderr.read().decode('utf-8'))
+                raise OVMError(process.stderr.read().decode('utf-8'))

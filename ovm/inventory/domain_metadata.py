@@ -25,7 +25,7 @@ import xml.etree.ElementTree as ET
 import libvirt
 
 
-class DomainMetadata(object):
+class DomainMetadata:
 
     def __init__(self, domain):
         self._metadata = {}

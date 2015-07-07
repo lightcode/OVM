@@ -24,12 +24,11 @@ import yaml
 
 from ovm.exceptions import OVMError
 from ovm.drivers.driver_loader import DriverLoader
-from ovm.utils.singleton import Singleton
 from ovm.resources.network import Network
 from ovm.resources.storage_pool import StoragePool
 
 
-class Resources(Singleton):
+class Resources:
 
     resources = None
     _cache = {}

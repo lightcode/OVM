@@ -20,6 +20,9 @@
 ########################################################################
 
 
+from ovm.exceptions import OVMError
+
+
 def is_ipv4_valid(ip):
     try:
         ip = [i for i in map(int, ip.split('.', 3)) if 0 <= i <= 255]
@@ -39,7 +42,7 @@ def iprange(a, b):
         yield '.'.join([str(ip >> (8 * i) & 255) for i in range(3, -1, -1)])
 
 
-class Network(object):
+class Network:
     def __init__(self, name, driver, ipv4_allocation=None, ipv4_pool=None,
                  options=None, **params):
 
@@ -100,7 +103,7 @@ class Network(object):
                 break
 
         if not ipchoose:
-            raise Exception('No IPs available in your IP pool')
+            raise OVMError('No IPs available in your IP pool')
 
         self.ipv4_pool['ip'] = ipchoose
 
@@ -118,18 +121,18 @@ class Network(object):
         try:
             is_ipv4_valid(ip)
         except ValueError:
-            raise Exception('"%s" is not a valid IP address.' % ip)
+            raise OVMError('"%s" is not a valid IP address.' % ip)
 
         # Check if the IP is in the ipv4_pool
         ipstart = self.ipv4_pool['ip_start']
         ipend = self.ipv4_pool['ip_end']
         if ip not in iprange(ipstart, ipend):
-            raise Exception('"%s" does not match with the pool.' % ip)
+            raise OVMError('"%s" does not match with the pool.' % ip)
 
         # Check if the IP has already attributed
         used_ips = self._get_used_ips()
         if str(ip) in used_ips:
-            raise Exception('This IP address has been provided.')
+            raise OVMError('This IP address has been provided.')
 
         self.ipv4_pool['ip'] = str(ip)
 

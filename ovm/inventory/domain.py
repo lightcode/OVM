@@ -30,7 +30,7 @@ from ovm.inventory.disk import Disk
 from ovm.exceptions import DomainException
 
 
-class Domain(object):
+class Domain:
     STATES = {1: 'Running', 3: 'Paused', 5: 'Stopped'}
 
     def __init__(self, vir_domain, libvirt_conn=None):
@@ -87,7 +87,10 @@ class Domain(object):
             raise DomainException('the VM must be active.')
         if self.is_saved():
             raise DomainException('the file to save the VM already exists.')
-        self.vir_domain.save(self.get_save_file())
+        try:
+            self.vir_domain.save(self.get_save_file())
+        except libvirt.libvirtError as e:
+            raise DomainException('libvirt returns an error: {0}'.format(e))
 
     def restore(self):
         if self.is_active():
@@ -97,7 +100,12 @@ class Domain(object):
             raise DomainException('this VM has already been saved.')
 
         save_file = self.get_save_file()
-        self._libvirt_conn.restore(save_file)
+
+        try:
+            self._libvirt_conn.restore(save_file)
+        except libvirt.libvirtError as e:
+            raise DomainException('libvirt returns an error: {0}'.format(e))
+
         self.remove_save()
 
     def _get_libvirt_state(self):

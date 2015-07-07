@@ -129,22 +129,22 @@ def _process_args_network(args):
         network.set_ip_auto()
         try:
             network.set_ip_auto()
-        except Exception as e:
+        except OVMError as e:
             App.fatal(e)
     elif args.ip == 'dhcp':
         try:
             network.set_ip_dhcp()
-        except Exception as e:
+        except OVMError as e:
             App.fatal(e)
     elif args.ip == 'default':
         try:
             network.set_ip_default()
-        except Exception as e:
+        except OVMError as e:
             App.fatal(e)
     else:
         try:
             network.set_ip_manual(args.ip)
-        except Exception as e:
+        except OVMError as e:
             App.fatal(e)
     return network
 

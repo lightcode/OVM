@@ -20,7 +20,7 @@
 ########################################################################
 
 
-class Driver(object):
+class Driver:
 
     def __init__(self):
         self._params = {}

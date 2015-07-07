@@ -20,7 +20,7 @@
 ########################################################################
 
 
-class NetworkInterface(object):
+class NetworkInterface:
     def __init__(self, xmldesc):
         self.xmldesc = xmldesc
 

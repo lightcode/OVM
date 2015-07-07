@@ -43,7 +43,7 @@ class bcolors:
         self.ENDC = ''
 
 
-class ColoredString(object):
+class ColoredString:
     def __init__(self, text, color):
         self.text = str(text)
         self.color = color

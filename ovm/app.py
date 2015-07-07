@@ -23,11 +23,10 @@
 import sys
 
 from ovm.utils.logger import logger
-from ovm.utils.singleton import Singleton
 from ovm.utils.printer import bcolors, ColoredString
 
 
-class App(Singleton):
+class App:
     VERSION = '0.2'
     ETC = '/etc/ovm'
     SAVED_VMS = '/var/lib/ovm/saved-vms'

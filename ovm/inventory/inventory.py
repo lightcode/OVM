@@ -23,10 +23,9 @@
 import libvirt
 
 from ovm.inventory.domain import Domain
-from ovm.utils.singleton import Singleton
 
 
-class Inventory(Singleton):
+class Inventory:
 
     _conn = None
     _connection_string = 'qemu:///system'

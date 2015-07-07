@@ -26,7 +26,7 @@ from lxml import etree
 from ovm.app import App
 
 
-class DomainDefinition(object):
+class DomainDefinition:
     def __init__(self, template, name):
         self.name = name
         self._template = template
@@ -71,8 +71,8 @@ class DomainDefinition(object):
         try:
             with open(basevm_path) as file_:
                 tree = etree.parse(file_)
-        except Exception as e:
-            App.fatal('Cannot open base-vm.xml: %s' % str(e))
+        except OSError as e:
+            App.fatal('Cannot open base-vm.xml: %s' % e)
         else:
             return tree.getroot()
 
