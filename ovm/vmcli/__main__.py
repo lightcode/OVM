@@ -21,12 +21,14 @@
 
 
 import argparse
-
 import libvirt
-from ovm.vmcli.creation import *
-from ovm.vmcli.management import *
+import logging
+
 from ovm.app import App
 from ovm.inventory import Inventory
+from ovm.utils.logger import logger
+from ovm.vmcli.creation import *
+from ovm.vmcli.management import *
 
 
 # Don't show error message from libvirt_driver
@@ -45,6 +47,7 @@ def parse_args():
         description='Provide functions to create and manage VMs on KVM.',
         prog='vm')
     parser.add_argument('--version', action='version', version='OVM 0.2')
+    parser.add_argument('-v', '--verbose', action='store_true')
 
     subparsers = parser.add_subparsers()
 
@@ -57,9 +60,6 @@ def parse_args():
     # Create a VM
     parser_create = subparsers.add_parser('create', help='create a new VM')
     parser_create.add_argument('name', help='set the name of the VM')
-    parser_create.add_argument(
-        '-v', '--verbose', action='store_true',
-        help='print output of post-install scripts')
     parser_create.add_argument('--template', required=True)
     parser_create.add_argument('--network', required=True)
     parser_create.add_argument('--storage', required=True)
@@ -166,7 +166,8 @@ def parse_args():
         'remove', aliases=['rm'], help='remove one or many VMs')
     parser_remove.add_argument('name', help='name of VMs', nargs='+')
     parser_remove.add_argument(
-        '-f', '--yes', '-y', action='store_true',
+        '-f', '--force', '--yes', '-y', action='store_true',
+        dest='force',
         help='Remove VM without asking confirmation.')
     parser_remove.set_defaults(func=vm_remove)
 
@@ -185,8 +186,12 @@ def parse_args():
     parser_top.set_defaults(func=vm_top)
 
     args = parser.parse_args()
+
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
+
     if hasattr(args, 'func'):
-        getattr(args, "func")(args)
+        getattr(args, 'func')(args)
     else:
         parser.print_help()
         sys.exit(0)

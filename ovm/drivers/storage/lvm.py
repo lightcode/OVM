@@ -26,6 +26,7 @@ from lxml.builder import E
 
 from ovm.drivers import DriverError
 from ovm.drivers.storage.generic import StorageDriver
+from ovm.utils.logger import logger
 
 
 __all__ = ['LvmDriver']
@@ -88,6 +89,7 @@ class LvmDriver(StorageDriver):
         return path
 
     def remove_disk(self, disk):
+        logger.debug('Trying to remove disk "%s".', disk.path)
         args = ['lvremove', '--force', disk.path]
         with Popen(args, stdout=PIPE, stderr=PIPE) as process:
             process.wait()

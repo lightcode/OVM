@@ -26,6 +26,7 @@ from lxml.builder import E
 
 from ovm.drivers import DriverError
 from ovm.drivers.storage.generic import StorageDriver
+from ovm.utils.logger import logger
 
 
 __all__ = ['FileDriver']
@@ -83,9 +84,9 @@ class FileDriver(StorageDriver):
         return path
 
     def remove_disk(self, disk):
+        logger.debug('Trying to remove disk "%s".', disk.path)
         try:
             os.remove(disk.path)
         except OSError as err:
-            print('Cannot remove disk "{}": {}'.format(disk.path, err))
-        else:
-            print('Disk "{}" removed'.format(disk.path))
+            raise DriverError(
+                'Cannot remove disk "{}": {}'.format(disk.path, err))

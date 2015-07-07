@@ -24,6 +24,7 @@ import os
 import sys
 from glob import iglob
 
+from ovm.utils.logger import logger
 from ovm.resources.resources import Resources
 from ovm.utils.singleton import Singleton
 from ovm.templates.template import Template
@@ -65,15 +66,6 @@ class App(Singleton):
                 return tpl
 
     @classmethod
-    def success(cls, text, newline=True):
-        type_txt = 'Success'.ljust(cls.LOG_TYPE_SIZE)
-        sys.stdout.write('{0} |  {1}'.format(
-            ColoredString(type_txt, bcolors.OKGREEN), text))
-        if newline:
-            sys.stdout.write('\n')
-        sys.stdout.flush()
-
-    @classmethod
     def notice(cls, text, newline=True):
         type_txt = 'Notice'.ljust(cls.LOG_TYPE_SIZE)
         sys.stdout.write('{0} |  {1}'.format(
@@ -92,11 +84,9 @@ class App(Singleton):
         sys.stdout.flush()
 
     @classmethod
-    def fatal(cls, text=None):
-        type_txt = 'Fatal'.ljust(cls.LOG_TYPE_SIZE)
-        if text:
-            print('{0} |  {1}'.format(
-                ColoredString(type_txt, bcolors.FAIL), text))
+    def fatal(cls, text=None, *args):
+        if text is not None:
+            logger.error(text, *args)
         sys.exit(1)
 
 

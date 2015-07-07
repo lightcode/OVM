@@ -26,8 +26,9 @@ import stat
 import tempfile
 from subprocess import PIPE, Popen
 
-from ovm.exceptions import OVMError
 from ovm.app import App
+from ovm.exceptions import OVMError
+from ovm.utils.logger import logger
 from ovm.inventory import Inventory
 from ovm.resources.resources import Resources
 from ovm.templates.domain_definition import DomainDefinition
@@ -42,7 +43,7 @@ def _resize_fs(template, vol_path, verbose=False):
     """Resize VM's filesystem if it defined in template.
     """
     if template.abilities['resizeDisk']:
-        print('Resizing filesystem...')
+        logger.info('Resizing filesystem...')
         options = template.abilities['resizeDisk']
         params = []
         for param in options['params']:
@@ -67,7 +68,7 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
         path = os.path.join(App.ETC, 'scripts', path)
 
     if not os.path.exists(path):
-        print('Script ignored "{0}": not found'.format(path))
+        logger.warning('Script ignored "%s": not found', path)
         return
 
     os.chmod(path, stat.S_IXUSR)
@@ -105,7 +106,7 @@ def _post_install(template, diskpath, env_params, verbose=False):
         for name, value in env_params.items():
             configuration.write(bytes('{}={}\n'.format(name, value), 'utf-8'))
 
-    print('Running post-install scripts...')
+    logger.info('Running post-install scripts...')
     for hook in post_install:
         path = hook['path']
         params = hook['params']
@@ -183,7 +184,7 @@ def vm_create(args):
     # 1. Find the template
     App.load_templates()
     template = App.get_template(args.template)
-    print('You choose the template {0}.'.format(template.name))
+    logger.info('You choose the template {0}.'.format(template.name))
 
     network.import_template_spec(template)
 
@@ -197,7 +198,7 @@ def vm_create(args):
     if args.memory:
         domdef.memory = args.memory
 
-    print("Creating VM's disk...")
+    logger.info("Creating VM's disk...")
     diskpath = domdef.create_main_disk()
     if args.size:
         domdef.resize_main_disk(args.size)
@@ -240,28 +241,4 @@ def vm_templates(args):
             default(tpl.get_os_name(), '-'),
             default(tpl.get_os_version(), '-')
         ))
-    print_table(headers, rows)
-
-
-def vm_storage(args):
-    if args.short:
-        print('\n'.join([p.name for p in Resources.get_storage_pools()]))
-        return
-
-    headers = ('Pool name',)
-    rows = []
-    for storage in Resources.get_storage_pools():
-        rows.append((storage.name,))
-    print_table(headers, rows)
-
-
-def vm_networks(args):
-    if args.short:
-        print('\n'.join([n.name for n in Resources.get_networks()]))
-        return
-
-    headers = ('Network name',)
-    rows = []
-    for network in Resources.get_networks():
-        rows.append((network.name,))
     print_table(headers, rows)
