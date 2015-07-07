@@ -22,9 +22,11 @@
 
 class OVMError(Exception):
 
-    pass
+    def __init__(self, message):
+        super(OVMError, self).__init__()
+        self.message = message
 
 
-class DomainException(Exception):
+class DomainException(OVMError):
 
     pass

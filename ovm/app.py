@@ -20,50 +20,19 @@
 ########################################################################
 
 
-import os
 import sys
-from glob import iglob
 
 from ovm.utils.logger import logger
-from ovm.resources.resources import Resources
 from ovm.utils.singleton import Singleton
-from ovm.templates.template import Template
 from ovm.utils.printer import bcolors, ColoredString
 
 
 class App(Singleton):
     VERSION = '0.2'
-    templates = []
-    _templates_loaded = False
     ETC = '/etc/ovm'
     SAVED_VMS = '/var/lib/ovm/saved-vms'
     LOG_TYPE_SIZE = 7
-
-    @classmethod
-    def init(cls):
-        Resources.init(os.path.join(cls.ETC, 'resources.yml'))
-
-    @classmethod
-    def load_templates(cls):
-        if cls._templates_loaded:
-            return
-
-        for path in iglob(ETC_TEMPLATES):
-            with open(path) as ofile:
-                try:
-                    cls.templates.append(Template.load_file(ofile))
-                except Exception as e:
-                    print('Error with template "{}": {}'.format(path, e))
-
-    @classmethod
-    def get_templates(cls):
-        return cls.templates
-
-    @classmethod
-    def get_template(cls, uid):
-        for tpl in cls.get_templates():
-            if tpl.uid == uid:
-                return tpl
+    ETC_TEMPLATES = ETC + '/templates'
 
     @classmethod
     def notice(cls, text, newline=True):
@@ -88,8 +57,3 @@ class App(Singleton):
         if text is not None:
             logger.error(text, *args)
         sys.exit(1)
-
-
-App.init()
-
-ETC_TEMPLATES = App.ETC + '/templates/*.yml'

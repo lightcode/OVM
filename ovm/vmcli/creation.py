@@ -23,15 +23,17 @@
 import concurrent.futures
 import os
 import stat
+import sys
 import tempfile
 from subprocess import PIPE, Popen
 
 from ovm.app import App
 from ovm.exceptions import OVMError
-from ovm.utils.logger import logger
 from ovm.inventory import Inventory
 from ovm.resources.resources import Resources
+from ovm.templates.template import Template
 from ovm.templates.domain_definition import DomainDefinition
+from ovm.utils.logger import logger
 from ovm.utils.printer import print_table, default
 from ovm.vmcli.management import print_vm_info
 
@@ -182,9 +184,13 @@ def vm_create(args):
     storage = _process_args_storage(args)
 
     # 1. Find the template
-    App.load_templates()
-    template = App.get_template(args.template)
-    logger.info('You choose the template {0}.'.format(template.name))
+    try:
+        template = Template.get_template(args.template)
+    except OVMError as e:
+        logger.error(e.message)
+        sys.exit(1)
+    else:
+        logger.info('Template "%s" loaded.', template.name)
 
     network.import_template_spec(template)
 
@@ -224,8 +230,7 @@ def vm_create(args):
 
 
 def vm_templates(args):
-    App.load_templates()
-    templates = App.get_templates()
+    templates = list(Template.get_templates())
 
     if args.short:
         print('\n'.join([tpl.uid for tpl in templates]))
