@@ -21,16 +21,25 @@
 
 
 import curses
+import fcntl
+import libvirt
+import struct
+import termios
 import threading
 import time
-import struct
 
-import psutil
-
-import fcntl
-import termios
 from ovm.inventory import Inventory
 from ovm.utils.printer import si_unit
+
+
+UPDATE_DATA_INTERVAL = 1
+
+
+class DomainStats:
+
+    def __init__(self, domain, stats):
+        self.domain = domain
+        self.stats = stats
 
 
 class Stats:
@@ -44,6 +53,8 @@ class Stats:
 
 class VMTop:
     def __init__(self):
+        self.libvirt_conn = Inventory.new_connection()
+
         self.sort_param = 'cpu'
         self.term_width = 0
         self.term_height = 0
@@ -77,10 +88,10 @@ class VMTop:
                 event = self.screen.getch()
                 if event == ord('q'):
                     break
-                elif event == ord('c'):
-                    self.sort_param = 'cpu'
-                elif event == ord('r'):
-                    self.sort_param = 'rss'
+                # elif event == ord('c'):
+                #     self.sort_param = 'cpu'
+                # elif event == ord('r'):
+                #     self.sort_param = 'rss'
                 elif event == curses.KEY_RESIZE:
                     self.resize()
         finally:
@@ -105,50 +116,63 @@ class VMTop:
     def update_data(self):
         while True:
             self._update_data()
-            time.sleep(2)
+            time.sleep(UPDATE_DATA_INTERVAL)
 
     def _update_data(self):
-        vms = {}
-        mem_vms_total = 0
+        all_stats = {}
+        total_mem_domain = 0
+        host_info = self.libvirt_conn.getInfo()
+        cpu_count = host_info[2]
 
-        for domain in Inventory.get_domains():
-            name = domain.get_name()
-            infos = {
-                'name': name,
-                'cpu': 0,
-                'mem': 0,
-                'rss': 0,
-                'is_active': domain.is_active()
+        for domain, libvirt_stats in self.libvirt_conn.getAllDomainStats(
+                flags=libvirt.VIR_CONNECT_GET_ALL_DOMAINS_STATS_RUNNING
+                ):
+
+            name = domain.name()
+            # Current memory allocated on the host
+            rss = domain.memoryStats().get('rss', 0) * 1024
+
+            old_stats = self.stats.vms.get(name)
+
+            # guest current max memory
+            guest_mem = libvirt_stats.get('balloon.maximum', 0) * 1024
+
+            cpu = 0
+            cur_cpu_time = 0
+
+            if old_stats is not None:
+                cpu_prev_time = old_stats.stats.get('cputime', 0)
+                cur_cpu_time = int(libvirt_stats.get('vcpu.0.time', 0))
+                if cpu_prev_time > 0:
+                    cpu = (cur_cpu_time - cpu_prev_time) \
+                        / (UPDATE_DATA_INTERVAL * cpu_count * 10**7)
+                    cpu = min(cpu, 100)
+
+            stats = {
+                'name': domain.name(),
+                'cputime': cur_cpu_time,
+                'cpu_usage': cpu,
+                'mem': si_unit(guest_mem, True) + 'B',
+                'rss': si_unit(rss, True) + 'B',
+                'rss_float': rss
             }
-            vms[name] = infos
+            total_mem_domain += stats['rss_float']
 
-        for p in psutil.process_iter():
-            try:
-                if p.name() == 'kvm':
-                    cmd = p.cmdline()
-                    vmname = cmd[cmd.index('-name') + 1]
+            all_stats[name] = DomainStats(domain, stats)
 
-                    if vmname not in vms:
-                        continue
+        self.stats.vms = all_stats
 
-                    vms[vmname]['cpu'] = p.cpu_percent(interval=False)
-                    vms[vmname]['mem'] = p.memory_percent()
-                    vms[vmname]['rss'] = '{}B'.format(
-                        si_unit(p.memory_info().rss, True))
-                    vms[vmname]['rss_float'] = p.memory_info().rss
-                    mem_vms_total += p.memory_info().rss
-            except:
-                continue
+        self.stats.mem_free = self.libvirt_conn.getFreeMemory()
+        self.stats.mem_total = host_info[1] * (1024**2)
+        self.stats.mem_vms_total = total_mem_domain
 
-        mem = psutil.virtual_memory()
-        mem_free = mem.free + mem.cached + mem.buffers
-        mem_total = mem.total
-
+        '''
         self.stats.vms.update(vms)
         self.stats.mem_vms_total = mem_vms_total
         self.stats.mem_free = mem_free
         self.stats.mem_os = mem_total - mem_free - mem_vms_total
         self.stats.mem_total = mem_total
+        '''
 
     def resize(self):
         w, h = VMTop.terminal_size()
@@ -212,28 +236,19 @@ class VMTop:
         # Table header
         cur_line += 1
         self.screen.move(cur_line, 0)
-        pattern = '{name:15} {cpu:>8} {mem:>8} {rss:>8}'
+        pattern = '{name:15} {cpu_usage:>8} {mem:>8} {rss:>8}'
         self.print_line(pattern.format(
-            name='NAME', cpu='CPU%', mem='MEM%', rss='MEM'
+            name='NAME', cpu_usage='%CPU', mem='MEM', rss='HMEM'
         ), curses.color_pair(1))
         cur_line += 1
 
-        # Print table
-        if self.sort_param == 'cpu':
-            sort_key = self._sort_by_cpu
-        elif self.sort_param == 'rss':
-            sort_key = self._sort_by_rss
-        else:
-            sort_key = None
-
-        pattern = '{name:15} {cpu:>8.1f} {mem:>8.1f} {rss:>8}'
-        for vm in sorted(self.stats.vms.values(), key=sort_key, reverse=True):
+        pattern = '{name:15} {cpu_usage:>8.1f} {mem:>8} {rss:>8}'
+        for vm in self.stats.vms.values():
+            stats = vm.stats
             style = 0
-            if not vm['is_active']:
-                style = curses.color_pair(2)
             if cur_line < self.term_width:
                 self.screen.move(cur_line, 0)
-                self.print_line(pattern.format(**vm), style)
+                self.print_line(pattern.format(**stats), style)
             cur_line += 1
 
         self.screen.refresh()
