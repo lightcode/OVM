@@ -33,6 +33,7 @@ from ovm.utils.printer import si_unit
 
 
 UPDATE_DATA_INTERVAL = 1
+REFRESH_INTERVAL = 0.5
 
 
 class DomainStats:
@@ -46,16 +47,15 @@ class Stats:
     def __init__(self):
         self.vms = {}
         self.mem_vms_total = 0
-        self.mem_free = 0
         self.mem_os = 0
         self.mem_total = 0
+        self.mem_cached = 0
 
 
 class VMTop:
     def __init__(self):
         self.libvirt_conn = Inventory.new_connection()
 
-        self.sort_param = 'cpu'
         self.term_width = 0
         self.term_height = 0
 
@@ -64,34 +64,33 @@ class VMTop:
         self.screen = curses.initscr()
         self.init_terminal()
 
-        # Black on green
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_GREEN)
-        # Grey on black
-        curses.init_pair(2, 8, curses.COLOR_BLACK)
-        # Red on black
-        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
-        # Green on black
-        curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
-        # Dark cyan on black
-        curses.init_pair(5, 6, curses.COLOR_BLACK)
+        # Init colors
+        colors = (
+            ('BLACK_ON_GREEN', curses.COLOR_BLACK, curses.COLOR_GREEN),
+            ('RED_ON_BLACK', curses.COLOR_RED, curses.COLOR_BLACK),
+            ('GREEN_ON_BLACK', curses.COLOR_GREEN, curses.COLOR_BLACK),
+            ('CYAN_ON_BLACK',  6, curses.COLOR_BLACK),
+            ('YELLOW_ON_BLACK', curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        )
 
-        clock = threading.Thread(target=self.update)
-        clock.daemon = True
-        clock.start()
+        for i, color in enumerate(colors, 1):
+            name, fg, bg = color
+            curses.init_pair(i, fg, bg)
+            setattr(self, name, curses.color_pair(i))
 
-        update_data = threading.Thread(target=self.update_data)
-        update_data.daemon = True
-        update_data.start()
+        refresh_thread = threading.Thread(target=self.refresh)
+        refresh_thread.daemon = True
+        refresh_thread.start()
+
+        update_data_thread = threading.Thread(target=self.update_data)
+        update_data_thread.daemon = True
+        update_data_thread.start()
 
         try:
             while True:
                 event = self.screen.getch()
                 if event == ord('q'):
                     break
-                # elif event == ord('c'):
-                #     self.sort_param = 'cpu'
-                # elif event == ord('r'):
-                #     self.sort_param = 'rss'
                 elif event == curses.KEY_RESIZE:
                     self.resize()
         finally:
@@ -124,9 +123,11 @@ class VMTop:
         host_info = self.libvirt_conn.getInfo()
         cpu_count = host_info[2]
 
-        for domain, libvirt_stats in self.libvirt_conn.getAllDomainStats(
-                flags=libvirt.VIR_CONNECT_GET_ALL_DOMAINS_STATS_RUNNING
-                ):
+        domains = self.libvirt_conn.getAllDomainStats(
+            flags=libvirt.VIR_CONNECT_GET_ALL_DOMAINS_STATS_RUNNING
+        )
+
+        for domain, libvirt_stats in domains:
 
             name = domain.name()
             # Current memory allocated on the host
@@ -137,9 +138,8 @@ class VMTop:
             # guest current max memory
             guest_mem = libvirt_stats.get('balloon.maximum', 0) * 1024
 
-            cpu = 0
-            cur_cpu_time = 0
-
+            cpu = cur_cpu_time = 0
+            net0_tx = net0_rx = net0_rx_cur = net0_tx_cur = 0
             if old_stats is not None:
                 cpu_prev_time = old_stats.stats.get('cputime', 0)
                 cur_cpu_time = int(libvirt_stats.get('vcpu.0.time', 0))
@@ -148,13 +148,29 @@ class VMTop:
                         / (UPDATE_DATA_INTERVAL * cpu_count * 10**7)
                     cpu = min(cpu, 100)
 
+                net0_rx_prev = old_stats.stats.get('net0_rx_bytes', 0)
+                net0_rx_cur = libvirt_stats.get('net.0.rx.bytes', 0)
+                if net0_rx_prev > 0:
+                    net0_rx = ((net0_rx_cur - net0_rx_prev)
+                               / UPDATE_DATA_INTERVAL)
+
+                net0_tx_prev = old_stats.stats.get('net0_tx_bytes', 0)
+                net0_tx_cur = libvirt_stats.get('net.0.tx.bytes', 0)
+                if net0_tx_prev > 0:
+                    net0_tx = ((net0_tx_cur - net0_tx_prev)
+                               / UPDATE_DATA_INTERVAL)
+
             stats = {
-                'name': domain.name(),
+                'name': name,
                 'cputime': cur_cpu_time,
                 'cpu_usage': cpu,
                 'mem': si_unit(guest_mem, True) + 'B',
                 'rss': si_unit(rss, True) + 'B',
-                'rss_float': rss
+                'rss_float': rss,
+                'net0_rx_bytes': net0_rx_cur,
+                'net0_tx_bytes': net0_tx_cur,
+                'net0_rx': '{0}Bps'.format(si_unit(net0_rx * 8)),
+                'net0_tx': '{0}Bps'.format(si_unit(net0_tx * 8))
             }
             total_mem_domain += stats['rss_float']
 
@@ -162,17 +178,18 @@ class VMTop:
 
         self.stats.vms = all_stats
 
-        self.stats.mem_free = self.libvirt_conn.getFreeMemory()
-        self.stats.mem_total = host_info[1] * (1024**2)
-        self.stats.mem_vms_total = total_mem_domain
+        mem_stats = self.libvirt_conn.getMemoryStats(
+            libvirt.VIR_NODE_MEMORY_STATS_ALL_CELLS
+        )
 
-        '''
-        self.stats.vms.update(vms)
-        self.stats.mem_vms_total = mem_vms_total
-        self.stats.mem_free = mem_free
-        self.stats.mem_os = mem_total - mem_free - mem_vms_total
-        self.stats.mem_total = mem_total
-        '''
+        self.stats.mem_total = mem_stats['total'] * 1024
+        self.stats.mem_vms_total = total_mem_domain
+        self.stats.mem_os = ((mem_stats['total'] - mem_stats['free']
+                              - mem_stats['cached']
+                              - mem_stats['buffers']) * 1024
+                             - total_mem_domain)
+        self.stats.mem_cached = (mem_stats['cached']
+                                 - mem_stats['buffers']) * 1024
 
     def resize(self):
         w, h = VMTop.terminal_size()
@@ -180,87 +197,123 @@ class VMTop:
         self.term_height = h
         curses.resizeterm(h, w)
 
-    def print_line(self, text, style=curses.A_NORMAL):
-        self.screen.addstr(text.ljust(self.term_width - 1), style)
-
-    def _sort_by_cpu(self, value):
-        return value.get('cpu', 0)
-
-    def _sort_by_rss(self, value):
-        return value.get('rss_float', 0)
-
     def refresh_interface(self):
         cur_line = 1
 
-        # Bar graph
-        self.screen.addstr(cur_line, 1, 'Mem', curses.color_pair(5))
+        ###
+        # MEMORY LINE
+        ##
+
+        # Clean the whole line
+        self.screen.move(cur_line, 0)
+        self.screen.clrtoeol()
+
+        # Show 'Mem'
+        self.screen.addstr(cur_line, 1, 'Mem', self.CYAN_ON_BLACK)
         bar_graph_offset = 6
         bar_graph_width = 40
         self.screen.addstr(cur_line, bar_graph_offset, '[')
         self.screen.addstr(cur_line, bar_graph_offset + bar_graph_width, ']')
+
+        posY = bar_graph_offset + 1
 
         mem_os_size = 0
         if self.stats.mem_total > 0:
             ratio = self.stats.mem_os / self.stats.mem_total
             mem_os_size = round(ratio * (bar_graph_width - 2))
         self.screen.addstr(
-            cur_line, bar_graph_offset + 1,
-            '|' * mem_os_size, curses.color_pair(3)
+            cur_line, posY,
+            '|' * mem_os_size, self.RED_ON_BLACK
         )
+        posY += mem_os_size
 
         mem_vms_size = 0
         if self.stats.mem_total > 0:
             ratio = self.stats.mem_vms_total / self.stats.mem_total
             mem_vms_size = round(ratio * (bar_graph_width - 2))
         self.screen.addstr(
-            cur_line, bar_graph_offset + mem_os_size + 1,
-            '|' * mem_vms_size, curses.color_pair(4)
+            cur_line, posY,
+            '|' * mem_vms_size, self.GREEN_ON_BLACK
         )
+        posY += mem_vms_size
 
-        # Erase all old characters on bar graph
+        mem_vms_size = 0
+        if self.stats.mem_total > 0:
+            ratio = self.stats.mem_cached / self.stats.mem_total
+            mem_vms_size = round(ratio * (bar_graph_width - 2))
         self.screen.addstr(
-            cur_line,
-            bar_graph_offset + mem_os_size + mem_vms_size + 1,
-            ' ' * (bar_graph_width - 2 - mem_os_size - mem_vms_size))
+            cur_line, posY,
+            '|' * mem_vms_size, self.YELLOW_ON_BLACK
+        )
+        posY += mem_vms_size
 
-        bar = '{0}B / {1}B'.format(
-            si_unit(self.stats.mem_vms_total, True),
-            si_unit(self.stats.mem_total, True)
-        )
+        posY = bar_graph_width + bar_graph_offset + 2
+
+        # Show memory takes by OS
+        text = '{0}B'.format(si_unit(self.stats.mem_os, True))
+        self.screen.addstr(cur_line, posY, text, self.RED_ON_BLACK)
+        posY += len(text)
+
+        text = ' / '
+        self.screen.addstr(cur_line, posY, text)
+        posY += len(text)
+
+        # Show total memory used by vms
+        text = '{0}B'.format(si_unit(self.stats.mem_vms_total, True))
+        self.screen.addstr(cur_line, posY, text, self.GREEN_ON_BLACK)
+        posY += len(text)
+
+        # Show all physical memory on host
         self.screen.addstr(
-            cur_line, bar_graph_width + bar_graph_offset + 2, bar
-        )
+            cur_line, posY,
+            ' / {0}B'.format(si_unit(self.stats.mem_total, True)))
 
         cur_line += 2
 
-        # Table header
+        ###
+        # TABLE HEADER
+        ##
         cur_line += 1
         self.screen.move(cur_line, 0)
-        pattern = '{name:15} {cpu_usage:>8} {mem:>8} {rss:>8}'
-        self.print_line(pattern.format(
-            name='NAME', cpu_usage='%CPU', mem='MEM', rss='HMEM'
-        ), curses.color_pair(1))
+        pattern = '{name:15} {cpu_usage:>8} {mem:>8} ' \
+                  '{rss:>8} {net0_rx:>10} {net0_tx:>10}'
+        text = pattern.format(
+            name='NAME', cpu_usage='%CPU', mem='MEM',
+            rss='HMEM', net0_rx='NET_RX', net0_tx='NET_TX')
+        self.screen.addstr(cur_line, 0,
+                           text.ljust(self.term_width, ' '),
+                           self.BLACK_ON_GREEN)
         cur_line += 1
+        self.screen.clrtoeol()
 
-        pattern = '{name:15} {cpu_usage:>8.1f} {mem:>8} {rss:>8}'
-        for vm in self.stats.vms.values():
-            stats = vm.stats
-            style = 0
-            if cur_line < self.term_width:
-                self.screen.move(cur_line, 0)
-                self.print_line(pattern.format(**stats), style)
+        ###
+        # PRINT ALL VMS
+        ###
+        pattern = '{name:15} {cpu_usage:>8.1f} {mem:>8}' \
+                  ' {rss:>8} {net0_rx:>10} {net0_tx:>10}'
+        vms = list(self.stats.vms.values())
+        vms.sort(key=lambda v: v.stats.get('cpu_usage', 0), reverse=True)
+        for vm in vms:
+            if cur_line < self.term_height:
+                text = pattern.format(**vm.stats)
+                self.screen.addstr(cur_line, 0, text)
+                self.screen.clrtoeol()
             cur_line += 1
 
+        ###
+        # CLEAR AND REFRESH
+        ###
+        self.screen.clrtobot()
         self.screen.refresh()
 
-    def update(self):
+    def refresh(self):
         while True:
             try:
                 self.refresh_interface()
             except curses.error:
                 pass
             finally:
-                time.sleep(0.2)
+                time.sleep(REFRESH_INTERVAL)
 
     @classmethod
     def terminal_size(cls):
