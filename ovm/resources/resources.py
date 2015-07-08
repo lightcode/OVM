@@ -34,7 +34,7 @@ class Resources:
     _cache = {}
 
     @classmethod
-    def init(cls, path):
+    def __init__(cls, path):
         try:
             with open(path) as fd:
                 cls.resources = yaml.load(fd)

@@ -212,7 +212,7 @@ def main():
     if args.verbose:
         logger.setLevel(logging.DEBUG)
 
-    Resources.init(os.path.join(Configuration.ETC, 'resources.yml'))
+    Resources(Configuration.RESOURCE_CONFIG)
     Inventory.open()
 
     if hasattr(args, 'func'):

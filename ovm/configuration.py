@@ -20,6 +20,9 @@
 ########################################################################
 
 
+import os.path
+
+
 __all__ = ['Configuration']
 
 
@@ -29,3 +32,4 @@ class Configuration:
     ETC = '/etc/ovm'
     SAVED_VMS = '/var/lib/ovm/saved-vms'
     ETC_TEMPLATES = ETC + '/templates'
+    RESOURCE_CONFIG = os.path.join(ETC, 'resources.yml')
