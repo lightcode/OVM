@@ -59,10 +59,13 @@ class Resources:
         resources_list = []
 
         dl = DriverLoader(driver_loader_type)
-        for name, options in cls.resources[resource_type].items():
-            driver_name = options.pop('driver')
+        resource = cls.resources[resource_type].copy()
+        for name, options in resource.items():
+            local_options = options.copy()
+            driver_name = local_options.pop('driver')
             driver = dl.load(driver_name)
-            resources_list.append(resource_class(name, driver, **options))
+            resources_list.append(
+                resource_class(name, driver, **local_options))
 
         cls._cache[resource_type] = resources_list
         return resources_list
