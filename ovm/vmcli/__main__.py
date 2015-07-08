@@ -190,13 +190,9 @@ def add_subparsers(parser):
     subcommand.set_defaults(func=vm_top)
 
 
-# Don't show error message from libvirt_driver
-def f(ctx, error):
-    return 1
-
-
 def main():
-    libvirt.registerErrorHandler(f, None)
+    # Ignore text error from libvirt
+    libvirt.registerErrorHandler(lambda: 1, None)
 
     parser = argparse.ArgumentParser(
         description='Provide functions to create and manage VMs on KVM.',
