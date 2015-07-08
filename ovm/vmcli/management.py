@@ -24,16 +24,21 @@ import libvirt
 import concurrent.futures
 from subprocess import Popen
 
-from ovm.resources import Resources
+from ovm.app import App
+from ovm.exceptions import DomainException
 from ovm.exceptions import OVMError
 from ovm.inventory import Inventory
-from ovm.utils.printer import print_title, si_unit, default, print_table
+from ovm.resources import Resources
+from ovm.templates.template import Template
+from ovm.utils.logger import logger
 from ovm.utils.printer import ColoredString, bcolors
-from ovm.app import App
+from ovm.utils.printer import print_title, si_unit, default, print_table
+from ovm.vmcli.creation import VMCreation
 from ovm.vmcli.libvirt_console import Console
 from ovm.vmcli.vmtop import VMTop
-from ovm.exceptions import DomainException
-from ovm.utils.logger import logger
+
+
+ENABLE_CONCURRENT = False
 
 
 ###################################
@@ -55,6 +60,16 @@ def bulk_command(func):
         vmnames = cli_args.name
         if isinstance(vmnames, str):
             vmnames = [vmnames]
+
+        if not ENABLE_CONCURRENT:
+            for name in vmnames:
+                try:
+                    func(name, cli_args)
+                except OVMError as e:
+                    logger.error(e.message)
+                except:
+                    logger.exception('Unhandled exception:')
+            return
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             tasks = {}
@@ -366,4 +381,29 @@ def vm_networks(args):
     rows = []
     for network in Resources.get_networks():
         rows.append((network.name,))
+    print_table(headers, rows)
+
+
+def vm_create(args):
+    vmc = VMCreation(args)
+    vmc.start()
+
+
+def vm_templates(args):
+    templates = list(Template.get_templates())
+
+    if args.short:
+        print('\n'.join([tpl.uid for tpl in templates]))
+        return
+
+    headers = ('ID', 'Name', 'OS type', 'OS name', 'OS version')
+    rows = []
+    for tpl in templates:
+        rows.append((
+            tpl.uid,
+            tpl.name,
+            default(tpl.get_os_type(), '-'),
+            default(tpl.get_os_name(), '-'),
+            default(tpl.get_os_version(), '-')
+        ))
     print_table(headers, rows)

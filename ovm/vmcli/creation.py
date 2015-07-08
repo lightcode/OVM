@@ -20,14 +20,12 @@
 ########################################################################
 
 
-import concurrent.futures
 import os
 import stat
 import sys
 import tempfile
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, STDOUT
 
-from ovm.app import App
 from ovm.configuration import Configuration
 from ovm.exceptions import OVMError
 from ovm.inventory import Inventory
@@ -35,38 +33,9 @@ from ovm.resources.resources import Resources
 from ovm.templates.domain_definition import DomainDefinition
 from ovm.templates.template import Template
 from ovm.utils.logger import logger
-from ovm.utils.printer import print_table, default
-from ovm.vmcli.management import print_vm_info
 
 
-LEVEL_ERROR, LEVEL_INFO = 0, 1
-
-
-def _resize_fs(template, vol_path, verbose=False):
-    """Resize VM's filesystem if it defined in template.
-    """
-    if template.abilities['resizeDisk']:
-        logger.info('Resizing filesystem...')
-        options = template.abilities['resizeDisk']
-        params = []
-        for param in options['params']:
-            params.append(param.format(vol_path=vol_path))
-        _exec_script(options['script'], params, verbose=verbose)
-    return vol_path
-
-
-def _thread_logger(fd, level, print_log):
-    for line in fd:
-        line = line.decode('utf8').rstrip()
-        if level == LEVEL_ERROR:
-            if print_log:
-                App.notice(line)
-        elif level == LEVEL_INFO:
-            if print_log:
-                App.info(line)
-
-
-def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
+def _exec_script(path, cmd_params=None, env_params=None):
     if not path.startswith('/'):
         path = os.path.join(Configuration.ETC, 'scripts', path)
 
@@ -84,70 +53,10 @@ def _exec_script(path, cmd_params=None, env_params=None, verbose=False):
     if env_params:
         env.update(env_params)
 
-    process = Popen(cmd, env=env, stdout=PIPE, stderr=PIPE)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        threads = []
-        threads.append(executor.submit(
-            _thread_logger, process.stdout, LEVEL_INFO, verbose
-        ))
-        threads.append(executor.submit(
-            _thread_logger, process.stderr, LEVEL_ERROR, verbose
-        ))
-        for future in concurrent.futures.as_completed(threads):
-            if future.exception() is not None:
-                print(future.exception())
-
-
-def _post_install(template, diskpath, env_params, verbose=False):
-    post_install = template.post_install
-
-    if not post_install:
-        return
-
-    _, filename = tempfile.mkstemp()
-    with open(filename, 'wb+') as configuration:
-        for name, value in env_params.items():
-            configuration.write(bytes('{}={}\n'.format(name, value), 'utf-8'))
-
-    logger.info('Running post-install scripts...')
-    for hook in post_install:
-        path = hook['path']
-        params = hook['params']
-        for i, param in enumerate(params):
-            params[i] = param.format(diskpath=diskpath, configuration=filename)
-        _exec_script(path, params, env_params, verbose)
-
-    os.remove(filename)
-
-
-def _process_args_network(args):
-    try:
-        network = Resources.get_network(args.network)
-    except OVMError as e:
-        App.fatal(e.message)
-
-    if args.ip == 'auto':
-        network.set_ip_auto()
-        try:
-            network.set_ip_auto()
-        except OVMError as e:
-            App.fatal(e)
-    elif args.ip == 'dhcp':
-        try:
-            network.set_ip_dhcp()
-        except OVMError as e:
-            App.fatal(e)
-    elif args.ip == 'default':
-        try:
-            network.set_ip_default()
-        except OVMError as e:
-            App.fatal(e)
-    else:
-        try:
-            network.set_ip_manual(args.ip)
-        except OVMError as e:
-            App.fatal(e)
-    return network
+    scriptname = os.path.basename(path)
+    process = Popen(cmd, env=env, stdout=PIPE, stderr=STDOUT)
+    for line in process.stdout:
+        logger.debug('[%s] %s', scriptname, line.decode('utf-8').strip())
 
 
 def _long_netmask(cidr):
@@ -155,96 +64,150 @@ def _long_netmask(cidr):
     return '.'.join([str(mask >> (8 * i) & 0xFF) for i in range(3, -1, -1)])
 
 
-def _process_args_storage(args):
-    try:
-        return Resources.get_storage_pool(args.storage)
-    except OVMError as e:
-        App.fatal(e.message)
+class VMCreation:
 
+    STEPS = (
+        'check_domain_name',
+        'process_network_args',
+        'process_storage_args',
+        'build_domain_definition',
+        'create_main_disk',
+        'resize_main_filesystem',
+        'running_post_install_scripts',
+        'add_domain_in_inventory',
+        'reserve_ip',
+        'print_domain'
+    )
 
-def vm_create(args):
-    domains = [domain.get_name() for domain in Inventory.get_domains()]
-    if args.name in domains:
-        App.fatal('This name is already taken by another VM.')
+    def __init__(self, args):
+        self._args = args
+        self._network = None
+        self._storage = None
+        self._domdef = None
+        self._diskpath = None
+        self._template = None
+        self._params = None
+        self._domain = None
 
-    verbose = False
-    if args.verbose:
-        verbose = True
+    def start(self):
+        for num, step in enumerate(self.STEPS, 1):
+            logger.debug('Step n°%d: %s', num, step)
+            try:
+                getattr(self, step)(self._args)
+            except OVMError as e:
+                logger.error('Cannot create VM "%s": %s', self._args.name,
+                             e.message)
+                sys.exit(1)
 
-    network = _process_args_network(args)
+    def check_domain_name(self, args):
+        domains = [domain.get_name() for domain in Inventory.get_domains()]
+        if args.name in domains:
+            raise OVMError('this name is already taken by another VM.')
 
-    params = {}
-    if network.is_dhcp():
-        params['IP'] = 'dhcp'
-    else:
-        params['IP'] = str(network.ipv4_pool['ip'])
-        params['NETMASK'] = _long_netmask(network.ipv4_pool['netmask'])
-        params['GATEWAY'] = str(network.ipv4_pool['gateway'])
-        params['NAMESERVERS'] = ' '.join(network.ipv4_pool['nameservers'])
+    def process_network_args(self, args):
+        network = Resources.get_network(args.network)
 
-    storage = _process_args_storage(args)
+        if args.ip == 'auto':
+            network.set_ip_auto()
+            network.set_ip_auto()
+        elif args.ip == 'dhcp':
+            network.set_ip_dhcp()
+        elif args.ip == 'default':
+            network.set_ip_default()
+        else:
+            network.set_ip_manual(args.ip)
+        self._network = network
 
-    # 1. Find the template
-    try:
+    def process_storage_args(self, args):
+        self._storage = Resources.get_storage_pool(args.storage)
+
+    def build_domain_definition(self, args):
         template = Template.get_template(args.template)
-    except OVMError as e:
-        logger.error(e.message)
-        sys.exit(1)
-    else:
         logger.info('Template "%s" loaded.', template.name)
 
-    network.import_template_spec(template)
+        self._network.import_template_spec(template)
 
-    domdef = DomainDefinition(template, args.name)
-    domdef.set_network(network)
-    domdef.set_storage(storage)
+        domdef = DomainDefinition(template, args.name)
+        domdef.set_network(self._network)
+        domdef.set_storage(self._storage)
 
-    if args.vcpu:
-        domdef.vcpu = args.vcpu
+        if args.vcpu:
+            domdef.vcpu = args.vcpu
 
-    if args.memory:
-        domdef.memory = args.memory
+        if args.memory:
+            domdef.memory = args.memory
 
-    logger.info("Creating VM's disk...")
-    diskpath = domdef.create_main_disk()
-    if args.size:
-        domdef.resize_main_disk(args.size)
+        self._template = template
+        self._domdef = domdef
 
-    # 2. Running post-install scripts
-    params['HOSTNAME'] = domdef.name
-    _resize_fs(template, diskpath, verbose=verbose)
-    _post_install(template, diskpath, params, verbose=verbose)
+    def create_main_disk(self, args):
+        logger.info("Creating VM's disk...")
+        self._diskpath = self._domdef.create_main_disk()
+        if args.size:
+            self._domdef.resize_main_disk(args.size)
 
-    # 3. Add the VM in libvirt_driver
-    Inventory.add_domain(domdef)
+    def resize_main_filesystem(self, args):
+        options = self._template.abilities['resizeDisk']
+        if not options:
+            logger.debug('The template has no attribut "resizeDisk": '
+                         'filesystem resize ignored')
+            return
 
-    domain = Inventory.get_domain(domdef.name)
-    domain.set_main_ipv4(params['IP'])
-    domain.metadata.update(template.metadata)
+        logger.info('Resizing filesystem...')
+        params = []
+        for param in options['params']:
+            params.append(param.format(vol_path=self._diskpath))
+        _exec_script(options['script'], params)
 
-    # 4. Lock network resources
-    network.lock_ip()
+    def running_post_install_scripts(self, args):
+        network = self._network
+        env = {}
+        if network.is_dhcp():
+            env['IP'] = 'dhcp'
+        else:
+            env['IP'] = str(network.ipv4_pool['ip'])
+            env['NETMASK'] = _long_netmask(network.ipv4_pool['netmask'])
+            env['GATEWAY'] = str(network.ipv4_pool['gateway'])
+            env['NAMESERVERS'] = ' '.join(network.ipv4_pool['nameservers'])
+        env['HOSTNAME'] = self._domdef.name
 
-    # 5. Print the VM specs
-    print('\n')
-    print_vm_info(domain)
+        self._params = env
+        post_install = self._template.post_install
 
+        if not post_install:
+            return
 
-def vm_templates(args):
-    templates = list(Template.get_templates())
+        _, filename = tempfile.mkstemp()
+        with open(filename, 'wb+') as configuration:
+            for name, value in env.items():
+                configuration.write(
+                    bytes('{}={}\n'.format(name, value), 'utf-8'))
 
-    if args.short:
-        print('\n'.join([tpl.uid for tpl in templates]))
-        return
+        logger.info('Running post-install scripts...')
+        for hook in post_install:
+            path = hook['path']
+            params = hook['params']
+            for i, param in enumerate(params):
+                params[i] = param.format(
+                    diskpath=self._diskpath,
+                    configuration=filename)
 
-    headers = ('ID', 'Name', 'OS type', 'OS name', 'OS version')
-    rows = []
-    for tpl in templates:
-        rows.append((
-            tpl.uid,
-            tpl.name,
-            default(tpl.get_os_type(), '-'),
-            default(tpl.get_os_name(), '-'),
-            default(tpl.get_os_version(), '-')
-        ))
-    print_table(headers, rows)
+            logger.debug('post-install: exec %s', path)
+            _exec_script(path, params, env)
+
+        os.remove(filename)
+
+    def add_domain_in_inventory(self, args):
+        Inventory.add_domain(self._domdef)
+        domain = Inventory.get_domain(self._domdef.name)
+        domain.set_main_ipv4(self._params['IP'])
+        domain.metadata.update(self._template.metadata)
+        self._domain = domain
+
+    def reserve_ip(self, args):
+        self._network.lock_ip()
+
+    def print_domain(self, args):
+        from ovm.vmcli.management import print_vm_info
+        print('\n')
+        print_vm_info(self._domain)

@@ -27,7 +27,6 @@ import logging
 from ovm.configuration import Configuration
 from ovm.inventory import Inventory
 from ovm.utils.logger import logger
-from ovm.vmcli.creation import *    # noqa
 from ovm.vmcli.management import *  # noqa
 
 
