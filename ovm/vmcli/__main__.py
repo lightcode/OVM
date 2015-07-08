@@ -199,6 +199,11 @@ def main():
     parser.add_argument('--version', action='version',
                         version=Configuration.VERSION)
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument(
+        '--fork',
+        default=4,
+        type=int,
+        help='set how many tasks launch parallelly')
 
     add_subparsers(parser)
 

@@ -20,12 +20,13 @@
 ########################################################################
 
 
+import fnmatch
 import libvirt
 import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 from subprocess import Popen
 
 from ovm.app import App
-from ovm.exceptions import DomainException
 from ovm.exceptions import OVMError
 from ovm.inventory import Inventory
 from ovm.resources import Resources
@@ -36,9 +37,6 @@ from ovm.utils.printer import print_title, si_unit, default, print_table
 from ovm.vmcli.creation import VMCreation
 from ovm.vmcli.libvirt_console import Console
 from ovm.vmcli.vmtop import VMTop
-
-
-ENABLE_CONCURRENT = False
 
 
 ###################################
@@ -54,33 +52,55 @@ def _get_domain(name):
         return domain
 
 
-def bulk_command(func):
-    def wrapper(*args, **kwargs):
-        cli_args = args[0]
-        vmnames = cli_args.name
-        if isinstance(vmnames, str):
-            vmnames = [vmnames]
+def bulk_command(confirm=None):
+    def decorated(func):
+        def wrapper(*args, **kwargs):
+            cli_args = args[0]
 
-        if not ENABLE_CONCURRENT:
-            for name in vmnames:
-                try:
-                    func(name, cli_args)
-                except OVMError as e:
-                    logger.error(e.message)
-                except:
-                    logger.exception('Unhandled exception:')
-            return
+            patterns = cli_args.name
+            if isinstance(patterns, str):
+                patterns = [patterns]
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            tasks = {}
-            for name in vmnames:
-                tasks[executor.submit(func, name, cli_args)] = name
+            if cli_args.fork <= 0:
+                logger.error('Number of fork must greater than 0.')
+                return
 
-            for future in concurrent.futures.as_completed(tasks):
-                if future.exception() is not None:
-                    logger.error('Unhandled error for %s: %s',
-                                 name, future.exception())
-    return wrapper
+            # Change patterns into domain name
+            domains = [d.get_name() for d in Inventory.get_domains()]
+            selection = set()
+            for pattern in patterns:
+                selection.update(fnmatch.filter(domains, pattern))
+
+            if len(selection) == 0:
+                logger.error('No vm selected. Abort.')
+                return
+
+            # If confirm is enabled, ask a confirmation
+            if confirm is not None:
+                prompt = confirm % ', '.join(selection) + ' [y/n] '
+                ans = ''
+                while ans not in ('y', 'n'):
+                    ans = input(prompt).strip().lower()
+
+                if ans == 'n':
+                    logger.info('Action aborted by user.')
+                    return
+
+            # Launch function
+            logger.debug('Fork is enabled with value of %d', cli_args.fork)
+            with ThreadPoolExecutor(max_workers=cli_args.fork) as executor:
+                tasks = {}
+                for name in selection:
+                    tasks[executor.submit(func, name, cli_args)] = name
+
+                for future in concurrent.futures.as_completed(tasks):
+                    name = tasks[future]
+                    try:
+                        future.result()
+                    except Exception:
+                        logger.exception('Unhandled error for %s:', name)
+        return wrapper
+    return decorated
 
 
 ###################################
@@ -216,26 +236,17 @@ def vm_reboot(args):
     virdomain.reset()
 
 
-@bulk_command
+@bulk_command(confirm='Do you want to remove these VMs: %s ?')
 def vm_remove(name, args):
-    ans = ''
-    while not args.force and ans not in ('y', 'n'):
-        ans = input('Delete VM "%s" and all disks? [y/n] ' % name)
-        ans = ans.strip().lower()
-
-    if ans == 'n':
-        logger.info('Deletion of "%s" aborted by user.', name)
-        return
-
     domain = _get_domain(name)
     try:
         res = domain.remove()
-    except DomainException as e:
+    except OVMError as e:
         logger.error('Error: the VM cannot be removed: %s', e.message)
         return
     else:
         if res == 0:
-            logger.info('The domain has been removed.')
+            logger.info('The domain "%s" has been removed.', name)
         else:
             logger.error('Libvirt return error code %d.', res)
 
@@ -293,7 +304,7 @@ def vm_ssh(args):
             pass
 
 
-@bulk_command
+@bulk_command()
 def vm_start(name, args):
     domain = _get_domain(name)
     if domain.is_active():
@@ -321,7 +332,7 @@ def vm_start(name, args):
         logger.info('%s.', info_string)
 
 
-@bulk_command
+@bulk_command()
 def vm_save(name, args):
     try:
         domain = _get_domain(name)
@@ -332,7 +343,7 @@ def vm_save(name, args):
         logger.info('VM "%s" is saved.')
 
 
-@bulk_command
+@bulk_command()
 def vm_restore(name, args):
     try:
         domain = _get_domain(name)
@@ -343,7 +354,7 @@ def vm_restore(name, args):
         logger.info('VM "%s" is restored.')
 
 
-@bulk_command
+@bulk_command()
 def vm_stop(name, args):
     virdomain = _get_domain(name).vir_domain
     if not virdomain.isActive():
