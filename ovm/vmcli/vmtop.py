@@ -149,6 +149,8 @@ class VMTop:
 
             cpu = cur_cpu_time = 0
             net0_tx = net0_rx = net0_rx_cur = net0_tx_cur = 0
+            block0_rd_cur = block0_wd_cur = block0_rd = block0_wd = 0
+
             if old_stats is not None:
                 cpu_prev_time = old_stats.stats.get('cputime', 0)
                 cur_cpu_time = int(libvirt_stats.get('vcpu.0.time', 0))
@@ -169,6 +171,18 @@ class VMTop:
                     net0_tx = ((net0_tx_cur - net0_tx_prev)
                                / UPDATE_DATA_INTERVAL)
 
+                block0_rd_prev = old_stats.stats.get('block0_rd_bytes', 0)
+                block0_rd_cur = libvirt_stats.get('block.0.rd.bytes', 0)
+                if block0_rd_prev > 0:
+                    block0_rd = ((block0_rd_cur - block0_rd_prev)
+                                 / UPDATE_DATA_INTERVAL)
+
+                block0_wd_prev = old_stats.stats.get('block0_wd_bytes', 0)
+                block0_wd_cur = libvirt_stats.get('block.0.wd.bytes', 0)
+                if block0_wd_prev > 0:
+                    block0_wd = ((block0_wd_cur - block0_wd_prev)
+                                 / UPDATE_DATA_INTERVAL)
+
             stats = {
                 'name': name,
                 'cputime': cur_cpu_time,
@@ -179,7 +193,11 @@ class VMTop:
                 'net0_rx_bytes': net0_rx_cur,
                 'net0_tx_bytes': net0_tx_cur,
                 'net0_rx': '{0}Bps'.format(si_unit(net0_rx * 8)),
-                'net0_tx': '{0}Bps'.format(si_unit(net0_tx * 8))
+                'net0_tx': '{0}Bps'.format(si_unit(net0_tx * 8)),
+                'block0_rd_bytes': block0_rd_cur,
+                'block0_wd_bytes': block0_wd_cur,
+                'block0_rd': '{0}Bps'.format(si_unit(block0_rd * 8)),
+                'block0_wd': '{0}Bps'.format(si_unit(block0_wd * 8))
             }
             total_mem_domain += stats['rss_float']
 
@@ -284,12 +302,14 @@ class VMTop:
         ##
         TABLES_COLS = (
             '{name:15}', '{cpu_usage:>10}', '{mem:>10}', '{rss:>10}',
-            '{net0_rx:>10}', '{net0_tx:>10}'
+            '{net0_rx:>10}', '{net0_tx:>10}',
+            '{block0_rd:>10}', '{block0_wd:>10}'
         )
 
         COLS_NAME = dict(
             name='NAME', cpu_usage='%CPU', mem='MEM',
-            rss='HMEM', net0_rx='NET RX', net0_tx='NET TX')
+            rss='HMEM', net0_rx='NET RX', net0_tx='NET TX',
+            block0_rd='BLKR', block0_wd='BLKW')
 
         cur_line += 1
         self.screen.move(cur_line, 0)
@@ -299,7 +319,7 @@ class VMTop:
         if self._sort_on == 'cpu_usage':
             sort_field = 1
         elif self._sort_on == 'rss_float':
-            sort_field = 2
+            sort_field = 3
         elif self._sort_on == 'name':
             sort_field = 0
 
