@@ -20,13 +20,13 @@
 ########################################################################
 
 
+import concurrent.futures
 import fnmatch
 import libvirt
-import concurrent.futures
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from subprocess import Popen
 
-from ovm.app import App
 from ovm.exceptions import OVMError
 from ovm.inventory import Inventory
 from ovm.resources import Resources
@@ -176,7 +176,8 @@ def vm_list(args):
     rows = []
 
     if args.active and args.inactive:
-        App.fatal('A VM cannot be active and inactive.')
+        logger.error('A VM cannot be active and inactive.')
+        sys.exit(1)
 
     for domain in Inventory.get_domains():
         virdomain = domain.vir_domain
@@ -215,11 +216,13 @@ def vm_ping(args):
     virdomain = domain.vir_domain
 
     if not virdomain.isActive():
-        App.fatal('Cannot ping an inactive VM.')
+        logger.error('Cannot ping an inactive VM.')
+        sys.exit(1)
 
     ipv4 = domain.get_main_ipv4()
     if not ipv4 or ipv4 == 'dhcp':
-        App.fatal('Cannot ping a VM with no IP.')
+        logger.error('Cannot ping a VM with no IP.')
+        sys.exit(1)
 
     cmd = ['ping', ipv4]
     with Popen(cmd) as process:
@@ -232,7 +235,8 @@ def vm_ping(args):
 def vm_reboot(args):
     virdomain = _get_domain(args.name).vir_domain
     if not virdomain.isActive():
-        App.fatal('VM must be active.')
+        logger.warning('VM {0} is inactive.')
+        return
     virdomain.reset()
 
 
@@ -278,7 +282,8 @@ def vm_console(args):
     virdomain = domain.vir_domain
 
     if not virdomain.isActive():
-        App.fatal('Cannot connect on an inactive VM.')
+        logger.error('Cannot connect on an inactive VM.')
+        sys.exit(1)
 
     Console.open_console(domain.get_name())
 
@@ -288,11 +293,13 @@ def vm_ssh(args):
     virdomain = domain.vir_domain
 
     if not virdomain.isActive():
-        App.fatal('Cannot connect on an inactive VM.')
+        logger.error('Cannot connect on an inactive VM.')
+        sys.exit(1)
 
     ipv4 = domain.get_main_ipv4()
     if not ipv4:
-        App.fatal('Cannot connect on a VM with no IP.')
+        logger.error('Cannot connect on a VM with no IP.')
+        sys.exit(1)
 
     cmd = ['ssh', '-q', '-o UserKnownHostsFile=/dev/null',
            '-o StrictHostKeyChecking=no', '-lroot', ipv4]

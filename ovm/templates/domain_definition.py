@@ -23,8 +23,8 @@
 import os.path
 from lxml import etree
 
-from ovm.app import App
 from ovm.configuration import Configuration
+from ovm.exceptions import OVMError
 
 
 class DomainDefinition:
@@ -68,12 +68,13 @@ class DomainDefinition:
         self._memory = int(memory)
 
     def _get_basevm(self):
-        basevm_path = os.path.join(Configuration.ETC, 'base-vm.xml')
+        basename = 'base-vm.xml'
+        basevm_path = os.path.join(Configuration.ETC, basename)
         try:
-            with open(basevm_path) as file_:
-                tree = etree.parse(file_)
+            with open(basevm_path) as fd:
+                tree = etree.parse(fd)
         except OSError as e:
-            App.fatal('Cannot open base-vm.xml: %s' % e)
+            raise OVMError('Cannot open {}: {}'.format(basename, e))
         else:
             return tree.getroot()
 
