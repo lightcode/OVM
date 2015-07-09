@@ -56,6 +56,8 @@ class VMTop:
     def __init__(self):
         self.libvirt_conn = Inventory.new_connection()
 
+        self._sort_on = 'cpu_usage'
+
         self.term_width = 0
         self.term_height = 0
 
@@ -70,6 +72,7 @@ class VMTop:
             ('RED_ON_BLACK', curses.COLOR_RED, curses.COLOR_BLACK),
             ('GREEN_ON_BLACK', curses.COLOR_GREEN, curses.COLOR_BLACK),
             ('CYAN_ON_BLACK',  6, curses.COLOR_BLACK),
+            ('BLACK_ON_CYAN',  curses.COLOR_BLACK, 6),
             ('YELLOW_ON_BLACK', curses.COLOR_YELLOW, curses.COLOR_BLACK)
         )
 
@@ -91,6 +94,12 @@ class VMTop:
                 event = self.screen.getch()
                 if event == ord('q'):
                     break
+                if event == ord('c'):
+                    self._sort_on = 'cpu_usage'
+                if event == ord('n'):
+                    self._sort_on = 'name'
+                if event == ord('m'):
+                    self._sort_on = 'rss_float'
                 elif event == curses.KEY_RESIZE:
                     self.resize()
         finally:
@@ -163,7 +172,7 @@ class VMTop:
             stats = {
                 'name': name,
                 'cputime': cur_cpu_time,
-                'cpu_usage': cpu,
+                'cpu_usage': round(cpu),
                 'mem': si_unit(guest_mem, True) + 'B',
                 'rss': si_unit(rss, True) + 'B',
                 'rss_float': rss,
@@ -273,29 +282,56 @@ class VMTop:
         ###
         # TABLE HEADER
         ##
+        TABLES_COLS = (
+            '{name:15}', '{cpu_usage:>10}', '{mem:>10}', '{rss:>10}',
+            '{net0_rx:>10}', '{net0_tx:>10}'
+        )
+
+        COLS_NAME = dict(
+            name='NAME', cpu_usage='%CPU', mem='MEM',
+            rss='HMEM', net0_rx='NET RX', net0_tx='NET TX')
+
         cur_line += 1
         self.screen.move(cur_line, 0)
-        pattern = '{name:15} {cpu_usage:>8} {mem:>8} ' \
-                  '{rss:>8} {net0_rx:>10} {net0_tx:>10}'
-        text = pattern.format(
-            name='NAME', cpu_usage='%CPU', mem='MEM',
-            rss='HMEM', net0_rx='NET_RX', net0_tx='NET_TX')
-        self.screen.addstr(cur_line, 0,
-                           text.ljust(self.term_width, ' '),
-                           self.BLACK_ON_GREEN)
+
+        posY = 0
+
+        if self._sort_on == 'cpu_usage':
+            sort_field = 1
+        elif self._sort_on == 'rss_float':
+            sort_field = 2
+        elif self._sort_on == 'name':
+            sort_field = 0
+
+        for i, pattern in enumerate(TABLES_COLS):
+            if sort_field == i:
+                color = self.BLACK_ON_CYAN
+            else:
+                color = self.BLACK_ON_GREEN
+            text = pattern.format(**COLS_NAME)
+            self.screen.addstr(cur_line, posY, text, color)
+            posY += len(text)
+
+        self.screen.addstr(
+            cur_line, posY, ' '*(self.term_width - posY), self.BLACK_ON_GREEN)
+
         cur_line += 1
         self.screen.clrtoeol()
 
         ###
         # PRINT ALL VMS
         ###
-        pattern = '{name:15} {cpu_usage:>8.1f} {mem:>8}' \
-                  ' {rss:>8} {net0_rx:>10} {net0_tx:>10}'
         vms = list(self.stats.vms.values())
-        vms.sort(key=lambda v: v.stats.get('cpu_usage', 0), reverse=True)
+        if self._sort_on == 'name':
+            reverse = False
+        else:
+            reverse = True
+
+        vms.sort(key=lambda v: v.stats.get('name'))
+        vms.sort(key=lambda v: v.stats.get(self._sort_on, 0), reverse=reverse)
         for vm in vms:
             if cur_line < self.term_height:
-                text = pattern.format(**vm.stats)
+                text = ''.join(TABLES_COLS).format(**vm.stats)
                 self.screen.addstr(cur_line, 0, text)
                 self.screen.clrtoeol()
             cur_line += 1
