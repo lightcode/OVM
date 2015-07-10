@@ -38,30 +38,157 @@ REFRESH_INTERVAL = 0.5
 
 class DomainStats:
 
-    def __init__(self, domain, stats):
+    def __init__(self, domain, host_stats):
         self.domain = domain
-        self.stats = stats
+
+        self.name = domain.name()
+        self.host_stats = host_stats
+
+        # CPU
+        self.cpu_usage = 0
+        self.cpu_time = 0
+
+        # Memory
+        self.host_mem = self.guest_mem = 0
+
+        # Network
+        self.net_rx_bytes = self.net_tx_bytes = 0
+        self.net_rx_rate = self.net_tx_rate = 0
+
+        # Storage
+        self.block_rd_bytes = self.block_wr_bytes = 0
+        self.block_rd_rate = self.block_wr_rate = 0
+
+    @staticmethod
+    def compute_cpu_usage(prev, cur, cpu_count):
+        return min(
+            (cur - prev) / (UPDATE_DATA_INTERVAL * cpu_count * 10**7),
+            100
+        )
+
+    def update_cpu(self, stats):
+        previous_cpu_time = self.cpu_time
+        domain_cpu_count = stats.get('vcpu.current', 1)
+
+        sum_time = 0
+        for i in range(domain_cpu_count):
+            sum_time += stats.get('vcpu.0.time', 0)
+        current_cpu_time = sum_time / domain_cpu_count
+
+        if previous_cpu_time > 0:
+            self.cpu_usage = self.compute_cpu_usage(
+                previous_cpu_time, current_cpu_time, self.host_stats.cpu_count
+            )
+
+        self.cpu_time = current_cpu_time
+
+    def update_memory(self, stats):
+        # Current memory allocated on the host
+        self.host_mem = self.domain.memoryStats().get('rss', 0) * 1024
+
+        # guest current max memory
+        self.guest_mem = stats.get('balloon.maximum', 0) * 1024
+
+    def update_network(self, stats):
+        current_rx_bytes = stats.get('net.0.rx.bytes', 0)
+        current_tx_bytes = stats.get('net.0.tx.bytes', 0)
+        previous_rx_bytes = self.net_rx_bytes
+        previous_tx_bytes = self.net_tx_bytes
+
+        if previous_rx_bytes > 0:
+            self.net_rx_rate = (
+                (current_rx_bytes - previous_rx_bytes) * 8
+                / UPDATE_DATA_INTERVAL
+            )
+
+        if previous_tx_bytes > 0:
+            self.net_tx_rate = (
+                (current_tx_bytes - previous_tx_bytes) * 8
+                / UPDATE_DATA_INTERVAL
+            )
+
+        self.net_rx_bytes = current_rx_bytes
+        self.net_tx_bytes = current_tx_bytes
+
+    def update_storage(self, stats):
+        current_rd_bytes = stats.get('block.0.rd.bytes', 0)
+        current_wd_bytes = stats.get('block.0.wr.bytes', 0)
+        previous_rd_bytes = self.block_rd_bytes
+        previous_wd_bytes = self.block_wr_bytes
+
+        if previous_rd_bytes > 0:
+            self.block_rd_rate = (
+                (current_rd_bytes - previous_rd_bytes) * 8
+                / UPDATE_DATA_INTERVAL
+            )
+
+        if previous_wd_bytes > 0:
+            self.block_wr_rate = (
+                (current_wd_bytes - previous_wd_bytes) * 8
+                / UPDATE_DATA_INTERVAL
+            )
+
+        self.block_rd_bytes = current_rd_bytes
+        self.block_wr_bytes = current_wd_bytes
+
+    def update(self, stats):
+        for name in ('cpu', 'memory', 'network', 'storage'):
+            getattr(self, 'update_%s' % name)(stats)
+
+    def format(self, pattern):
+        stats = {
+            'name': self.name,
+            'cpu_usage': round(self.cpu_usage),
+            'guest_mem': si_unit(self.guest_mem, True) + 'B',
+            'host_mem': si_unit(self.host_mem, True) + 'B',
+            'net_rx': '{0}bps'.format(si_unit(self.net_rx_rate)),
+            'net_tx': '{0}bps'.format(si_unit(self.net_tx_rate)),
+            'block_rd': '{0}bps'.format(si_unit(self.block_rd_rate)),
+            'block_wr': '{0}bps'.format(si_unit(self.block_wr_rate))
+        }
+        return pattern.format(**stats)
 
 
-class Stats:
-    def __init__(self):
-        self.vms = {}
+class HostStats:
+
+    def __init__(self, connection):
+        self._connection = connection
+
+        host_info = connection.getInfo()
+        self.cpu_count = host_info[2]
+
         self.mem_vms_total = 0
         self.mem_os = 0
         self.mem_total = 0
         self.mem_cached = 0
 
+    def update(self, total_mem_domain):
+        mem_stats = self._connection.getMemoryStats(
+            libvirt.VIR_NODE_MEMORY_STATS_ALL_CELLS
+        )
+
+        self.mem_total = mem_stats['total'] * 1024
+        self.mem_vms_total = total_mem_domain
+        self.mem_os = ((mem_stats['total'] - mem_stats['free']
+                       - mem_stats['cached']
+                       - mem_stats['buffers']) * 1024
+                       - total_mem_domain)
+        self.mem_cached = (mem_stats['cached'] - mem_stats['buffers']) * 1024
+
 
 class VMTop:
+
     def __init__(self):
+        self._domains = {}
+
         self.libvirt_conn = Inventory.new_connection()
 
-        self._sort_on = 'cpu_usage'
+        self._sort_on = 'name'
 
         self.term_width = 0
         self.term_height = 0
 
-        self.stats = Stats()
+        self.host_stats = HostStats(self.libvirt_conn)
 
         self.screen = curses.initscr()
         self.init_terminal()
@@ -92,14 +219,14 @@ class VMTop:
         try:
             while True:
                 event = self.screen.getch()
-                if event == ord('q'):
-                    break
                 if event == ord('c'):
-                    self._sort_on = 'cpu_usage'
-                if event == ord('n'):
+                    self._sort_on = 'cpu'
+                elif event == ord('n'):
                     self._sort_on = 'name'
-                if event == ord('m'):
-                    self._sort_on = 'rss_float'
+                elif event == ord('m'):
+                    self._sort_on = 'mem'
+                elif event == ord('q'):
+                    break
                 elif event == curses.KEY_RESIZE:
                     self.resize()
         finally:
@@ -127,96 +254,27 @@ class VMTop:
             time.sleep(UPDATE_DATA_INTERVAL)
 
     def _update_data(self):
-        all_stats = {}
         total_mem_domain = 0
-        host_info = self.libvirt_conn.getInfo()
-        cpu_count = host_info[2]
 
         domains = self.libvirt_conn.getAllDomainStats(
             flags=libvirt.VIR_CONNECT_GET_ALL_DOMAINS_STATS_RUNNING
         )
 
+        current_domains = set()
         for domain, libvirt_stats in domains:
-
             name = domain.name()
-            # Current memory allocated on the host
-            rss = domain.memoryStats().get('rss', 0) * 1024
+            current_domains.add(name)
+            if name not in self._domains:
+                self._domains[name] = DomainStats(domain, self.host_stats)
 
-            old_stats = self.stats.vms.get(name)
+            self._domains[name].update(libvirt_stats)
+            total_mem_domain += self._domains[name].host_mem
 
-            # guest current max memory
-            guest_mem = libvirt_stats.get('balloon.maximum', 0) * 1024
+        # Delete all domains not active in domain stats list
+        deleted_domains = set(self._domains.keys()) - current_domains
+        list(map(self._domains.pop, deleted_domains))
 
-            cpu = cur_cpu_time = 0
-            net0_tx = net0_rx = net0_rx_cur = net0_tx_cur = 0
-            block0_rd_cur = block0_wd_cur = block0_rd = block0_wd = 0
-
-            if old_stats is not None:
-                cpu_prev_time = old_stats.stats.get('cputime', 0)
-                cur_cpu_time = int(libvirt_stats.get('vcpu.0.time', 0))
-                if cpu_prev_time > 0:
-                    cpu = (cur_cpu_time - cpu_prev_time) \
-                        / (UPDATE_DATA_INTERVAL * cpu_count * 10**7)
-                    cpu = min(cpu, 100)
-
-                net0_rx_prev = old_stats.stats.get('net0_rx_bytes', 0)
-                net0_rx_cur = libvirt_stats.get('net.0.rx.bytes', 0)
-                if net0_rx_prev > 0:
-                    net0_rx = ((net0_rx_cur - net0_rx_prev)
-                               / UPDATE_DATA_INTERVAL)
-
-                net0_tx_prev = old_stats.stats.get('net0_tx_bytes', 0)
-                net0_tx_cur = libvirt_stats.get('net.0.tx.bytes', 0)
-                if net0_tx_prev > 0:
-                    net0_tx = ((net0_tx_cur - net0_tx_prev)
-                               / UPDATE_DATA_INTERVAL)
-
-                block0_rd_prev = old_stats.stats.get('block0_rd_bytes', 0)
-                block0_rd_cur = libvirt_stats.get('block.0.rd.bytes', 0)
-                if block0_rd_prev > 0:
-                    block0_rd = ((block0_rd_cur - block0_rd_prev)
-                                 / UPDATE_DATA_INTERVAL)
-
-                block0_wd_prev = old_stats.stats.get('block0_wd_bytes', 0)
-                block0_wd_cur = libvirt_stats.get('block.0.wd.bytes', 0)
-                if block0_wd_prev > 0:
-                    block0_wd = ((block0_wd_cur - block0_wd_prev)
-                                 / UPDATE_DATA_INTERVAL)
-
-            stats = {
-                'name': name,
-                'cputime': cur_cpu_time,
-                'cpu_usage': round(cpu),
-                'mem': si_unit(guest_mem, True) + 'B',
-                'rss': si_unit(rss, True) + 'B',
-                'rss_float': rss,
-                'net0_rx_bytes': net0_rx_cur,
-                'net0_tx_bytes': net0_tx_cur,
-                'net0_rx': '{0}Bps'.format(si_unit(net0_rx * 8)),
-                'net0_tx': '{0}Bps'.format(si_unit(net0_tx * 8)),
-                'block0_rd_bytes': block0_rd_cur,
-                'block0_wd_bytes': block0_wd_cur,
-                'block0_rd': '{0}Bps'.format(si_unit(block0_rd * 8)),
-                'block0_wd': '{0}Bps'.format(si_unit(block0_wd * 8))
-            }
-            total_mem_domain += stats['rss_float']
-
-            all_stats[name] = DomainStats(domain, stats)
-
-        self.stats.vms = all_stats
-
-        mem_stats = self.libvirt_conn.getMemoryStats(
-            libvirt.VIR_NODE_MEMORY_STATS_ALL_CELLS
-        )
-
-        self.stats.mem_total = mem_stats['total'] * 1024
-        self.stats.mem_vms_total = total_mem_domain
-        self.stats.mem_os = ((mem_stats['total'] - mem_stats['free']
-                              - mem_stats['cached']
-                              - mem_stats['buffers']) * 1024
-                             - total_mem_domain)
-        self.stats.mem_cached = (mem_stats['cached']
-                                 - mem_stats['buffers']) * 1024
+        self.host_stats.update(total_mem_domain)
 
     def resize(self):
         w, h = VMTop.terminal_size()
@@ -245,8 +303,8 @@ class VMTop:
         posY = bar_graph_offset + 1
 
         mem_os_size = 0
-        if self.stats.mem_total > 0:
-            ratio = self.stats.mem_os / self.stats.mem_total
+        if self.host_stats.mem_total > 0:
+            ratio = self.host_stats.mem_os / self.host_stats.mem_total
             mem_os_size = round(ratio * (bar_graph_width - 2))
         self.screen.addstr(
             cur_line, posY,
@@ -255,8 +313,8 @@ class VMTop:
         posY += mem_os_size
 
         mem_vms_size = 0
-        if self.stats.mem_total > 0:
-            ratio = self.stats.mem_vms_total / self.stats.mem_total
+        if self.host_stats.mem_total > 0:
+            ratio = self.host_stats.mem_vms_total / self.host_stats.mem_total
             mem_vms_size = round(ratio * (bar_graph_width - 2))
         self.screen.addstr(
             cur_line, posY,
@@ -265,8 +323,8 @@ class VMTop:
         posY += mem_vms_size
 
         mem_vms_size = 0
-        if self.stats.mem_total > 0:
-            ratio = self.stats.mem_cached / self.stats.mem_total
+        if self.host_stats.mem_total > 0:
+            ratio = self.host_stats.mem_cached / self.host_stats.mem_total
             mem_vms_size = round(ratio * (bar_graph_width - 2))
         self.screen.addstr(
             cur_line, posY,
@@ -277,7 +335,7 @@ class VMTop:
         posY = bar_graph_width + bar_graph_offset + 2
 
         # Show memory takes by OS
-        text = '{0}B'.format(si_unit(self.stats.mem_os, True))
+        text = '{0}B'.format(si_unit(self.host_stats.mem_os, True))
         self.screen.addstr(cur_line, posY, text, self.RED_ON_BLACK)
         posY += len(text)
 
@@ -286,14 +344,14 @@ class VMTop:
         posY += len(text)
 
         # Show total memory used by vms
-        text = '{0}B'.format(si_unit(self.stats.mem_vms_total, True))
+        text = '{0}B'.format(si_unit(self.host_stats.mem_vms_total, True))
         self.screen.addstr(cur_line, posY, text, self.GREEN_ON_BLACK)
         posY += len(text)
 
         # Show all physical memory on host
         self.screen.addstr(
             cur_line, posY,
-            ' / {0}B'.format(si_unit(self.stats.mem_total, True)))
+            ' / {0}B'.format(si_unit(self.host_stats.mem_total, True)))
 
         cur_line += 2
 
@@ -301,26 +359,26 @@ class VMTop:
         # TABLE HEADER
         ##
         TABLES_COLS = (
-            '{name:15}', '{cpu_usage:>10}', '{mem:>10}', '{rss:>10}',
-            '{net0_rx:>10}', '{net0_tx:>10}',
-            '{block0_rd:>10}', '{block0_wd:>10}'
+            '{name:15}', '{cpu_usage:>8}', '{guest_mem:>10}', '{host_mem:>10}',
+            '{net_rx:>10}', '{net_tx:>10}',
+            '{block_rd:>10}', '{block_wr:>10}'
         )
 
         COLS_NAME = dict(
-            name='NAME', cpu_usage='%CPU', mem='MEM',
-            rss='HMEM', net0_rx='NET RX', net0_tx='NET TX',
-            block0_rd='BLKR', block0_wd='BLKW')
+            name='NAME', cpu_usage='%CPU', guest_mem='MEM',
+            host_mem='HMEM', net_rx='NET RX', net_tx='NET TX',
+            block_rd='BLK RD', block_wr='BLK WR')
 
         cur_line += 1
         self.screen.move(cur_line, 0)
 
         posY = 0
 
-        if self._sort_on == 'cpu_usage':
+        if self._sort_on == 'cpu':
             sort_field = 1
-        elif self._sort_on == 'rss_float':
+        elif self._sort_on == 'mem':
             sort_field = 3
-        elif self._sort_on == 'name':
+        else:
             sort_field = 0
 
         for i, pattern in enumerate(TABLES_COLS):
@@ -341,18 +399,18 @@ class VMTop:
         ###
         # PRINT ALL VMS
         ###
-        vms = list(self.stats.vms.values())
-        if self._sort_on == 'name':
-            reverse = False
-        else:
-            reverse = True
+        domains = list(self._domains.values())
+        domains.sort(key=lambda dom: dom.name)
 
-        vms.sort(key=lambda v: v.stats.get('name'))
-        vms.sort(key=lambda v: v.stats.get(self._sort_on, 0), reverse=reverse)
-        for vm in vms:
+        if self._sort_on == 'cpu':
+            domains.sort(key=lambda dom: dom.cpu_usage, reverse=True)
+        elif self._sort_on == 'mem':
+            domains.sort(key=lambda dom: dom.host_mem, reverse=True)
+
+        for domain in domains:
             if cur_line < self.term_height:
-                text = ''.join(TABLES_COLS).format(**vm.stats)
-                self.screen.addstr(cur_line, 0, text)
+                self.screen.addstr(
+                    cur_line, 0, domain.format(''.join(TABLES_COLS)))
                 self.screen.clrtoeol()
             cur_line += 1
 
