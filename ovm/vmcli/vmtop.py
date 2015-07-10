@@ -35,6 +35,8 @@ from ovm.utils.printer import si_unit
 UPDATE_DATA_INTERVAL = 1
 REFRESH_INTERVAL = 0.5
 
+SORT_NAME, SORT_CPU, SORT_MEM = 0, 1, 3
+
 
 class DomainStats:
 
@@ -178,7 +180,8 @@ class HostStats:
         cpu_stats = self._connection.getCPUStats(
             libvirt.VIR_NODE_CPU_STATS_ALL_CPUS)
 
-        cpu_time = (cpu_stats['kernel'] + cpu_stats['user']) / self.cpu_count
+        cpu_time = sum((cpu_stats[k] for k in ('kernel', 'user', 'iowait'))) \
+            / self.cpu_count
 
         if self.cpu_time > 0:
             self.cpu_usage = min(1, ((cpu_time - self.cpu_time)
@@ -205,10 +208,7 @@ class VMTop:
 
         self.libvirt_conn = Inventory.new_connection()
 
-        self._sort_on = 'name'
-
-        self.term_width = 0
-        self.term_height = 0
+        self._sort_on = SORT_NAME
 
         self.host_stats = HostStats(self.libvirt_conn)
 
@@ -217,11 +217,12 @@ class VMTop:
 
         # Init colors
         colors = (
-            ('BLACK_ON_GREEN', curses.COLOR_BLACK, curses.COLOR_GREEN),
+            ('TABLE_HEADER', curses.COLOR_BLACK, curses.COLOR_GREEN),
+            ('TABLE_HEADER_SELECTED', curses.COLOR_BLACK, curses.COLOR_CYAN),
             ('RED_ON_BLACK', curses.COLOR_RED, curses.COLOR_BLACK),
             ('GREEN_ON_BLACK', curses.COLOR_GREEN, curses.COLOR_BLACK),
-            ('CYAN_ON_BLACK',  6, curses.COLOR_BLACK),
-            ('BLACK_ON_CYAN',  curses.COLOR_BLACK, 6),
+            ('CYAN_ON_BLACK',  curses.COLOR_CYAN, curses.COLOR_BLACK),
+            ('BLACK_ON_CYAN',  curses.COLOR_BLACK, curses.COLOR_CYAN),
             ('YELLOW_ON_BLACK', curses.COLOR_YELLOW, curses.COLOR_BLACK)
         )
 
@@ -230,6 +231,12 @@ class VMTop:
             curses.init_pair(i, fg, bg)
             setattr(self, name, curses.color_pair(i))
 
+        try:
+            self.main()
+        finally:
+            self.reset_terminal()
+
+    def main(self):
         refresh_thread = threading.Thread(target=self.refresh)
         refresh_thread.daemon = True
         refresh_thread.start()
@@ -238,21 +245,18 @@ class VMTop:
         update_data_thread.daemon = True
         update_data_thread.start()
 
-        try:
-            while True:
-                event = self.screen.getch()
-                if event == ord('c'):
-                    self._sort_on = 'cpu'
-                elif event == ord('n'):
-                    self._sort_on = 'name'
-                elif event == ord('m'):
-                    self._sort_on = 'mem'
-                elif event == ord('q'):
-                    break
-                elif event == curses.KEY_RESIZE:
-                    self.resize()
-        finally:
-            self.reset_terminal()
+        while True:
+            event = self.screen.getch()
+            if event == ord('c'):
+                self._sort_on = SORT_CPU
+            elif event == ord('n'):
+                self._sort_on = SORT_NAME
+            elif event == ord('m'):
+                self._sort_on = SORT_MEM
+            elif event == ord('q'):
+                break
+            elif event == curses.KEY_RESIZE:
+                self.resize()
 
     def init_terminal(self):
         curses.start_color()
@@ -302,8 +306,6 @@ class VMTop:
 
     def resize(self):
         w, h = VMTop.terminal_size()
-        self.term_width = w
-        self.term_height = h
         curses.resizeterm(h, w)
 
     def draw_host_bar(self, line):
@@ -414,86 +416,53 @@ class VMTop:
             ' / {0}B'.format(si_unit(self.host_stats.mem_total, True))
         )
 
-    def refresh_interface(self):
-        ###
-        #  THE HOST BAR
-        ##
-
-        self.draw_host_bar(0)
-
-        ###
-        # CPU LINE
-        ##
-        self.draw_cpu_bar(2)
-
-        ###
-        # MEMORY LINE
-        ##
-        self.draw_memory_bar(3)
-
-        ###
-        # TABLE HEADER
-        ##
+    def draw_domains(self, line):
+        # Initialize columns
         TABLES_COLS = (
             '{name:15}', '{cpu_usage:>8}', '{guest_mem:>10}', '{host_mem:>10}',
-            '{net_rx:>10}', '{net_tx:>10}',
-            '{block_rd:>10}', '{block_wr:>10}'
+            '{net_rx:>10}', '{net_tx:>10}', '{block_rd:>10}', '{block_wr:>10}'
         )
 
+        # Prepare table header
         COLS_NAME = dict(
             name='NAME', cpu_usage='%CPU', guest_mem='MEM',
             host_mem='HOST MEM', net_rx='NET RX', net_tx='NET TX',
             block_rd='BLK RD', block_wr='BLK WR')
 
-        cur_line = 5
-        self.screen.move(cur_line, 0)
-
-        posY = 0
-
-        if self._sort_on == 'cpu':
-            sort_field = 1
-        elif self._sort_on == 'mem':
-            sort_field = 3
-        else:
-            sort_field = 0
+        # Draw the header
+        self.screen.move(line, 0)
 
         for i, pattern in enumerate(TABLES_COLS):
-            if sort_field == i:
-                color = self.BLACK_ON_CYAN
+            if self._sort_on == i:
+                color = self.TABLE_HEADER_SELECTED
             else:
-                color = self.BLACK_ON_GREEN
+                color = self.TABLE_HEADER
             text = pattern.format(**COLS_NAME)
-            self.screen.addstr(cur_line, posY, text, color)
-            posY += len(text)
+            self.screen.addstr(text, color)
 
         self.screen.addstr(
-            cur_line, posY, ' '*(self.term_width - posY), self.BLACK_ON_GREEN)
+            ' '*(self.screen.getmaxyx()[1] - self.screen.getyx()[1]),
+            self.TABLE_HEADER)
 
-        cur_line += 1
-        self.screen.clrtoeol()
-
-        ###
-        # PRINT ALL VMS
-        ###
         domains = list(self._domains.values())
         domains.sort(key=lambda dom: dom.name)
 
-        if self._sort_on == 'cpu':
+        if self._sort_on == SORT_CPU:
             domains.sort(key=lambda dom: dom.cpu_usage, reverse=True)
-        elif self._sort_on == 'mem':
+        elif self._sort_on == SORT_MEM:
             domains.sort(key=lambda dom: dom.host_mem, reverse=True)
 
         for domain in domains:
-            if cur_line < self.term_height:
-                self.screen.addstr(
-                    cur_line, 0, domain.format(''.join(TABLES_COLS)))
-                self.screen.clrtoeol()
-            cur_line += 1
-
-        ###
-        # CLEAR AND REFRESH
-        ###
+            self.screen.addstr(domain.format(''.join(TABLES_COLS)))
+            self.screen.clrtoeol()
+            self.screen.addch('\n')
         self.screen.clrtobot()
+
+    def refresh_interface(self):
+        self.draw_host_bar(0)
+        self.draw_cpu_bar(2)
+        self.draw_memory_bar(3)
+        self.draw_domains(5)
         self.screen.refresh()
 
     def refresh(self):
