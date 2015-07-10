@@ -159,6 +159,8 @@ class HostStats:
         host_info = connection.getInfo()
         self.cpu_count = host_info[2]
         self.cpu_freq = host_info[3] * (10**6)
+        self.cpu_time = 0
+        self.cpu_usage = 0
 
         self.mem_vms_total = 0
         self.mem_os = 0
@@ -169,6 +171,19 @@ class HostStats:
 
     def update(self, total_mem_domain, domain_count):
         self.domain_count = domain_count
+
+        host_info = self._connection.getInfo()
+        self.cpu_freq = host_info[3] * (10**6)
+
+        cpu_stats = self._connection.getCPUStats(
+            libvirt.VIR_NODE_CPU_STATS_ALL_CPUS)
+
+        cpu_time = (cpu_stats['kernel'] + cpu_stats['user']) / self.cpu_count
+
+        if self.cpu_time > 0:
+            self.cpu_usage = min(1, ((cpu_time - self.cpu_time)
+                                     / (UPDATE_DATA_INTERVAL * 10**9)))
+        self.cpu_time = cpu_time
 
         mem_stats = self._connection.getMemoryStats(
             libvirt.VIR_NODE_MEMORY_STATS_ALL_CELLS
@@ -296,7 +311,7 @@ class VMTop:
 
         bar_format = '  ::  '.join((
             '{hostname}',
-            'CPU: {cpu_count} ({cpu_freq}Hz)',
+            'CPU: {cpu_count} ({cpu_freq} MHz)',
             'Memory: {mem_total}iB',
             'Domains: {domain_count}'
         ))
@@ -304,7 +319,7 @@ class VMTop:
         text = bar_format.format(
             hostname=self.host_stats.hostname,
             cpu_count=self.host_stats.cpu_count,
-            cpu_freq=si_unit(self.host_stats.cpu_freq),
+            cpu_freq=int(self.host_stats.cpu_freq / 10**6),
             mem_total=si_unit(self.host_stats.mem_total),
             domain_count=self.host_stats.domain_count
         )
@@ -312,85 +327,109 @@ class VMTop:
         self.screen.addstr(line, 0, text, style)
         self.screen.clrtoeol()
 
-    def refresh_interface(self):
-        cur_line = 0
+    def draw_cpu_bar(self, line):
+        # Some params
+        bar_graph_width = 40
 
+        # Inialize the line
+        self.screen.move(line, 0)
+        self.screen.clrtoeol()
+
+        # Show 'CPU'
+        self.screen.move(line, 1)
+        self.screen.addstr('CPU', self.CYAN_ON_BLACK)
+
+        # Print the left side of the bar graph
+        self.screen.addstr('  [')
+
+        # Print the memory take by OS
+        pipe_count = round(self.host_stats.cpu_usage * bar_graph_width)
+        self.screen.addstr('|' * pipe_count, self.RED_ON_BLACK)
+
+        # Print the right side of the bar graph
+        _, x = self.screen.getyx()
+        self.screen.move(line, x + bar_graph_width - pipe_count)
+        self.screen.addstr(']  ')
+
+        self.screen.addstr('{0} %'.format(
+            round(self.host_stats.cpu_usage * 100)))
+
+    def draw_memory_bar(self, line):
+        current_bar_size = 0
+
+        # Some params
+        bar_graph_width = 40
+
+        # Inialize the line
+        self.screen.move(line, 0)
+        self.screen.clrtoeol()
+
+        # Show 'Mem'
+        self.screen.move(line, 1)
+        self.screen.addstr('Mem', self.CYAN_ON_BLACK)
+
+        # Print the left side of the bar graph
+        self.screen.addstr('  [')
+
+        # Print the memory take by OS
+        if self.host_stats.mem_total > 0:
+            ratio = self.host_stats.mem_os / self.host_stats.mem_total
+            mem_os_size = round(ratio * bar_graph_width)
+            self.screen.addstr('|' * mem_os_size, self.RED_ON_BLACK)
+            current_bar_size += mem_os_size
+
+        # Print the memory take by VMs
+        if self.host_stats.mem_total > 0:
+            ratio = self.host_stats.mem_vms_total / self.host_stats.mem_total
+            mem_vms_size = round(ratio * bar_graph_width)
+            self.screen.addstr('|' * mem_vms_size, self.GREEN_ON_BLACK)
+            current_bar_size += mem_vms_size
+
+        # Print the memory cached
+        if self.host_stats.mem_total > 0:
+            ratio = self.host_stats.mem_cached / self.host_stats.mem_total
+            mem_cached_size = round(ratio * bar_graph_width)
+            self.screen.addstr('|' * mem_cached_size, self.YELLOW_ON_BLACK)
+            current_bar_size += mem_cached_size
+
+        # Print the right side of the bar graph
+        _, x = self.screen.getyx()
+        self.screen.move(line, x + bar_graph_width - current_bar_size)
+        self.screen.addstr(']  ')
+
+        # Print the text aside
+        self.screen.addstr(
+            '{0}B'.format(si_unit(self.host_stats.mem_os, True)),
+            self.RED_ON_BLACK
+        )
+
+        self.screen.addstr(' / ')
+
+        self.screen.addstr(
+            '{0}B'.format(si_unit(self.host_stats.mem_vms_total, True)),
+            self.GREEN_ON_BLACK
+        )
+
+        self.screen.addstr(
+            ' / {0}B'.format(si_unit(self.host_stats.mem_total, True))
+        )
+
+    def refresh_interface(self):
         ###
         #  THE HOST BAR
         ##
 
-        self.draw_host_bar(cur_line)
+        self.draw_host_bar(0)
+
+        ###
+        # CPU LINE
+        ##
+        self.draw_cpu_bar(2)
 
         ###
         # MEMORY LINE
         ##
-        cur_line = 2
-
-        # Clean the whole line
-        self.screen.move(cur_line, 0)
-        self.screen.clrtoeol()
-
-        # Show 'Mem'
-        self.screen.addstr(cur_line, 1, 'Mem', self.CYAN_ON_BLACK)
-        bar_graph_offset = 6
-        bar_graph_width = 40
-        self.screen.addstr(cur_line, bar_graph_offset, '[')
-        self.screen.addstr(cur_line, bar_graph_offset + bar_graph_width, ']')
-
-        posY = bar_graph_offset + 1
-
-        mem_os_size = 0
-        if self.host_stats.mem_total > 0:
-            ratio = self.host_stats.mem_os / self.host_stats.mem_total
-            mem_os_size = round(ratio * (bar_graph_width - 2))
-        self.screen.addstr(
-            cur_line, posY,
-            '|' * mem_os_size, self.RED_ON_BLACK
-        )
-        posY += mem_os_size
-
-        mem_vms_size = 0
-        if self.host_stats.mem_total > 0:
-            ratio = self.host_stats.mem_vms_total / self.host_stats.mem_total
-            mem_vms_size = round(ratio * (bar_graph_width - 2))
-        self.screen.addstr(
-            cur_line, posY,
-            '|' * mem_vms_size, self.GREEN_ON_BLACK
-        )
-        posY += mem_vms_size
-
-        mem_vms_size = 0
-        if self.host_stats.mem_total > 0:
-            ratio = self.host_stats.mem_cached / self.host_stats.mem_total
-            mem_vms_size = round(ratio * (bar_graph_width - 2))
-        self.screen.addstr(
-            cur_line, posY,
-            '|' * mem_vms_size, self.YELLOW_ON_BLACK
-        )
-        posY += mem_vms_size
-
-        posY = bar_graph_width + bar_graph_offset + 2
-
-        # Show memory takes by OS
-        text = '{0}B'.format(si_unit(self.host_stats.mem_os, True))
-        self.screen.addstr(cur_line, posY, text, self.RED_ON_BLACK)
-        posY += len(text)
-
-        text = ' / '
-        self.screen.addstr(cur_line, posY, text)
-        posY += len(text)
-
-        # Show total memory used by vms
-        text = '{0}B'.format(si_unit(self.host_stats.mem_vms_total, True))
-        self.screen.addstr(cur_line, posY, text, self.GREEN_ON_BLACK)
-        posY += len(text)
-
-        # Show all physical memory on host
-        self.screen.addstr(
-            cur_line, posY,
-            ' / {0}B'.format(si_unit(self.host_stats.mem_total, True)))
-
-        cur_line += 2
+        self.draw_memory_bar(3)
 
         ###
         # TABLE HEADER
@@ -403,10 +442,10 @@ class VMTop:
 
         COLS_NAME = dict(
             name='NAME', cpu_usage='%CPU', guest_mem='MEM',
-            host_mem='HMEM', net_rx='NET RX', net_tx='NET TX',
+            host_mem='HOST MEM', net_rx='NET RX', net_tx='NET TX',
             block_rd='BLK RD', block_wr='BLK WR')
 
-        cur_line += 1
+        cur_line = 5
         self.screen.move(cur_line, 0)
 
         posY = 0
