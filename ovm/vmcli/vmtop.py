@@ -154,15 +154,22 @@ class HostStats:
     def __init__(self, connection):
         self._connection = connection
 
+        self.hostname = connection.getHostname()
+
         host_info = connection.getInfo()
         self.cpu_count = host_info[2]
+        self.cpu_freq = host_info[3] * (10**6)
 
         self.mem_vms_total = 0
         self.mem_os = 0
         self.mem_total = 0
         self.mem_cached = 0
 
-    def update(self, total_mem_domain):
+        self.domain_count = 0
+
+    def update(self, total_mem_domain, domain_count):
+        self.domain_count = domain_count
+
         mem_stats = self._connection.getMemoryStats(
             libvirt.VIR_NODE_MEMORY_STATS_ALL_CELLS
         )
@@ -274,7 +281,9 @@ class VMTop:
         deleted_domains = set(self._domains.keys()) - current_domains
         list(map(self._domains.pop, deleted_domains))
 
-        self.host_stats.update(total_mem_domain)
+        domain_count = len(current_domains)
+
+        self.host_stats.update(total_mem_domain, domain_count)
 
     def resize(self):
         w, h = VMTop.terminal_size()
@@ -282,12 +291,40 @@ class VMTop:
         self.term_height = h
         curses.resizeterm(h, w)
 
+    def draw_host_bar(self, line):
+        style = self.CYAN_ON_BLACK
+
+        bar_format = '  ::  '.join((
+            '{hostname}',
+            'CPU: {cpu_count} ({cpu_freq}Hz)',
+            'Memory: {mem_total}iB',
+            'Domains: {domain_count}'
+        ))
+
+        text = bar_format.format(
+            hostname=self.host_stats.hostname,
+            cpu_count=self.host_stats.cpu_count,
+            cpu_freq=si_unit(self.host_stats.cpu_freq),
+            mem_total=si_unit(self.host_stats.mem_total),
+            domain_count=self.host_stats.domain_count
+        )
+
+        self.screen.addstr(line, 0, text, style)
+        self.screen.clrtoeol()
+
     def refresh_interface(self):
-        cur_line = 1
+        cur_line = 0
+
+        ###
+        #  THE HOST BAR
+        ##
+
+        self.draw_host_bar(cur_line)
 
         ###
         # MEMORY LINE
         ##
+        cur_line = 2
 
         # Clean the whole line
         self.screen.move(cur_line, 0)
