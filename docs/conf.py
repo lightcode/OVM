@@ -48,8 +48,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'OVM'
-copyright = '2015, Matthieu'
-author = 'Matthieu'
+copyright = '2015, Matthieu Gaignière'
+author = 'Matthieu Gaignière'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -224,7 +224,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   (master_doc, 'OVM.tex', 'OVM Documentation',
-   'Matthieu', 'manual'),
+   'Matthieu Gaignière', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

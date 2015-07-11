@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import unittest
 
 from ovm.drivers.driver_loader import DriverLoader
