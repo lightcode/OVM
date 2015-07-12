@@ -8,7 +8,7 @@ __all__ = ['Configuration']
 
 class Configuration:
 
-    VERSION = '0.2'
+    VERSION = '0.3'
     ETC = '/etc/ovm'
     SAVED_VMS = '/var/lib/ovm/saved-vms'
     ETC_TEMPLATES = ETC + '/templates'

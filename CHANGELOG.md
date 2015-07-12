@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Version 0.3 (not released yet)
+## Version 0.3 (07/12/2015)
 
 - New metadata API: store arbitrary key/value data
 - Add metadata support in templates
@@ -10,6 +10,8 @@
 - Add a default storage driver
 - New command: `vm unset`
 - Modify the command `vm set`
+- Improve `vm top`: add CPU host graph, info about disks and network
+- Create an abstract storage driver
 
 
 ## Version 0.2 (06/30/2015)
