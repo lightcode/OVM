@@ -6,7 +6,7 @@
 - Add metadata support in templates (done: 07/03/15)
 - Storage: LVM driver (done: 07/03/15)
 - Add a default storage driver (done: 07/05/15)
-- Create an abstract storage driver
+- Create an abstract storage driver (done: 07/12/15)
 
 
 ## Version 0.4

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+from abc import ABCMeta
 
-class Driver:
+
+class Driver(metaclass=ABCMeta):
 
     def __init__(self):
         self._params = {}
