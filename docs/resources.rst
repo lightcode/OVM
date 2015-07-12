@@ -32,6 +32,15 @@ The file driver
 
 To use flat file to store VM disks.
 
+
+**File driver additional parameters**:
+
+**disk_format**
+   define the format of the disk file.
+
+   Supported values: qcow2, raw. (Default: qcow2)
+
+
 **Configuration example**:
 
 .. code-block:: yaml
@@ -40,10 +49,11 @@ To use flat file to store VM disks.
       ssd:
         driver: file
         root: /mnt/pool-vm-ssd
-
+        disk_format: qcow2
 
 Here we create the storage pool **ssd**. We use the driver **file** to
 access it.
+
 
 
 
