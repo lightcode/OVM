@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configure resources &mdash; OVM 0.2 documentation</title>
+  <title>Configure resources &mdash; OVM 0.3 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="OVM 0.2 documentation" href="index.html"/>
+    <link rel="top" title="OVM 0.3 documentation" href="index.html"/>
         <link rel="next" title="Command reference" href="commands.html"/>
         <link rel="prev" title="Configure OS templates" href="templates.html"/> 
 
@@ -161,7 +161,9 @@ create several storage pools with the same <code class="docutils literal"><span 
 <p><strong>File driver additional parameters</strong>:</p>
 <dl class="docutils">
 <dt><strong>disk_format</strong></dt>
-<dd>define the format of the disk file. Sopported values: qcow2, raw.</dd>
+<dd><p class="first">define the format of the disk file.</p>
+<p class="last">Supported values: qcow2, raw. (Default: qcow2)</p>
+</dd>
 </dl>
 <p><strong>Configuration example</strong>:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">storage</span><span class="p-Indicator">:</span>
@@ -276,7 +278,7 @@ can choose <cite>dhcp</cite> and let the DHCP server on your network allocate th
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.2',
+            VERSION:'0.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

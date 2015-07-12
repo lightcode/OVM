@@ -36,7 +36,9 @@ To use flat file to store VM disks.
 **File driver additional parameters**:
 
 **disk_format**
-   define the format of the disk file. Sopported values: qcow2, raw.
+   define the format of the disk file.
+
+   Supported values: qcow2, raw. (Default: qcow2)
 
 
 **Configuration example**:
