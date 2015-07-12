@@ -158,11 +158,17 @@ create several storage pools with the same <code class="docutils literal"><span 
 <div class="section" id="the-file-driver">
 <h3>The file driver<a class="headerlink" href="#the-file-driver" title="Permalink to this headline">¶</a></h3>
 <p>To use flat file to store VM disks.</p>
+<p><strong>File driver additional parameters</strong>:</p>
+<dl class="docutils">
+<dt><strong>disk_format</strong></dt>
+<dd>define the format of the disk file. Sopported values: qcow2, raw.</dd>
+</dl>
 <p><strong>Configuration example</strong>:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">storage</span><span class="p-Indicator">:</span>
   <span class="l-Scalar-Plain">ssd</span><span class="p-Indicator">:</span>
     <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">file</span>
     <span class="l-Scalar-Plain">root</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/mnt/pool-vm-ssd</span>
+    <span class="l-Scalar-Plain">disk_format</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">qcow2</span>
 </pre></div>
 </div>
 <p>Here we create the storage pool <strong>ssd</strong>. We use the driver <strong>file</strong> to
@@ -249,7 +255,7 @@ can choose <cite>dhcp</cite> and let the DHCP server on your network allocate th
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2015, Matthieu.
+        &copy; Copyright 2015, Matthieu Gaignière.
     </p>
   </div>
   Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
