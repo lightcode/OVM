@@ -13,7 +13,8 @@
   <on_reboot>restart</on_reboot>
   <on_crash>restart</on_crash>
   <devices>
-    <emulator>/usr/bin/kvm</emulator>
+    <!-- `emulator` is set automatically by OVM -->
+    <emulator></emulator>
     <controller type="usb" index="0">
     </controller>
     <controller type="pci" index="0" model="pci-root"/>

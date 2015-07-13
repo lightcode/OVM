@@ -3,6 +3,7 @@
 
 import os.path
 from lxml import etree
+from distutils import spawn
 
 from ovm.configuration import Configuration
 from ovm.exceptions import OVMError
@@ -20,6 +21,15 @@ class DomainDefinition:
         self._vcpu = self._template.vcpu
         self._memory = self._template.memory
         self._main_disk = None
+
+    @staticmethod
+    def find_kvm():
+        commands = ('qemu-kvm', 'kvm')
+        for command in commands:
+            path = spawn.find_executable(command)
+            if path:
+                return path
+        raise OVMError('Path to KVM no found.')
 
     def network(self):
         return self._network
@@ -57,8 +67,17 @@ class DomainDefinition:
                 tree = etree.parse(fd)
         except OSError as e:
             raise OVMError('Cannot open {}: {}'.format(basename, e))
-        else:
-            return tree.getroot()
+
+        root = tree.getroot()
+
+        devices = root.find('devices')
+        for emulator in devices.findall('emulator'):
+            devices.remove(emulator)
+
+        emulator = etree.SubElement(devices, 'emulator')
+        emulator.text = self.find_kvm()
+
+        return root
 
     def create_main_disk(self):
         name = '{}-main'.format(self.name)
