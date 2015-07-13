@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+from __future__ import division
 import curses
 import fcntl
 import libvirt
@@ -325,7 +327,7 @@ class VMTop:
         self.screen.addstr('  [')
 
         # Print the memory take by OS
-        pipe_count = round(self.host_stats.cpu_usage * bar_graph_width)
+        pipe_count = int(round(self.host_stats.cpu_usage * bar_graph_width))
         self.screen.addstr('|' * pipe_count, self.RED_ON_BLACK)
 
         # Print the right side of the bar graph
@@ -356,21 +358,21 @@ class VMTop:
         # Print the memory take by OS
         if self.host_stats.mem_total > 0:
             ratio = self.host_stats.mem_os / self.host_stats.mem_total
-            mem_os_size = round(ratio * bar_graph_width)
+            mem_os_size = int(round(ratio * bar_graph_width))
             self.screen.addstr('|' * mem_os_size, self.RED_ON_BLACK)
             current_bar_size += mem_os_size
 
         # Print the memory take by VMs
         if self.host_stats.mem_total > 0:
             ratio = self.host_stats.mem_vms_total / self.host_stats.mem_total
-            mem_vms_size = round(ratio * bar_graph_width)
+            mem_vms_size = int(round(ratio * bar_graph_width))
             self.screen.addstr('|' * mem_vms_size, self.GREEN_ON_BLACK)
             current_bar_size += mem_vms_size
 
         # Print the memory cached
         if self.host_stats.mem_total > 0:
             ratio = self.host_stats.mem_cached / self.host_stats.mem_total
-            mem_cached_size = round(ratio * bar_graph_width)
+            mem_cached_size = int(round(ratio * bar_graph_width))
             self.screen.addstr('|' * mem_cached_size, self.YELLOW_ON_BLACK)
             current_bar_size += mem_cached_size
 

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import os
 import stat
 import sys
 import tempfile
-from subprocess import PIPE, Popen, STDOUT
+from subprocess import PIPE, STDOUT
 
 from ovm.configuration import Configuration
 from ovm.exceptions import OVMError
@@ -13,6 +15,7 @@ from ovm.resources.resources import Resources
 from ovm.templates.domain_definition import DomainDefinition
 from ovm.templates.template import Template
 from ovm.utils.logger import logger
+from ovm.utils.compat23 import Popen
 
 
 def _exec_script(path, cmd_params=None, env_params=None):
@@ -158,10 +161,9 @@ class VMCreation:
             return
 
         _, filename = tempfile.mkstemp()
-        with open(filename, 'wb+') as configuration:
+        with open(filename, 'w+') as configuration:
             for name, value in env.items():
-                configuration.write(
-                    bytes('{}={}\n'.format(name, value), 'utf-8'))
+                configuration.write('{}={}\n'.format(name, value))
 
         logger.info('Running post-install scripts...')
         for hook in post_install:

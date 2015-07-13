@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import libvirt
 from lxml import etree
 
 from ovm.configuration import Configuration
+from ovm.exceptions import DomainException
+from ovm.inventory.disk import Disk
 from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.inventory.network_interface import NetworkInterface
-from ovm.inventory.disk import Disk
-from ovm.exceptions import DomainException
+from ovm.utils.logger import logger
 
 
 class Domain:
@@ -98,7 +100,7 @@ class Domain:
         except KeyError:
             pass
         if unit not in ('k', 'KiB'):
-            print("WARNING: this unit of memory isn't recognize")
+            logger.warning("WARNING: this unit of memory isn't recognize")
         mem = int(node.text) * (2**10)
         return mem
 
@@ -129,7 +131,7 @@ class Domain:
         try:
             node = self._saved_tree.xpath('/domain/vcpu')[0]
         except:
-            print("Cannot get the 'vcpu' element in XML.")
+            logger.warning("Cannot get the 'vcpu' element in XML.")
             return
 
         return int(node.text)

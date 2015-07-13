@@ -11,6 +11,7 @@
 
 ## Version 0.4
 
+- Python 2 support
 - Add `clone` command
 - Get the IPv4 through the Qemu Guest Agent
 

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import concurrent.futures
 import fnmatch
 import libvirt
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from subprocess import Popen
+from six.moves import input
 
 from ovm.exceptions import OVMError
 from ovm.inventory import Inventory
@@ -14,6 +16,7 @@ from ovm.templates.template import Template
 from ovm.utils.logger import logger
 from ovm.utils.printer import ColoredString, bcolors
 from ovm.utils.printer import print_title, si_unit, default, print_table
+from ovm.utils.compat23 import Popen
 from ovm.vmcli.creation import VMCreation
 from ovm.vmcli.libvirt_console import Console
 from ovm.vmcli.vmtop import VMTop

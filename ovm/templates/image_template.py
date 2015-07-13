@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
-from subprocess import Popen, PIPE
+from subprocess import PIPE
 
 from ovm.exceptions import OVMError
+from ovm.utils.compat23 import Popen
 
 
 class ImageTemplate:

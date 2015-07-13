@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import argparse
 import libvirt
@@ -60,8 +61,7 @@ def add_subparsers(parser):
 
     # list
     subcommand = subparsers.add_parser(
-        'list',
-        aliases=['ls'],
+        'ls',
         help='list VMs')
     subcommand.add_argument(
         '--short',
@@ -142,7 +142,7 @@ def add_subparsers(parser):
 
     # remove
     subcommand = subparsers.add_parser(
-        'remove', aliases=['rm'],
+        'rm',
         help='remove one or many VMs')
     subcommand.add_argument('name', help='name of VMs', nargs='+')
     subcommand.add_argument(

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import concurrent.futures
 import os
@@ -30,7 +31,8 @@ class CopyFile:
             threads.append(executor.submit(self._monitor, src, dst))
             for future in concurrent.futures.as_completed(threads):
                 if future.exception() is not None:
-                    print(future.exception())
+                    sys.stdout.write(future.exception())
+                    sys.stdout.flush()
         sys.stdout.write('\n')
         sys.stdout.flush()
 

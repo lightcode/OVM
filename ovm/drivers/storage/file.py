@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os.path
-from subprocess import Popen, PIPE
+from subprocess import PIPE
 from lxml.builder import E
 
-from ovm.exceptions import DriverError
 from ovm.drivers.storage.generic import StorageDriver
+from ovm.exceptions import DriverError
 from ovm.utils.logger import logger
+from ovm.utils.compat23 import Popen
 
 
 __all__ = ['FileDriver']
@@ -52,7 +54,7 @@ class FileDriver(StorageDriver):
         with Popen(args, stdout=PIPE, stderr=PIPE) as process:
             process.wait()
             if process.returncode != 0:
-                print(process.stderr.read())
+                raise DriverError(process.stderr.read().decode('utf-8'))
 
     def import_image(self, image, name):
         path = os.path.join(self._params.get('root'), name)

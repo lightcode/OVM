@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os.path
-from subprocess import Popen, PIPE
+from subprocess import PIPE
 from lxml.builder import E
 
-from ovm.exceptions import DriverError
 from ovm.drivers.storage.generic import StorageDriver
+from ovm.exceptions import DriverError
 from ovm.utils.logger import logger
+from ovm.utils.compat23 import Popen
 
 
 __all__ = ['LvmDriver']
