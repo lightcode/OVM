@@ -29,6 +29,11 @@ class DomainDefinition:
             path = spawn.find_executable(command)
             if path:
                 return path
+
+        # Patch for CentOS 7
+        path = '/usr/libexec/qemu-kvm'
+        if os.path.isfile(path):
+            return path
         raise OVMError('Path to KVM no found.')
 
     def network(self):
