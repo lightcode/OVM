@@ -330,18 +330,18 @@ def vm_save(name, args):
     except OVMError as e:
         logger.error('VM "%s" cannot be saved: %s', name, e)
     else:
-        logger.info('VM "%s" is saved.')
+        logger.info('VM "%s" is saved.', name)
 
 
 @bulk_command()
 def vm_restore(name, args):
     try:
         domain = _get_domain(name)
-        domain.save()
+        domain.restore()
     except OVMError as e:
         logger.error('VM "%s" cannot be restored: %s', name, e)
     else:
-        logger.info('VM "%s" is restored.')
+        logger.info('VM "%s" is restored.', name)
 
 
 @bulk_command()
