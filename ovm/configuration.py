@@ -14,3 +14,4 @@ class Configuration:
     SAVED_VMS = '/var/lib/ovm/saved-vms'
     ETC_TEMPLATES = ETC + '/templates'
     RESOURCE_CONFIG = os.path.join(ETC, 'resources.yml')
+    IP_DATABASE = '/var/lib/ovm/ipdatabase.db'

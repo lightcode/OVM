@@ -27,7 +27,7 @@ def add_subparsers(parser):
     subcommand.add_argument('--template', required=True)
     subcommand.add_argument('--network', required=True)
     subcommand.add_argument('--storage', required=True)
-    subcommand.add_argument('--ip', nargs='?', default='default')
+    subcommand.add_argument('--ip', nargs='?')
     subcommand.add_argument('--size', nargs='?')
     subcommand.add_argument('--vcpu', nargs='?')
     subcommand.add_argument('--memory', nargs='?')

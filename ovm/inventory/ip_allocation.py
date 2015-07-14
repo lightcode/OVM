@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import sqlite3
+
+from ovm.configuration import Configuration
+from ovm.exceptions import OVMError
+from ovm.utils.logger import logger
+
+
+def is_ipv4_valid(ip):
+    try:
+        ip = [i for i in map(int, ip.split('.', 3)) if 0 <= i <= 255]
+    except ValueError:
+        return False
+    return len(ip) == 4
+
+
+def iprange(a, b):
+    if not is_ipv4_valid(a) or not is_ipv4_valid(b):
+        raise ValueError('Bap IP address')
+    a = int(''.join(['{0:08b}'.format(int(i)) for i in a.split('.')]), 2)
+    b = int(''.join(['{0:08b}'.format(int(i)) for i in b.split('.')]), 2)
+    if a > b:
+        raise ValueError('Invalid range')
+    for ip in range(a, b + 1):
+        yield '.'.join([str(ip >> (8 * i) & 255) for i in range(3, -1, -1)])
+
+
+class IpAllocation:
+
+    def __init__(self, network):
+        self._connection = None
+        self.address = None
+
+        self._network = network
+        self.pool = network.ipv4_pool
+
+        self.init_connection()
+
+    def __del__(self):
+        self._connection.close()
+
+    def _get_used_ips(self):
+        cur = self._connection.cursor()
+        cur.execute('SELECT address FROM ipv4 WHERE network=?',
+                    (self._network.name,))
+        return [e[0] for e in cur.fetchall()]
+
+    def init_connection(self):
+        self._connection = sqlite3.connect(Configuration.IP_DATABASE)
+        cur = self._connection.cursor()
+        cur.execute('CREATE TABLE IF NOT EXISTS ipv4 '
+                    '(domain text, network text, address text)')
+        self._connection.commit()
+
+    def new_ip(self):
+        used_ips = self._get_used_ips()
+        ipstart = self.pool['ip_start']
+        ipend = self.pool['ip_end']
+        for ip in iprange(ipstart, ipend):
+            if ip not in used_ips:
+                return ip
+
+        raise OVMError('No IPs available in your IP pool')
+
+    def check_ip(self, address):
+        if not is_ipv4_valid(address):
+            raise OVMError('The IP address "{}" is not valid.'.format(address))
+
+        if address not in iprange(self.pool['ip_start'], self.pool['ip_end']):
+            raise OVMError('This IP is not in '
+                           'the defined range'.format(address))
+
+        if address in self._get_used_ips():
+            raise OVMError('The IP address "{}" has '
+                           'already been attributed'.format(address))
+
+    def hold_ip(self, domain, address=None):
+        if address:
+            self.check_ip(address)
+        else:
+            address = self.new_ip()
+
+        self.address = address
+
+        cur = self._connection.cursor()
+        cur.execute('INSERT INTO ipv4(domain, network, address) VALUES(?,?,?)',
+                    (domain, self._network.name, self.address))
+        self._connection.commit()
+
+        logger.debug('New allocation saved: %s -> %s', domain, self.address)
+
+    def release_ips(self, domain):
+        cur = self._connection.cursor()
+        cur.execute('DELETE FROM ipv4 WHERE network=? AND domain=?',
+                    (self._network.name, domain))
+        self._connection.commit()
+
+        logger.debug('Release IP allocation for domain "%s"', domain)
+
+    def remove(self):
+        if not self.address:
+            return
+
+        cur = self._connection.cursor()
+        cur.execute('DELETE FROM ipv4 WHERE network=? AND address=?',
+                    (self._network.name, self.address))
+        self._connection.commit()
+
+        logger.debug('Realease IP "%s" from network "%s"', self.address,
+                     self._network.name)

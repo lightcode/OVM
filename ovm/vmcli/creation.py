@@ -16,6 +16,7 @@ from ovm.templates.domain_definition import DomainDefinition
 from ovm.templates.template import Template
 from ovm.utils.logger import logger
 from ovm.utils.compat23 import Popen
+from ovm.resources.network import ALLOCATION_STATIC, ALLOCATION_DHCP
 
 
 def _exec_script(path, cmd_params=None, env_params=None):
@@ -58,7 +59,6 @@ class VMCreation:
         'resize_main_filesystem',
         'running_post_install_scripts',
         'add_domain_in_inventory',
-        'reserve_ip',
         'print_domain'
     )
 
@@ -71,6 +71,7 @@ class VMCreation:
         self._template = None
         self._params = None
         self._domain = None
+        self._alloc = None
 
     def start(self):
         for num, step in enumerate(self.STEPS, 1):
@@ -80,7 +81,13 @@ class VMCreation:
             except OVMError as e:
                 logger.error('Cannot create VM "%s": %s', self._args.name,
                              e.message)
+                self.clean_on_abort(self._args)
                 sys.exit(1)
+
+    def clean_on_abort(self, args):
+        logger.info('Cleaning all...')
+        if self._alloc:
+            self._alloc.remove()
 
     def check_domain_name(self, args):
         domains = [domain.get_name() for domain in Inventory.get_domains()]
@@ -90,16 +97,16 @@ class VMCreation:
     def process_network_args(self, args):
         network = Resources.get_network(args.network)
 
-        if args.ip == 'auto':
-            network.set_ip_auto()
-            network.set_ip_auto()
-        elif args.ip == 'dhcp':
-            network.set_ip_dhcp()
-        elif args.ip == 'default':
-            network.set_ip_default()
-        else:
-            network.set_ip_manual(args.ip)
+        if network.allocation_method == ALLOCATION_DHCP:
+            if args.ip:
+                raise OVMError('You cannot use --ip with a DHCP network.')
+
+        elif network.allocation_method == ALLOCATION_STATIC:
+            alloc = network.new_ipv4_allocation()
+            alloc.hold_ip(args.name, args.ip)
+
         self._network = network
+        self._alloc = alloc
 
     def process_storage_args(self, args):
         self._storage = Resources.get_storage_pool(args.storage)
@@ -144,10 +151,10 @@ class VMCreation:
     def running_post_install_scripts(self, args):
         network = self._network
         env = {}
-        if network.is_dhcp():
+        if network.allocation_method == ALLOCATION_DHCP:
             env['IP'] = 'dhcp'
         else:
-            env['IP'] = str(network.ipv4_pool['ip'])
+            env['IP'] = self._alloc.address
             env['NETMASK'] = _long_netmask(network.ipv4_pool['netmask'])
             env['GATEWAY'] = str(network.ipv4_pool['gateway'])
             env['NAMESERVERS'] = ' '.join(network.ipv4_pool['nameservers'])
@@ -184,9 +191,6 @@ class VMCreation:
         domain.set_main_ipv4(self._params['IP'])
         domain.metadata.update(self._template.metadata)
         self._domain = domain
-
-    def reserve_ip(self, args):
-        self._network.lock_ip()
 
     def print_domain(self, args):
         from ovm.vmcli.management import print_vm_info

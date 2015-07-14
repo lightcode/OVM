@@ -131,4 +131,3 @@ with different parameters:
          netmask: 24
          gateway: 192.168.1.1
          nameservers: ['192.168.1.1']
-         autoip_path: /etc/ovm/autoip/local.dat
