@@ -11,10 +11,17 @@ storage:
 networks:
 
   prod-1:
-    driver: openvswitch
+    driver: bridge
+    openvswitch: true
+    bridge: sw0
+    vlan: 10
 
   prod-2:
-    driver: openvswitch
+    driver: bridge
+    openvswitch: true
+    bridge: sw0
+    vlan: 20
 
   labs:
-    driver: openvswitch
+    driver: bridge
+    bridge: sw1

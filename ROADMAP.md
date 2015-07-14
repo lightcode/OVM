@@ -12,14 +12,14 @@
 ## Version 0.4
 
 - Python 2 support
-- Add `clone` command
 - Get the IPv4 through the Qemu Guest Agent
+- Update the network drivers
+- Create a generic storage driver
 
 
 ## Version 0.5
 
-- Update the network drivers
-- Create a generic storage driver
+- Add `clone` command
 
 
 ## Version 1.0

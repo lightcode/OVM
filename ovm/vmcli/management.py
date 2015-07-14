@@ -106,13 +106,13 @@ def print_vm_info(domain):
     print()
 
     print_title('Network')
-    headers = ['MAC address', 'Network', 'Port group']
+    headers = ['MAC address', 'Bridge', 'VLAN']
     rows = []
     for iface in domain.get_interfaces():
         rows.append((
-            iface.get_mac(),
-            iface.get_network_name(),
-            iface.get_portgroup()
+            iface.mac,
+            iface.bridge,
+            ','.join(iface.vlans)
         ))
     print_table(headers, rows)
     print()

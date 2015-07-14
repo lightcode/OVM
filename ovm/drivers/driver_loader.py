@@ -4,6 +4,7 @@
 import importlib
 import inspect
 
+from ovm.exceptions import OVMError
 from ovm.drivers.storage.generic import StorageDriver
 from ovm.drivers.network.generic import NetworkDriver
 
@@ -25,7 +26,7 @@ class DriverLoader:
         try:
             pkg = importlib.import_module(module_name)
         except ImportError:
-            raise ValueError('No driver "{0}" found.'.format(driver_name))
+            raise OVMError('No driver "{0}" found.'.format(driver_name))
 
         clsmembers = inspect.getmembers(pkg, inspect.isclass)
 

@@ -3,10 +3,11 @@
 
 import unittest
 
+from ovm.exceptions import OVMError
 from ovm.drivers.driver_loader import DriverLoader
 from ovm.drivers.storage.lvm import LvmDriver
 from ovm.drivers.storage.file import FileDriver
-from ovm.drivers.network.openvswitch import OpenvSwitchDriver
+from ovm.drivers.network.bridge import BridgeDriver
 
 
 class TestDriverLoader(unittest.TestCase):
@@ -26,10 +27,10 @@ class TestDriverLoader(unittest.TestCase):
     def test_to_load_openvswitch_driver(self):
         """this should return the openvswitch driver"""
         dl = DriverLoader(DriverLoader.NETWORK)
-        driver = dl.load('openvswitch')
-        self.assertEqual(driver, OpenvSwitchDriver)
+        driver = dl.load('bridge')
+        self.assertEqual(driver, BridgeDriver)
 
     def test_to_load_non_existing_driver(self):
-        """this should raise a ValueError"""
+        """this should raise a OVMError"""
         dl = DriverLoader(DriverLoader.NETWORK)
-        self.assertRaises(ValueError, dl.load, 'non-existing-driver')
+        self.assertRaises(OVMError, dl.load, 'non-existing-driver')

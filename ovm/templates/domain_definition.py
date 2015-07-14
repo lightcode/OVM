@@ -94,9 +94,12 @@ class DomainDefinition:
     def resize_main_disk(self, new_size):
         self._main_disk.resize(new_size)
 
+    def create_main_network_interface(self):
+        netdef = self._network.create_interface(self._template.main_interface)
+        self._devices.append(netdef)
+
     def get_xml(self):
-        root = self._get_basevm()
-        domain = root
+        domain = self._get_basevm()
 
         # Add VM params
         name = etree.SubElement(domain, 'name')
@@ -107,14 +110,10 @@ class DomainDefinition:
         vcpu = etree.SubElement(domain, 'vcpu')
         vcpu.text = str(self.vcpu)
 
-        devices = root.find('devices')
-
-        # Add network in device
-        net = etree.fromstring(self.network().get_xml())
-        devices.append(net)
+        devices = domain.find('devices')
 
         for device_xml in self._devices:
             node = etree.fromstring(device_xml)
             devices.append(node)
 
-        return etree.tostring(root)
+        return etree.tostring(domain)

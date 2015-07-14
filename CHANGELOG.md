@@ -1,6 +1,12 @@
 # Changelog
 
 
+## Version 0.4 (not release yet)
+
+- Network: remove dependency to libvirt network
+- Network: rename `openvswitch` to `bridge`. It support all kind of Linux bridge
+
+
 ## Version 0.3 (07/12/2015)
 
 - New metadata API: store arbitrary key/value data

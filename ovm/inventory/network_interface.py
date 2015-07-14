@@ -3,21 +3,19 @@
 
 
 class NetworkInterface:
+
     def __init__(self, xmldesc):
-        self.xmldesc = xmldesc
+        # Get the bridge name
+        source = xmldesc.find('source')
+        self.bridge = source.attrib.get('bridge')
 
-    def get_network_name(self):
-        source = self.xmldesc.xpath('source')[0]
-        return source.attrib.get('network')
+        # Get all vlans
+        vlan = xmldesc.find('vlan')
+        self.vlans = []
 
-    def get_portgroup(self):
-        source = self.xmldesc.xpath('source')[0]
-        return source.attrib.get('portgroup')
+        for tag in vlan.findall('tag'):
+            self.vlans.append(tag.attrib.get('id'))
 
-    def get_mac(self):
-        try:
-            mac_xml = self.xmldesc.xpath('mac')[0]
-        except:
-            return
-        else:
-            return mac_xml.attrib.get('address')
+        # Get mac address
+        mac_xml = xmldesc.find('mac')
+        self.mac = mac_xml.attrib.get('address')

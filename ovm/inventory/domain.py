@@ -175,7 +175,7 @@ class Domain:
     def get_interfaces(self):
         interfaces = []
         xml_ifaces = self._saved_tree.xpath(
-            "/domain/devices/interface[@type='network']")
+            "/domain/devices/interface[@type='bridge']")
         for iface in xml_ifaces:
             interfaces.append(NetworkInterface(iface))
         return interfaces

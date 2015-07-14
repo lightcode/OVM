@@ -108,11 +108,10 @@ class VMCreation:
         template = Template.get_template(args.template)
         logger.info('Template "%s" loaded.', template.name)
 
-        self._network.import_template_spec(template)
-
         domdef = DomainDefinition(template, args.name)
         domdef.set_network(self._network)
         domdef.set_storage(self._storage)
+        domdef.create_main_network_interface()
 
         if args.vcpu:
             domdef.vcpu = args.vcpu

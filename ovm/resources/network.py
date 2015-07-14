@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from lxml import etree
+
 from ovm.exceptions import OVMError
 
 
@@ -24,14 +26,14 @@ def iprange(a, b):
 
 
 class Network:
+
     def __init__(self, name, driver, ipv4_allocation=None, ipv4_pool=None,
                  options=None, **params):
 
         self.name = name
         self._method = None
         self._driver = driver()
-
-        self._params = params
+        self._driver.set_params(**params)
 
         options_default = {
             'allow_dhcp': False,
@@ -43,9 +45,6 @@ class Network:
 
         self.ipv4_allocation = ipv4_allocation
         self.ipv4_pool = ipv4_pool
-
-        # Set driver params
-        self._driver.set_params(**params)
 
     def _lock_ip(self):
         autoip_path = self.ipv4_pool['autoip_path']
@@ -117,9 +116,7 @@ class Network:
 
         self.ipv4_pool['ip'] = str(ip)
 
-    def import_template_spec(self, template):
-        model = template.main_interface['model']
-        self._driver.set_params(driver_type=model)
-
-    def get_xml(self):
-        return self._driver.get_xml()
+    def create_interface(self, template_params):
+        self._driver.set_params(driver_type=template_params['model'])
+        netdef = self._driver.generate_xml()
+        return etree.tostring(netdef).decode('utf-8')
