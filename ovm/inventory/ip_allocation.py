@@ -32,9 +32,11 @@ class IpAllocation:
     def __init__(self, network):
         self._connection = None
         self.address = None
+        self.domain = None
 
         self._network = network
-        self.pool = network.ipv4_pool
+        if network:
+            self.pool = network.ipv4_pool
 
         self.init_connection()
 
@@ -46,6 +48,28 @@ class IpAllocation:
         cur.execute('SELECT address FROM ipv4 WHERE network=?',
                     (self._network.name,))
         return [e[0] for e in cur.fetchall()]
+
+    def get_allocations(self):
+        cur = self._connection.cursor()
+        cur.execute('SELECT domain, address FROM ipv4 WHERE network=?',
+                    (self._network.name,))
+        for domain, address in cur:
+            alloc = IpAllocation(self._network)
+            alloc.address = address
+            alloc.domain = domain
+            yield alloc
+
+    @staticmethod
+    def remove_domain(domain):
+        alloc = IpAllocation(None)
+        cur = alloc._connection.cursor()
+        cur.execute('DELETE FROM ipv4 WHERE domain=?', (domain,))
+        alloc._connection.commit()
+
+    def remove_allocation(self, address):
+        cur = self._connection.cursor()
+        cur.execute('DELETE FROM ipv4 WHERE network=? AND address=?', (self._network.name, address))
+        self._connection.commit()
 
     def init_connection(self):
         self._connection = sqlite3.connect(Configuration.IP_DATABASE)

@@ -6,9 +6,10 @@ import libvirt
 from lxml import etree
 
 from ovm.configuration import Configuration
-from ovm.exceptions import DomainException
+from ovm.exceptions import DomainException, DriverError
 from ovm.inventory.disk import Disk
 from ovm.inventory.domain_metadata import DomainMetadata
+from ovm.inventory.ip_allocation import IpAllocation
 from ovm.inventory.network_interface import NetworkInterface
 from ovm.utils.logger import logger
 
@@ -58,7 +59,12 @@ class Domain:
             self.vir_domain.destroy()
 
         for disk in self.get_disks():
-            disk.remove()
+            try:
+                disk.remove()
+            except DriverError as e:
+                logger.warning(e)
+
+        IpAllocation.remove_domain(self.get_name())
 
         self.remove_save()
 

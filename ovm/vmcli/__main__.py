@@ -51,14 +51,6 @@ def add_subparsers(parser):
         help='print only the list of storage names')
     subcommand.set_defaults(func=vm_storage)
 
-    # networks
-    subcommand = subparsers.add_parser('networks', help='list networks')
-    subcommand.add_argument(
-        '--short',
-        action='store_true',
-        help='print only the list of networks names')
-    subcommand.set_defaults(func=vm_networks)
-
     # list
     subcommand = subparsers.add_parser(
         'ls',
@@ -167,6 +159,42 @@ def add_subparsers(parser):
         'top',
         help='show all VMs and their states')
     subcommand.set_defaults(func=vm_top)
+
+    # networks
+    subcommand = subparsers.add_parser('network')
+    add_network_subparsers(subcommand)
+
+
+def add_network_subparsers(parser):
+    subparsers = parser.add_subparsers()
+
+    cmd = subparsers.add_parser('list')
+    cmd.add_argument(
+        '--short',
+        action='store_true',
+        help='print only the list of networks names')
+    cmd.set_defaults(func=network_list)
+
+    cmd = subparsers.add_parser(
+        'ipv4-list',
+        help='show IPv4 allocated to a network')
+    cmd.add_argument('network')
+    cmd.set_defaults(func=network_ipv4_list)
+
+    cmd = subparsers.add_parser(
+        'ipv4-del',
+        help='delete an IPv4 associated with a network')
+    cmd.add_argument('network')
+    cmd.add_argument('address', nargs='+')
+    cmd.set_defaults(func=network_ipv4_delete)
+
+    cmd = subparsers.add_parser(
+        'ipv4-add',
+        help='add a new association between a domain and an IP address')
+    cmd.add_argument('network')
+    cmd.add_argument('domain')
+    cmd.add_argument('address', nargs='?')
+    cmd.set_defaults(func=network_ipv4_add)
 
 
 def main():

@@ -373,18 +373,6 @@ def vm_storage(args):
     print_table(headers, rows)
 
 
-def vm_networks(args):
-    if args.short:
-        print('\n'.join([n.name for n in Resources.get_networks()]))
-        return
-
-    headers = ('Network name',)
-    rows = []
-    for network in Resources.get_networks():
-        rows.append((network.name,))
-    print_table(headers, rows)
-
-
 def vm_create(args):
     vmc = VMCreation(args)
     vmc.start()
@@ -408,3 +396,44 @@ def vm_templates(args):
             default(tpl.get_os_version(), '-')
         ))
     print_table(headers, rows)
+
+
+def network_list(args):
+    if args.short:
+        print('\n'.join([n.name for n in Resources.get_networks()]))
+        return
+
+    headers = ('Network name',)
+    rows = []
+    for network in Resources.get_networks():
+        rows.append((network.name,))
+    print_table(headers, rows)
+
+
+def network_ipv4_list(args):
+    net = Resources.get_network(args.network)
+    alloc = net.new_ipv4_allocation()
+    headers = ('IPv4', 'Domain')
+    rows = []
+    for allocation in alloc.get_allocations():
+        rows.append((allocation.address, allocation.domain))
+    print_table(headers, rows)
+
+
+def network_ipv4_delete(args):
+    net = Resources.get_network(args.network)
+    alloc = net.new_ipv4_allocation()
+    for address in args.address:
+        alloc.remove_allocation(address)
+
+
+def network_ipv4_add(args):
+    net = Resources.get_network(args.network)
+    alloc = net.new_ipv4_allocation()
+    try:
+        alloc.hold_ip(args.domain, args.address)
+    except OVMError as e:
+        logger.error(e)
+        sys.exit(1)
+    print('The IP address {} is now associated with {}.'.format(
+        alloc.address, args.domain))
