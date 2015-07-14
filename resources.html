@@ -207,12 +207,15 @@ with different parameters:</p>
 <dt><strong>driver</strong></dt>
 <dd>is the name of the network driver. OVM uses it to create new VMs
 with the right configuration. Today, only the driver
-<cite>openvswitch</cite> exists.</dd>
-<dt><strong>net_name</strong></dt>
-<dd>the parameter <cite>net_name</cite> defines the name of the network in libvirt.</dd>
-<dt><strong>net_portgroup</strong></dt>
-<dd>this term is used in libvirt configuration network.
-<em>This option is facultative</em>.</dd>
+<cite>bridge</cite> exists.</dd>
+<dt><strong>bridge</strong></dt>
+<dd>is the name of the bridge on your hypervisor.</dd>
+<dt><strong>vlan</strong></dt>
+<dd>is the VLAN ID used by your network.
+<em>This option is facultative</em>. Default: not set (no VLAN created).</dd>
+<dt><strong>openvswitch</strong></dt>
+<dd>if your bridge is an Open vSwitch bridge, then put this parameter at true.
+<em>This option is facultative</em>. Default: <cite>false</cite>.</dd>
 <dt><strong>ipv4_allocation</strong></dt>
 <dd>this parameter is used to precise to OVM the type of IPv4 allocation.
 You can choose <cite>static</cite> and precise the <cite>ipv4_pool</cite> parameter or you
@@ -223,9 +226,10 @@ can choose <cite>dhcp</cite> and let the DHCP server on your network allocate th
 <p><strong>Configuration example</strong>:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span class="l-Scalar-Plain">networks</span><span class="p-Indicator">:</span>
   <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">openvswitch</span>
-    <span class="l-Scalar-Plain">net_name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">net-ovs</span>
-    <span class="l-Scalar-Plain">net_portgroup</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">local</span>
+    <span class="l-Scalar-Plain">driver</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">bridge</span>
+    <span class="l-Scalar-Plain">openvswitch</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span>
+    <span class="l-Scalar-Plain">bridge</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">sw0</span>
+    <span class="l-Scalar-Plain">vlan</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">42</span>
     <span class="l-Scalar-Plain">ipv4_allocation</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">static</span>
     <span class="l-Scalar-Plain">ipv4_pool</span><span class="p-Indicator">:</span>
       <span class="l-Scalar-Plain">ip_start</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.1.30</span>
@@ -233,7 +237,6 @@ can choose <cite>dhcp</cite> and let the DHCP server on your network allocate th
       <span class="l-Scalar-Plain">netmask</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">24</span>
       <span class="l-Scalar-Plain">gateway</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.1.1</span>
       <span class="l-Scalar-Plain">nameservers</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span><span class="s">&#39;192.168.1.1&#39;</span><span class="p-Indicator">]</span>
-      <span class="l-Scalar-Plain">autoip_path</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/etc/autoip/ovm/local.dat</span>
 </pre></div>
 </div>
 </div>

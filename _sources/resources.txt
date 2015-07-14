@@ -98,12 +98,15 @@ with different parameters:
 **driver**
    is the name of the network driver. OVM uses it to create new VMs
    with the right configuration. Today, only the driver
-   `openvswitch` exists.
-**net_name**
-   the parameter `net_name` defines the name of the network in libvirt.
-**net_portgroup**
-   this term is used in libvirt configuration network.
-   *This option is facultative*.
+   `bridge` exists.
+**bridge**
+   is the name of the bridge on your hypervisor.
+**vlan**
+   is the VLAN ID used by your network.
+   *This option is facultative*. Default: not set (no VLAN created).
+**openvswitch**
+   if your bridge is an Open vSwitch bridge, then put this parameter at true.
+   *This option is facultative*. Default: `false`.
 **ipv4_allocation**
    this parameter is used to precise to OVM the type of IPv4 allocation.
    You can choose `static` and precise the `ipv4_pool` parameter or you
@@ -117,9 +120,10 @@ with different parameters:
 
    networks:
      local:
-       driver: openvswitch
-       net_name: net-ovs
-       net_portgroup: local
+       driver: bridge
+       openvswitch: true
+       bridge: sw0
+       vlan: 42
        ipv4_allocation: static
        ipv4_pool:
          ip_start: 192.168.1.30
@@ -127,4 +131,3 @@ with different parameters:
          netmask: 24
          gateway: 192.168.1.1
          nameservers: ['192.168.1.1']
-         autoip_path: /etc/autoip/ovm/local.dat

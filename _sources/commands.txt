@@ -31,7 +31,7 @@ Here, you have the list of subcommands:
    Give information about a VM
 
 
-.. option:: list (ls)
+.. option:: ls
 
    Print the list of VM
 
@@ -58,7 +58,7 @@ Here, you have the list of subcommands:
    Restore a VM
 
 
-.. option:: remove (rm)
+.. option:: rm
 
    Remove a VM
 
