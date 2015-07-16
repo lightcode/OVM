@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
+
 import curses
-import fcntl
 import libvirt
-import struct
-import termios
 import threading
 import time
 
@@ -237,8 +235,6 @@ class VMTop:
                 self._sort_on = SORT_MEM
             elif event == ord('q'):
                 break
-            elif event == curses.KEY_RESIZE:
-                self.resize()
 
     def init_terminal(self):
         curses.start_color()
@@ -246,7 +242,6 @@ class VMTop:
         curses.cbreak()
         curses.curs_set(0)
         self.screen.keypad(1)
-        self.resize()
         self.screen.clear()
         self.screen.refresh()
 
@@ -285,10 +280,6 @@ class VMTop:
         domain_count = len(current_domains)
 
         self.host_stats.update(total_mem_domain, domain_count)
-
-    def resize(self):
-        w, h = VMTop.terminal_size()
-        curses.resizeterm(h, w)
 
     def draw_host_bar(self, line):
         style = self.CYAN_ON_BLACK
@@ -455,13 +446,6 @@ class VMTop:
                 pass
             finally:
                 time.sleep(REFRESH_INTERVAL)
-
-    @classmethod
-    def terminal_size(cls):
-        h, w, hp, wp = struct.unpack('HHHH', fcntl.ioctl(
-            0, termios.TIOCGWINSZ, struct.pack('HHHH', 0, 0, 0, 0)
-        ))
-        return w, h
 
 
 if __name__ == '__main__':
