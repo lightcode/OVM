@@ -41,7 +41,8 @@ class IpAllocation:
         self.init_connection()
 
     def __del__(self):
-        self._connection.close()
+        if self._connection:
+            self._connection.close()
 
     def _get_used_ips(self):
         cur = self._connection.cursor()
@@ -68,7 +69,8 @@ class IpAllocation:
 
     def remove_allocation(self, address):
         cur = self._connection.cursor()
-        cur.execute('DELETE FROM ipv4 WHERE network=? AND address=?', (self._network.name, address))
+        cur.execute('DELETE FROM ipv4 WHERE network=? AND address=?',
+                    (self._network.name, address))
         self._connection.commit()
 
     def init_connection(self):
