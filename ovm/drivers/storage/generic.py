@@ -29,6 +29,11 @@ class StorageDriver(Driver):
         """Get the file size by seeking at end"""
         try:
             fd = os.open(disk.path, os.O_RDONLY)
-            return os.lseek(fd, 0, os.SEEK_END)
+        except OSError:
+            return 0
+
+        try:
+            size = os.lseek(fd, 0, os.SEEK_END)
         finally:
             os.close(fd)
+            return size
