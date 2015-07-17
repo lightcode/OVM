@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import os
 import shutil
+import sys
 from setuptools import setup, find_packages
 
 from ovm.configuration import Configuration
 
 
-with open('requirements.txt') as f:
-    requirements = [line.strip() for line in f.readlines()]
+requirements = ['pyaml', 'six']
+
+if sys.version_info.major == 2:
+    requirements.append('futures')
 
 setup(
     name='OVM',
@@ -22,21 +24,15 @@ setup(
     install_requires=requirements,
     packages=find_packages(),
     data_files=[
-        ('/etc/bash_completion.d', ['bin/vm-completion'])
+        ('bash_completion.d', ['bin/vm-completion'])
     ],
     entry_points={
         'console_scripts': ['vm = ovm.vmcli.__main__:main']
     }
 )
 
-if os.path.exists(Configuration.ETC):
-    print("Don't change {0}".format(Configuration.ETC))
-else:
-    shutil.copytree('etc/', '/etc/ovm')
+if not os.path.exists(Configuration.ETC):
+    shutil.copytree('etc/', Configuration.ETC)
 
 if not os.path.exists(Configuration.SAVED_VMS):
     os.makedirs(Configuration.SAVED_VMS)
-
-DEFAULT_STORAGE_POOL = '/var/lib/ovm/storage-pools/default'
-if not os.path.exists(DEFAULT_STORAGE_POOL):
-    os.makedirs(DEFAULT_STORAGE_POOL)

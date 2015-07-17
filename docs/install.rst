@@ -24,11 +24,6 @@ We need to install Python libraries (example on Debian):
 
     # apt-get install python3-pip
 
-We need to install all requirements with pip:
-
-.. code-block:: console
-
-    # pip-3.2 install -r requirements.txt
 
 Now, you can download and extract OVM. Then, to achieve the
 installation, we simply do this command into the ``ovm`` directory:

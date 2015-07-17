@@ -12,10 +12,7 @@
 #       driver: file
 #       root: /mnt/pool-vm-ssd
 
-storage:
-  default:
-    driver: file
-    root: /var/lib/ovm/storage-pools/default
+storage: {}
 
 
 
@@ -45,4 +42,4 @@ storage:
 #          gateway: 10.42.1.1
 #          nameservers: ['192.168.1.1']
 
-networks: {}  # Replace me
+networks: {}
