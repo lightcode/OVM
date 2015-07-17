@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-from lxml import etree
 from distutils import spawn
 
+from ovm.utils.compat23 import etree
 from ovm.configuration import Configuration
 from ovm.exceptions import OVMError
 

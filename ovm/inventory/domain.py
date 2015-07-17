@@ -3,7 +3,6 @@
 
 import os
 import libvirt
-from lxml import etree
 
 from ovm.configuration import Configuration
 from ovm.exceptions import DomainException, DriverError
@@ -11,6 +10,7 @@ from ovm.inventory.disk import Disk
 from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.inventory.ip_allocation import IpAllocation
 from ovm.inventory.network_interface import NetworkInterface
+from ovm.utils.compat23 import etree
 from ovm.utils.logger import logger
 
 
@@ -134,32 +134,24 @@ class Domain:
             return 'Unknown (%d)' % num
 
     def get_vcpu_count(self):
-        try:
-            node = self._saved_tree.xpath('/domain/vcpu')[0]
-        except:
-            logger.warning("Cannot get the 'vcpu' element in XML.")
-            return
-
-        return int(node.text)
+        vcpu = self._saved_tree.find('vcpu')
+        return int(vcpu.text)
 
     def get_vnc_info(self):
-        vnc_infos = {
-            'screen': None
-        }
-        try:
-            node = self._lived_tree.xpath(
-                "/domain/devices/graphics[@type='vnc']")[0]
-        except:
-            return {}
-        else:
-            try:
-                port = int(node.attrib.get('port'))
-            except:
-                pass
-            else:
-                if port >= 5900:
-                    vnc_infos['screen'] = port - 5900
-        return vnc_infos
+        vncport = None
+
+        devices = list(self.find_device('graphics', type='vnc'))
+
+        if devices > 0:
+            vncport = devices[0].attrib.get('port')
+
+        if vncport is not None:
+            vncport = int(vncport)
+
+        if vncport < 0:
+            vncport = None
+
+        return dict(port=vncport)
 
     def get_autostart(self):
         return self.vir_domain.autostart()
@@ -168,31 +160,32 @@ class Domain:
         self.vir_domain.setAutostart(bool(boolean))
 
     def get_memory(self):
-        """Returns the max memory the domain can use."""
-        node = self._saved_tree.xpath('/domain/memory')[0]
-        mem = self._mem_extract_value(node)
-        return mem
+        memory = self._saved_tree.find('memory')
+        return self._mem_extract_value(memory)
 
     def get_current_memory(self):
-        node = self._saved_tree.xpath('/domain/currentMemory')[0]
-        mem = self._mem_extract_value(node)
-        return mem
+        memory = self._saved_tree.find('currentMemory')
+        return self._mem_extract_value(memory)
+
+    def find_device(self, name, **kargs):
+        devices = self._lived_tree.find('devices')
+        for device in devices:
+            if device.tag == name:
+                for key, value in kargs.items():
+                    if device.attrib.get(key) != value:
+                        continue
+                yield device
 
     def get_interfaces(self):
         interfaces = []
-        xml_ifaces = self._saved_tree.xpath(
-            "/domain/devices/interface[@type='bridge']")
-        for iface in xml_ifaces:
+        for iface in self.find_device('interface', type='bridge'):
             interfaces.append(NetworkInterface(iface))
         return interfaces
 
     def get_disks(self):
         disks = []
-        xml_disks = self._saved_tree.xpath(
-            "/domain/devices/disk[@device='disk']")
-        for disk in xml_disks:
+        for disk in self.find_device('disk', device='disk'):
             disks.append(Disk(xmldef=disk))
-
         return disks
 
     def get_os_info(self):

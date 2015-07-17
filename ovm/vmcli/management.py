@@ -101,7 +101,7 @@ def print_vm_info(domain):
     print('IP address     : {0}'.format(domain.get_main_ipv4()))
     print('Starting       : {0}'.format(
         'Auto' if domain.get_autostart() else 'Manual'))
-    print('VNC screen     : {0}'.format(domain.get_vnc_info()['screen']))
+    print('VNC port       : {0}'.format(domain.get_vnc_info()['port']))
     print()
     print()
 

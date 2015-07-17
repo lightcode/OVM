@@ -3,12 +3,11 @@
 
 import os.path
 from subprocess import PIPE
-from lxml.builder import E
 
 from ovm.drivers.storage.generic import StorageDriver
 from ovm.exceptions import DriverError
 from ovm.utils.logger import logger
-from ovm.utils.compat23 import Popen
+from ovm.utils.compat23 import Popen, etree
 
 
 __all__ = ['FileDriver']
@@ -30,21 +29,19 @@ class FileDriver(StorageDriver):
         super(FileDriver, self).set_params(**params)
 
     def generate_xml(self, disk):
-        xmldef = (
-            E.disk(
-                E.driver(
-                    name='qemu',
-                    type=self._params['disk_format'],
-                    cache='writeback'
-                ),
-                E.source(
-                    file=disk.path
-                ),
-                type='file',
-                device='disk'
-            )
-        )
-        return xmldef
+        disktree = etree.Element('disk')
+        disktree.set('type', 'file')
+        disktree.set('device', 'disk')
+
+        driver = etree.SubElement(disktree, 'driver')
+        driver.set('name', 'qemu')
+        driver.set('type', self._params['disk_format'])
+        driver.set('cache', 'writeback')
+
+        source = etree.SubElement(disktree, 'source')
+        source.set('file', disk.path)
+
+        return disktree
 
     def resize_disk(self, disk, new_size):
         if not os.path.exists(disk.path):

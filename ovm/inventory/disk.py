@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from lxml import etree
-
 from ovm.exceptions import OVMError
+from ovm.utils.compat23 import etree
 
 
 class Disk:

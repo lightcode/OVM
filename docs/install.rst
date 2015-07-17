@@ -22,7 +22,7 @@ We need to install Python libraries (example on Debian):
 
 .. code-block:: console
 
-    # apt-get install python3-lxml python3-pip
+    # apt-get install python3-pip
 
 We need to install all requirements with pip:
 

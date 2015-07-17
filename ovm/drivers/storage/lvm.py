@@ -3,12 +3,11 @@
 
 import os.path
 from subprocess import PIPE
-from lxml.builder import E
 
 from ovm.drivers.storage.generic import StorageDriver
 from ovm.exceptions import DriverError
 from ovm.utils.logger import logger
-from ovm.utils.compat23 import Popen
+from ovm.utils.compat23 import Popen, etree
 
 
 __all__ = ['LvmDriver']
@@ -35,22 +34,19 @@ class LvmDriver(StorageDriver):
                 DriverError(process.stderr.read().decode('utf-8'))
 
     def generate_xml(self, disk):
-        domdef = (
-            E.disk(
-                E.driver(
-                    name='qemu',
-                    type=LvmDriver.DISK_FORMAT,
-                    cache='writeback'
-                ),
-                E.source(
-                    dev=disk.path
-                ),
-                type='block',
-                device='disk'
-            )
-        )
+        disktree = etree.Element('disk')
+        disktree.set('type', 'block')
+        disktree.set('device', 'disk')
 
-        return domdef
+        driver = etree.SubElement(disktree, 'driver')
+        driver.set('name', 'qemu')
+        driver.set('type', LvmDriver.DISK_FORMAT)
+        driver.set('cache', 'writeback')
+
+        source = etree.SubElement(disktree, 'source')
+        source.set('dev', disk.path)
+
+        return disktree
 
     def resize_disk(self, disk, new_size):
         args = ['lvresize', '--size', '{}G'.format(new_size), disk.path]

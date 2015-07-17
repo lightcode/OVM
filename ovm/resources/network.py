@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from lxml import etree
-
+from ovm.utils.compat23 import etree
 from ovm.exceptions import OVMError
 from ovm.inventory.ip_allocation import IpAllocation
 
