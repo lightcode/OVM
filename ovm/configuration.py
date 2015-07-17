@@ -7,11 +7,17 @@ import os.path
 __all__ = ['Configuration']
 
 
+ROOT = os.path.join(os.path.expanduser('~'), 'ovm')
+
+
 class Configuration:
 
     VERSION = '0.3'
-    ETC = '/etc/ovm'
-    SAVED_VMS = '/var/lib/ovm/saved-vms'
-    ETC_TEMPLATES = ETC + '/templates'
+    ETC = os.path.join(ROOT, 'etc')
+    VAR = os.path.join(ROOT, 'var')
+
     RESOURCE_CONFIG = os.path.join(ETC, 'resources.yml')
-    IP_DATABASE = '/var/lib/ovm/ipdatabase.db'
+    ETC_TEMPLATES = os.path.join(ETC, 'templates')
+
+    SAVED_VMS = os.path.join(VAR, 'saved-vms')
+    IP_DATABASE = os.path.join(VAR, 'ipdatabase.db')
