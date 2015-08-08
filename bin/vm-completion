@@ -38,7 +38,7 @@ _vm()
                 fi
                 return 0
             ;;
-            list | ls)
+            ls)
                 COMPREPLY=( $(compgen -W "--active --inactive --short" -- ${cur}) )
                 return 0
             ;;
@@ -46,14 +46,14 @@ _vm()
                 COMPREPLY=( $(compgen -W "--short" -- ${cur}) )
                 return 0
             ;;
-            remove | rm)
-                vm_list="$(vm list --inactive --short)"
+            rm)
+                vm_list="$(vm ls --inactive --short)"
                 COMPREPLY=( $(compgen -W "--yes ${vm_list}" -- ${cur}) )
                 return 0
             ;;
             autostart | set | info | unset)
                 if [[ COMP_CWORD -eq 2 ]]; then
-                    vm_list="$(vm list --short)"
+                    vm_list="$(vm ls --short)"
                     COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 elif [[ COMP_CWORD -eq 3 ]] && [[ "$cmd" == "autostart" ]]; then
                     COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
@@ -62,18 +62,18 @@ _vm()
             ;;
             ping | reboot | ssh | console)
                 if [[ COMP_CWORD -eq 2 ]]; then
-                    vm_list="$(vm list --active --short)"
+                    vm_list="$(vm ls --active --short)"
                     COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 fi
                 return 0
             ;;
             stop | save)
-                vm_list="$(vm list --active --short)"
+                vm_list="$(vm ls --active --short)"
                 COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 return 0
             ;;
             start | restore)
-                vm_list="$(vm list --inactive --short)"
+                vm_list="$(vm ls --inactive --short)"
                 COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
                 return 0
             ;;
