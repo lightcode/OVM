@@ -20,6 +20,7 @@ from ovm.utils.compat23 import Popen
 from ovm.vmcli.creation import VMCreation
 from ovm.vmcli.libvirt_console import Console
 from ovm.vmcli.vmtop import VMTop
+from ovm.inventory.ip_allocation import IpAllocation
 
 
 ###################################
@@ -418,6 +419,10 @@ def network_ipv4_list(args):
     for allocation in alloc.get_allocations():
         rows.append((allocation.address, allocation.domain))
     print_table(headers, rows)
+
+
+def network_ipv4_flush(args):
+    IpAllocation.flush_network(args.network)
 
 
 def network_ipv4_delete(args):

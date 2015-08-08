@@ -196,6 +196,12 @@ def add_network_subparsers(parser):
     cmd.add_argument('address', nargs='?')
     cmd.set_defaults(func=network_ipv4_add)
 
+    cmd = subparsers.add_parser(
+        'ipv4-flush',
+        help='remove all ip address in a network')
+    cmd.add_argument('network')
+    cmd.set_defaults(func=network_ipv4_flush)
+
 
 def main():
     # Ignore text error from libvirt

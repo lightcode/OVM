@@ -30,7 +30,6 @@ def iprange(a, b):
 class IpAllocation:
 
     def __init__(self, network):
-        self._connection = None
         self.address = None
         self.domain = None
 
@@ -38,7 +37,7 @@ class IpAllocation:
         if network:
             self.pool = network.ipv4_pool
 
-        self.init_connection()
+        self._connection = self.get_connection()
 
     def __del__(self):
         if self._connection:
@@ -73,12 +72,16 @@ class IpAllocation:
                     (self._network.name, address))
         self._connection.commit()
 
-    def init_connection(self):
-        self._connection = sqlite3.connect(Configuration.IP_DATABASE)
-        cur = self._connection.cursor()
+    @staticmethod
+    def get_connection():
+        logger.debug('Connect to the IP database (%s)',
+                     Configuration.IP_DATABASE)
+        connection = sqlite3.connect(Configuration.IP_DATABASE)
+        cur = connection.cursor()
         cur.execute('CREATE TABLE IF NOT EXISTS ipv4 '
                     '(domain text, network text, address text)')
-        self._connection.commit()
+        connection.commit()
+        return connection
 
     def new_ip(self):
         used_ips = self._get_used_ips()
@@ -124,6 +127,14 @@ class IpAllocation:
         self._connection.commit()
 
         logger.debug('Release IP allocation for domain "%s"', domain)
+
+    @staticmethod
+    def flush_network(network):
+        connection = IpAllocation.get_connection()
+        cur = connection.cursor()
+        cur.execute('DELETE FROM ipv4 WHERE network=?', (network,))
+        connection.commit()
+        connection.close()
 
     def remove(self):
         if not self.address:
