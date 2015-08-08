@@ -11,11 +11,9 @@
 
 ## Version 0.4
 
-- Python 2 support (in progress)
-- New IPv4 allocation system (in progress)
-- Update the network drivers (in progress)
-- Create a generic network driver
-- Get the IPv4 through the Qemu Guest Agent
+- Python 2 support (done: 07/13/15)
+- Update the network drivers (done: 07/13/15)
+- New IPv4 allocation system (done: 08/08/15)
 
 
 ## Version 0.5
@@ -33,4 +31,4 @@
 - IPv6 support
 - Remote administration
 - Keep vm create logs
-- At a boot script for initd and systemd
+- Get the IPv4 through the Qemu Guest Agent

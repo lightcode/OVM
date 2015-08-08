@@ -1,10 +1,13 @@
 # Changelog
 
 
-## Version 0.4 (not release yet)
+## Version 0.4 (08/08/2015)
 
 - Network: remove dependency to libvirt network
 - Network: rename `openvswitch` to `bridge`. It support all kind of Linux bridge
+- Add an IPv4 management system
+- Add Python 2 support
+- Modify the setup script to accept non-root installation
 
 
 ## Version 0.3 (07/12/2015)

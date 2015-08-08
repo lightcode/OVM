@@ -1,5 +1,7 @@
 *.pyc
 *.pyo
 *~
-.idea
-docs-html
+
+__pycache__
+
+/docs-html

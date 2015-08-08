@@ -12,7 +12,7 @@ ROOT = os.path.join(os.path.expanduser('~'), 'ovm')
 
 class Configuration:
 
-    VERSION = '0.3'
+    VERSION = '0.4'
     ETC = os.path.join(ROOT, 'etc')
     VAR = os.path.join(ROOT, 'var')
 
