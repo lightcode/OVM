@@ -4,8 +4,6 @@ set -e
 
 cd "$(dirname $0)"
 
-DEVICE="/dev/vda"
-
 DISK="$1"
 ROOT="$2"
 
@@ -49,6 +47,13 @@ convert_in_block() {
 ###########################
 
 guestfish --remote -- run
+
+DEVICE="$(guestfish --remote -- list-devices | grep -E '^(/dev/sda|/dev/vda)$' | head -n1)"
+
+if [ -z "$DEVICE" ]; then
+  echo "No device found" >&2
+  exit 1
+fi
 
 nb_part=$(guestfish --remote -- part-list $DEVICE | grep -c '^\[')
 
