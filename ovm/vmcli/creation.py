@@ -27,8 +27,6 @@ def _exec_script(path, cmd_params=None, env_params=None):
         logger.warning('Script ignored "%s": not found', path)
         return
 
-    os.chmod(path, stat.S_IXUSR)
-
     cmd = [path]
     if cmd_params:
         cmd += cmd_params
