@@ -93,18 +93,15 @@ class VMCreation:
             raise OVMError('this name is already taken by another VM.')
 
     def process_network_args(self, args):
-        network = Resources.get_network(args.network)
+        self._network = Resources.get_network(args.network)
 
-        if network.allocation_method == ALLOCATION_DHCP:
+        if self._network.allocation_method == ALLOCATION_DHCP:
             if args.ip:
                 raise OVMError('You cannot use --ip with a DHCP network.')
 
-        elif network.allocation_method == ALLOCATION_STATIC:
-            alloc = network.new_ipv4_allocation()
-            alloc.hold_ip(args.name, args.ip)
-
-        self._network = network
-        self._alloc = alloc
+        elif self._network.allocation_method == ALLOCATION_STATIC:
+            self._alloc = self._network.new_ipv4_allocation()
+            self._alloc.hold_ip(args.name, args.ip)
 
     def process_storage_args(self, args):
         self._storage = Resources.get_storage_pool(args.storage)
