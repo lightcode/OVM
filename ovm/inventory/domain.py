@@ -169,12 +169,17 @@ class Domain:
 
     def find_device(self, name, **kargs):
         devices = self._lived_tree.find('devices')
+
+        def check_properties(device, properties):
+            for key, value in properties:
+                if device.attrib.get(key) != value:
+                    return False
+            return True
+
         for device in devices:
             if device.tag == name:
-                for key, value in kargs.items():
-                    if device.attrib.get(key) != value:
-                        continue
-                yield device
+                if check_properties(device, kargs.items()):
+                    yield device
 
     def get_interfaces(self):
         interfaces = []
