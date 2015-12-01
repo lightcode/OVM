@@ -25,7 +25,8 @@ class Domain:
         if libvirt_conn:
             self._libvirt_conn = libvirt_conn
         else:
-            self._libvirt_conn = libvirt.open()
+            from ovm.inventory.inventory import Inventory
+            self._libvirt_conn = Inventory.new_connection()
 
         saved_desc = self.vir_domain.XMLDesc(libvirt.VIR_DOMAIN_XML_INACTIVE)
         self._saved_tree = etree.fromstring(saved_desc)
