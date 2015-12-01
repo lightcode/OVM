@@ -8,7 +8,7 @@ import libvirt
 import threading
 import time
 
-from ovm.inventory import Inventory
+from ovm.lvconnect import LibvirtConnect
 from ovm.utils.printer import si_unit
 
 
@@ -186,7 +186,7 @@ class VMTop:
     def __init__(self):
         self._domains = {}
 
-        self.libvirt_conn = Inventory.new_connection()
+        self.libvirt_conn = LibvirtConnect.get_connection()
 
         self._sort_on = SORT_NAME
 

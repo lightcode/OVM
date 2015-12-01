@@ -1,36 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import libvirt
-
 from ovm.inventory.domain import Domain
-from ovm.utils.logger import logger
+from ovm.lvconnect import LibvirtConnect
 
 
 class Inventory:
 
-    _conn = None
-    _connection_string = 'qemu:///system'
-
-    @classmethod
-    def open(cls):
-        cls._conn = libvirt.open(cls._connection_string)
-        logger.debug('New connection to libvirt opened.')
-
-    @classmethod
-    def new_connection(cls):
-        return libvirt.open(cls._connection_string)
-
     @classmethod
     def get_domains(cls):
-        for domain in cls._conn.listAllDomains():
+        connection = LibvirtConnect.get_connection()
+        for domain in connection.listAllDomains():
             yield Domain(domain)
 
     @classmethod
     def get_domain(cls, name):
-        domain = cls._conn.lookupByName(name)
+        connection = LibvirtConnect.get_connection()
+        domain = connection.lookupByName(name)
         return Domain(domain)
 
     @classmethod
     def add_domain(cls, domain):
-        cls._conn.defineXML(domain.get_xml().decode('utf8'))
+        connection = LibvirtConnect.get_connection()
+        connection.defineXML(domain.get_xml().decode('utf8'))

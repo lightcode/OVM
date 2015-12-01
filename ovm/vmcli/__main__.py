@@ -6,7 +6,6 @@ import libvirt
 import logging
 
 from ovm.configuration import Configuration
-from ovm.inventory import Inventory
 from ovm.utils.logger import logger
 from ovm.vmcli.management import *  # noqa
 
@@ -227,7 +226,6 @@ def main():
         logger.setLevel(logging.DEBUG)
 
     Resources(Configuration.RESOURCE_CONFIG)
-    Inventory.open()
 
     if hasattr(args, 'func'):
         getattr(args, 'func')(args)

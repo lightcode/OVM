@@ -8,7 +8,7 @@ import sys
 import termios
 import tty
 
-from ovm.inventory import Inventory
+from ovm.lvconnect import LibvirtConnect
 
 
 def error_handler(_, error):
@@ -36,7 +36,7 @@ class Console:
         self.attrs = termios.tcgetattr(0)
         tty.setraw(0)
 
-        self.connection = Inventory.new_connection()
+        self.connection = LibvirtConnect.get_connection()
         self.domain = self.connection.lookupByName(self.domain_name)
         self.state = self.domain.state(0)
         self.connection.domainEventRegister(self.lifecycle_callback, self)

@@ -10,6 +10,7 @@ from ovm.inventory.disk import Disk
 from ovm.inventory.domain_metadata import DomainMetadata
 from ovm.inventory.ip_allocation import IpAllocation
 from ovm.inventory.network_interface import NetworkInterface
+from ovm.lvconnect import LibvirtConnect
 from ovm.utils.compat23 import etree
 from ovm.utils.logger import logger
 
@@ -17,16 +18,10 @@ from ovm.utils.logger import logger
 class Domain:
     STATES = {1: 'Running', 3: 'Paused', 5: 'Stopped'}
 
-    def __init__(self, vir_domain, libvirt_conn=None):
+    def __init__(self, vir_domain):
         self.vir_domain = vir_domain
-
         self._cached_metadata = None
-
-        if libvirt_conn:
-            self._libvirt_conn = libvirt_conn
-        else:
-            from ovm.inventory.inventory import Inventory
-            self._libvirt_conn = Inventory.new_connection()
+        self._libvirt_conn = LibvirtConnect.get_connection()
 
         saved_desc = self.vir_domain.XMLDesc(libvirt.VIR_DOMAIN_XML_INACTIVE)
         self._saved_tree = etree.fromstring(saved_desc)
