@@ -58,24 +58,32 @@ def print_title(text, length=60):
 def print_table(headers, rows, align=None):
     if not align:
         align = ['l'] * len(headers)
-    row_width = [len(t) for t in headers]
-    for line in rows:
-        line = list(line)
-        for i, l in enumerate(line):
-            if not isinstance(l, str) and not isinstance(l, ColoredString):
-                line[i] = str(l)
-        for i, column in enumerate(line):
-            row_width[i] = max(len(column), row_width[i])
 
-    template = TABLE_PADDING.join(
-        ['{%d:%s%d}' % (i, '>' if a == 'r' else '<', w) for i, w, a in
-            zip(list(range(len(row_width))), row_width, align)])
+    col_width = [len(t) for t in headers]
+    for i, line in enumerate(rows):
+        rows[i] = list(line)
+
+        for j, c in enumerate(line):
+            if not isinstance(c, str) and not isinstance(c, ColoredString):
+                c = str(c)
+                rows[i][j] = c
+
+            col_width[j] = max(len(c), col_width[j])
+
     template_headers = TABLE_PADDING.join(
-        ['{%d:%d}' % (i, w) for i, w in enumerate(row_width)]) + TABLE_PADDING
+        ['{%d:%d}' % (i, w) for i, w in enumerate(col_width)]) + TABLE_PADDING
 
     print(underline(template_headers.format(*headers)))
+
     for line in rows:
-        print(template.format(*line))
+        row = ""
+        for cell, size, a in zip(line, col_width, align):
+            cell_pad = ' ' * (size - len(cell))
+            if a == 'r':
+                row += cell_pad + str(cell) + TABLE_PADDING
+            else:
+                row += str(cell) + cell_pad + TABLE_PADDING
+        print(row)
 
 
 def si_unit(x, binary=False):

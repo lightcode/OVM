@@ -164,17 +164,16 @@ def vm_list(args):
         sys.exit(1)
 
     for domain in Inventory.get_domains():
-        virdomain = domain.vir_domain
-
-        if (args.active and not virdomain.isActive()) \
-                or (args.inactive and virdomain.isActive()):
+        if (args.active and not domain.is_active()) \
+                or (args.inactive and domain.is_active()):
             continue
 
+        # Color state in green if domain is active, red else
         state = domain.get_state_text()
-        if state == 'Running':
-            state = ColoredString('Running', bcolors.OKGREEN)
-        elif state == 'Stopped':
-            state = ColoredString('Stopped', bcolors.FAIL)
+        if domain.is_active():
+            state = ColoredString(state, bcolors.OKGREEN)
+        else:
+            state = ColoredString(state, bcolors.FAIL)
 
         main_ip = domain.get_main_ipv4()
         rows.append((
