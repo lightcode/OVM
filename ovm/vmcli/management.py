@@ -60,7 +60,7 @@ def bulk_command(confirm=None):
                 return
 
             # If confirm is enabled, ask a confirmation
-            if confirm is not None:
+            if confirm is not None and not cli_args.force:
                 prompt = confirm % ', '.join(selection) + ' [y/n] '
                 ans = ''
                 while ans not in ('y', 'n'):

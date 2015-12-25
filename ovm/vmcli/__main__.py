@@ -137,7 +137,7 @@ def add_subparsers(parser):
         help='remove one or many VMs')
     subcommand.add_argument('name', help='name of VMs', nargs='+')
     subcommand.add_argument(
-        '-f', '--force', '--yes', '-y',
+        '-f', '--force',
         action='store_true',
         dest='force',
         help='Remove VM without asking confirmation.')
