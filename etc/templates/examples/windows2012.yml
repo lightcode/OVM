@@ -1,0 +1,22 @@
+uid: windows2012r2
+name: Windows 2012 R2
+
+vcpu: 1
+memory: 1024
+
+metadata:
+  os_type: windows
+  os_name: Windows
+  os_version: 2012 R2
+
+main_disk:
+  target_bus: sata
+  target_dev: hdb
+
+  image:
+    path: /mnt/pool-templates/win2012r2.qcow2
+    size: 25
+    format: qcow2
+
+main_interface:
+  model: rtl8139

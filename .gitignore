@@ -1,0 +1,11 @@
+*.pyc
+*.pyo
+*~
+
+*.egg-info/
+.venv
+__pycache__
+build
+dist
+docs-html
+tests/files/ipdatabase.db

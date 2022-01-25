@@ -1,0 +1,36 @@
+storage:
+
+  lvm_storage:
+    driver: lvm
+
+  file_storage:
+    driver: file
+
+
+
+networks:
+
+  prod-1:
+    driver: bridge
+    openvswitch: true
+    bridge: sw0
+    vlan: 10
+
+  prod-2:
+    driver: bridge
+    openvswitch: true
+    bridge: sw0
+    vlan: 20
+
+  labs:
+    driver: bridge
+    bridge: sw1
+
+    ipv4_allocation: static
+
+    ipv4_pool:
+      ip_start: 10.42.2.10
+      ip_end: 10.42.2.254
+      netmask: 24
+      gateway: 10.42.2.1
+      nameservers: ['10.42.0.1']

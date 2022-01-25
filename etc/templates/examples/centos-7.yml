@@ -1,0 +1,31 @@
+uid: centos-7
+name: CentOS 7
+
+vcpu: 1
+memory: 128
+
+metadata:
+  os_type: linux
+  os_name: CentOS
+  os_version: 7
+
+main_disk:
+  target_bus: virtio
+  target_dev: vda
+
+  image:
+    path: /mnt/pool-templates/centos-7.qcow2
+    size: 8
+    format: qcow2
+
+main_interface:
+  model: virtio
+
+abilities:
+  resizeDisk:
+    script: linux/resize.sh
+    params: ["{vol_path}", "/dev/centos/lv_root"]
+
+post_install:
+  - path: linux/setcontext.sh
+    params: ["{diskpath}", "centos-7", "{configuration}", "/dev/centos/lv_root"]

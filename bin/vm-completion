@@ -1,0 +1,93 @@
+#!/bin/bash
+
+_vm()
+{
+    local cur prev opts cmd vm_list
+    COMPREPLY=()
+    cmd=${COMP_WORDS[1]}
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="autostart console create info ls ping reboot restore rm \
+          save set ssh start stop storage network templates top unset \
+          --version --help"
+
+    if [[ COMP_CWORD -gt 1 ]]; then
+        case "$cmd" in
+            --version | --help)
+                return 0
+            ;;
+            top)
+                return 0
+            ;;
+            create)
+                if [[ "$prev" == "--template" ]]; then
+                    templates="$(vm templates --short)"
+                    COMPREPLY=( $(compgen -W "${templates}" -- ${cur}) )
+                elif [[ "$prev" == "--network" ]]; then
+                    templates="$(vm network list --short)"
+                    COMPREPLY=( $(compgen -W "${templates}" -- ${cur}) )
+                elif [[ "$prev" == "--storage" ]]; then
+                    templates="$(vm storage --short)"
+                    COMPREPLY=( $(compgen -W "${templates}" -- ${cur}) )
+                elif [[ "$prev" == "--vcpu" ]] || [[ "$prev" == "--ip" ]] || \
+                        [[ "$prev" == "--memory" ]] || [[ "$prev" == "--size" ]]; then
+                    return 0
+                else
+                    create_opts="--vcpu --ip --memory --storage --template --network --size"
+                    COMPREPLY=( $(compgen -W "${create_opts}" -- ${cur}) )
+                fi
+                return 0
+            ;;
+            ls)
+                COMPREPLY=( $(compgen -W "--active --inactive --short" -- ${cur}) )
+                return 0
+            ;;
+            templates | storage)
+                COMPREPLY=( $(compgen -W "--short" -- ${cur}) )
+                return 0
+            ;;
+            rm)
+                vm_list="$(vm ls --inactive --short)"
+                COMPREPLY=( $(compgen -W "--yes ${vm_list}" -- ${cur}) )
+                return 0
+            ;;
+            autostart | set | info | unset)
+                if [[ COMP_CWORD -eq 2 ]]; then
+                    vm_list="$(vm ls --short)"
+                    COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
+                elif [[ COMP_CWORD -eq 3 ]] && [[ "$cmd" == "autostart" ]]; then
+                    COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+                fi
+                return 0
+            ;;
+            ping | reboot | ssh | console)
+                if [[ COMP_CWORD -eq 2 ]]; then
+                    vm_list="$(vm ls --active --short)"
+                    COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
+                fi
+                return 0
+            ;;
+            stop | save)
+                vm_list="$(vm ls --active --short)"
+                COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
+                return 0
+            ;;
+            start | restore)
+                vm_list="$(vm ls --inactive --short)"
+                COMPREPLY=( $(compgen -W "${vm_list}" -- ${cur}) )
+                return 0
+            ;;
+            *)
+            ;;
+        esac
+    fi
+
+    if [[ COMP_CWORD -eq 1 ]]; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    return 0
+}
+
+complete -F _vm vm

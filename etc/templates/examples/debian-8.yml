@@ -1,0 +1,31 @@
+uid: debian-8
+name: Debian Jessie
+
+vcpu: 1
+memory: 128
+
+metadata:
+  os_type: linux
+  os_name: Debian
+  os_version: 8
+
+main_disk:
+  target_bus: virtio
+  target_dev: vda
+
+  image:
+    path: /mnt/pool-templates/debian-8.qcow2
+    size: 8
+    format: qcow2
+
+main_interface:
+  model: virtio
+
+abilities:
+  resizeDisk:
+    script: linux/resize.sh
+    params: ["{vol_path}", "/dev/debian-vg/root"]
+
+post_install:
+  - path: linux/setcontext.sh
+    params: ["{diskpath}", "debian-8", "{configuration}", "/dev/debian-vg/root"]

@@ -1,0 +1,31 @@
+uid: debian-7
+name: Debian Wheezy
+
+vcpu: 1
+memory: 128
+
+metadata:
+  os_type: linux
+  os_name: Debian
+  os_version: 7
+
+main_disk:
+  target_bus: virtio
+  target_dev: vda
+
+  image:
+    path: /mnt/pool-templates/debian-wheezy.qcow2
+    size: 8
+    format: qcow2
+
+main_interface:
+  model: virtio
+
+abilities:
+  resizeDisk:
+    script: linux/resize.sh
+    params: ["{vol_path}", "/dev/debian/root"]
+
+post_install:
+  - path: linux/setcontext.sh
+    params: ["{diskpath}", "debian-7", "{configuration}", "/dev/debian/root"]

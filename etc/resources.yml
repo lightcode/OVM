@@ -1,0 +1,45 @@
+#
+# Storage section
+#
+# Here you can add the configuration of your
+# storage units. You can write it as followed:
+#
+#   storage:
+#     hdd:
+#       driver: file
+#       root: /mnt/pool-vm-hdd
+#     ssd:
+#       driver: file
+#       root: /mnt/pool-vm-ssd
+
+storage: {}
+
+
+
+#
+# Network section
+#
+# Here you can add the configuration of your
+# networks. You can write it as followed:
+#    networks:
+#      local:
+#        driver: bridge
+#        bridge: sw0
+#        openvswitch: true
+#        vlan: 10
+#        ipv4_allocation: dhcp
+#      prod:
+#        driver: bridge
+#        bridge: sw0
+#        openvswitch: true
+#        vlan: 20
+#        driver: openvswitch
+#        net_name: net-ovs
+#        ipv4_pool:
+#          ip_start: 10.42.1.10
+#          ip_end: 10.42.1.254
+#          netmask: 24
+#          gateway: 10.42.1.1
+#          nameservers: ['192.168.1.1']
+
+networks: {}
